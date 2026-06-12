@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monad Sistema Interno - Home</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Sistema Interno</h1>
+        <h2>Clínica Monad Ocupacional - Oriximiná</h2>
+        <nav>
+            <ul>
+                <li><a href="index.html">Recepção</a></li>
+                <li><a href="#">Check-in Pacientes</a></li>
+                <li><a href="#">Relatórios</a></li>
+                <li><a href="#">Impressão de ASO's</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <div class="sistema-fichas">
+            <div class="no-print painel-recepcao">
+                <h2>Painel de Cadastro (Recepção)</h2>
+                <p>Preencha os dados e marque os exames. Apenas os exames marcados aparecerão nas fichas.</p>
+                
+                <form id="masterForm">
+                    <fieldset>
+                        <legend>Dados do Colaborador</legend>
+                        <div class="form-group row">
+                            <label>Empresa: <input type="text" class="master-input" name="empresa"></label>
+                            <label>Nome: <input type="text" class="master-input" name="nome"></label>
+                        </div>
+                        <div class="form-group row">
+                            <label>Função: <input type="text" class="master-input" name="funcao"></label>
+                            <label>Data de Nasc.: <input type="date" class="master-input" name="dn"></label>
+                        </div>
+                        <div class="form-group row">
+                            <label>RG: <input type="text" class="master-input" name="rg"></label>
+                            <label>CPF: <input type="text" class="master-input" name="cpf"></label>
+                        </div>
+                        <div class="form-group row">
+                            <label>Peso (kg): <input type="number" step="0.1" class="master-input" name="peso"></label>
+                            <label>Altura (m): <input type="number" step="0.01" class="master-input" name="altura"></label>
+                            <label>Data Exame: <input type="date" class="master-input" name="data"></label>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Exames Solicitados</legend>
+                        <div class="exames-grid-master">
+                            <div>
+                                <h4>Clínicos</h4>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Eletrocardiograma"> Eletrocardiograma</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Espirometria"> Espirometria</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Eletroencefalograma"> Eletroencefalograma</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Acuidade visual"> Acuidade visual</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Campimetria"> Campimetria</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Avaliação oftalmológica"> Avaliação oftalmológica</label>
+                            </div>
+                            <div>
+                                <h4>Raio-X</h4>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Tórax PA"> Raio-x torax PA</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Tórax OIT"> Raio-x tórax OIT</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Total"> Raio-x Coluna Total</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombar"> Raio-x coluna lombar</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombo-Sacra"> Raio-x Coluna Lombo-Sacra</label>
+                            </div>
+                            <div>
+                                <h4>Laboratoriais</h4>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="Hemograma"> Hemograma</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="Glicemia"> Glicemia</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TGO/TGP"> TGO/TGP</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EAS"> EAS</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EPF"> EPF</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TOXICOLÓGICO"> TOXICOLÓGICO</label>
+                                
+                                <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                                    <label style="font-size: 12px; color: #555;">Adicionar Exame Extra:</label>
+                                    <div style="display: flex; gap: 5px; margin-top: 5px;">
+                                        <input type="text" id="input-exame-extra" placeholder="Nome do exame..." style="padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; flex: 1;">
+                                        <button type="button" id="btn-add-exame" style="background: #004080; color: white; border: none; border-radius: 4px; padding: 0 10px; cursor: pointer; font-weight: bold;">Inserir</button>
+                                    </div>
+                                    <div id="lista-extras-painel" style="margin-top: 10px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                   <div style="display: flex; gap: 15px; margin-top: 20px;">
+    <button type="button" id="btn-salvar-imprimir" class="btn-imprimir">Salvar na Planilha e Imprimir</button>
+</div>
+<p id="msg-status" style="color: #004080; font-weight: bold; margin-top: 10px; display: none;">Salvando dados no Google Planilhas...</p>
+                </form>
+            </div>
+
+            <div class="area-impressao">
+                
+                <div class="ficha-setor" id="setor-clinico">
+                    <div class="cabecalho-setor">
+                        <h2>AVALIAÇÃO CLÍNICA / NEUROLÓGICA</h2>
+                        <div class="dados-espelhados">
+                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span> <span class="info-menor"><strong>Peso:</strong> <span class="out-peso"></span>kg | <strong>Alt:</strong> <span class="out-altura"></span>m</span></div>
+                        </div>
+                    </div>
+                    <div class="corpo-setor">
+                        <h3>Exames Solicitados:</h3>
+                        <ul class="lista-exames-print" id="lista-clinico">
+                            <li class="vazio">Nenhum exame selecionado</li>
+                        </ul>
+                    </div>
+                    <div class="rodape-setor">
+                        <div class="area-assinatura">Assinatura do Profissional / Laudo</div>
+                    </div>
+                </div>
+
+                <div class="ficha-setor" id="setor-raiox">
+                    <div class="cabecalho-setor">
+                        <h2>RADIOLOGIA (RAIO-X)</h2>
+                        <div class="dados-espelhados">
+                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span></span></div>
+                        </div>
+                    </div>
+                    <div class="corpo-setor">
+                        <h3>Exames Solicitados:</h3>
+                        <ul class="lista-exames-print" id="lista-raiox">
+                            <li class="vazio">Nenhum exame selecionado</li>
+                        </ul>
+                    </div>
+                    <div class="rodape-setor">
+                        <div class="area-assinatura">Assinatura do Técnico / Laudo</div>
+                    </div>
+                </div>
+
+                <div class="ficha-setor" id="setor-audio">
+                    <div class="cabecalho-setor">
+                        <h2>FONOAUDIOLOGIA</h2>
+                        <div class="dados-espelhados">
+                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span></span></div>
+                        </div>
+                    </div>
+                    <div class="corpo-setor">
+                        <h3>Registro Audiométrico:</h3>
+                        <table class="tabela-audiometria">
+                            <thead>
+                                <tr>
+                                    <th>Hz</th><th>500</th><th>1K</th><th>2K</th><th>3K</th><th>4K</th><th>6K</th><th>8K</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>OD</strong></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                                <tr><td><strong>OE</strong></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="rodape-setor">
+                        <div class="area-assinatura">Assinatura do Fonoaudiólogo / CRM</div>
+                    </div>
+                </div>
+
+                <div class="ficha-setor" id="setor-lab">
+                    <div class="cabecalho-setor">
+                        <h2>LABORATÓRIO (COLETAS)</h2>
+                        <div class="dados-espelhados">
+                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span></span></div>
+                        </div>
+                    </div>
+                    <div class="corpo-setor">
+                        <h3>Exames Solicitados:</h3>
+                        <ul class="lista-exames-print" id="lista-lab">
+                            <li class="vazio">Nenhum exame selecionado</li>
+                        </ul>
+                    </div>
+                    <div class="rodape-setor">
+                        <div class="area-assinatura">Responsável pela Coleta</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>&copy; 2026 Clínica Monad Ocupacional - Oriximiná.</p>
+    </footer>
+
+    <script src="JS/script.js"></script>
+</body>
+</html>
