@@ -13,7 +13,7 @@
         <nav>
             <ul>
                 <li><a href="index.html">Recepção</a></li>
-                <li><a href="#">Check-in Pacientes</a></li>
+                <li><a href="checkin.html">Check-in Pacientes</a></li>
                 <li><a href="#">Relatórios</a></li>
                 <li><a href="#">Impressão de ASO's</a></li>
             </ul>
@@ -39,12 +39,28 @@
                         </div>
                         <div class="form-group row">
                             <label>RG: <input type="text" class="master-input" name="rg"></label>
-                            <label>CPF: <input type="text" class="master-input" name="cpf"></label>
+                            <label>CPF: 
+                                <input type="text" class="master-input" name="cpf" placeholder="000.000.000-00">
+                                <span id="cpf-error" style="color: red; font-size: 12px; display: none; margin-top: 4px;">⚠️ CPF Inválido</span>
+                            </label>
                         </div>
                         <div class="form-group row">
-                            <label>Peso (kg): <input type="number" step="0.1" class="master-input" name="peso"></label>
-                            <label>Altura (m): <input type="number" step="0.01" class="master-input" name="altura"></label>
+                            <label>Telefone: <input type="text" class="master-input" name="telefone" placeholder="(00) 00000-0000"></label>
                             <label>Data Exame: <input type="date" class="master-input" name="data"></label>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Tipo de Exame</legend>
+                        <div class="tipo-exame-grid">
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="ADMISSIONAL"> ADMISSIONAL</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="PERIODICO"> PERIÓDICO</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="DEMISSIONAL"> DEMISSIONAL</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="MUDANÇA DE FUNÇÃO"> MUDANÇA DE FUNÇÃO</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="MUDANÇA DE RISCO"> MUDANÇA DE RISCO</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="COMPLEMENTAR"> COMPLEMENTAR</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="PARTICULAR"> PARTICULAR</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="ENCAMINHAMENTO"> ENCAMINHAMENTO</label>
                         </div>
                     </fieldset>
 
@@ -60,6 +76,7 @@
                                 <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Campimetria"> Campimetria</label><br>
                                 <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Avaliação oftalmológica"> Avaliação oftalmológica</label>
                             </div>
+                            
                             <div>
                                 <h4>Raio-X</h4>
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Tórax PA"> Raio-x torax PA</label><br>
@@ -67,46 +84,56 @@
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Total"> Raio-x Coluna Total</label><br>
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombar"> Raio-x coluna lombar</label><br>
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombo-Sacra"> Raio-x Coluna Lombo-Sacra</label>
-                            </div>
-                            <div>
-                                <h4>Laboratoriais</h4>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="HEMOGRAMA"> HEMOGRAMA</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="GLICEMIA"> GLICEMIA</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TGO/TGP"> TGO/TGP</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="GAMAGT"> GAMA GT</label>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ABELHA/MARIMBONDO"> ABELHA/MARIMBONDO</label>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="GOTA-ESPESSA"> GOTA ESPESSA</label>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="CROPOCULTURA"> COPROCULTURA</label>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TIPAGEM"> TIPAGEM</label>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EAS"> EAS</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EPF"> EPF</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TOXICOLÓGICO"> TOXICOLÓGICO</label>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="HEMOG.-GLICADA"> HEMOG. GLICADA</label>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="MICOLOGICO"> MICOLOGICO</label>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-HIPURICO"> ACIDO HIPÚRICO</label>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-METIL-HIPURICO"> ÁCIDO METIL HIPÚRICO</label>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="PSA"> PSA</label>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-DELTA-AMINOLEVULINICO"> ACIDO DELTA AMINOLEVULINICO</label>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TRICLOROCOMPOSTOS-TOTAIS"> TRICOLOROCOMPOSTOS TOTAIS</label>
-                                
-                                
                                 
                                 <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc;">
-                                    <label style="font-size: 12px; color: #555;">Adicionar Exame Extra:</label>
+                                    <label style="font-size: 12px; color: #555;">Adicionar Raio-X Extra:</label>
                                     <div style="display: flex; gap: 5px; margin-top: 5px;">
-                                        <input type="text" id="input-exame-extra" placeholder="Nome do exame..." style="padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; flex: 1;">
-                                        <button type="button" id="btn-add-exame" style="background: #004080; color: white; border: none; border-radius: 4px; padding: 0 10px; cursor: pointer; font-weight: bold;">Inserir</button>
+                                        <input type="text" id="input-exame-extra-raiox" placeholder="Nome do Raio-X..." style="padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; flex: 1;">
+                                        <button type="button" id="btn-add-exame-raiox" style="background: #004080; color: white; border: none; border-radius: 4px; padding: 0 10px; cursor: pointer; font-weight: bold;">Inserir</button>
                                     </div>
-                                    <div id="lista-extras-painel" style="margin-top: 10px;"></div>
+                                    <div id="lista-extras-painel-raiox" style="margin-top: 10px;"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4>Laboratoriais</h4>
+                                <div class="scroll-box">
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="HEMOGRAMA"> HEMOGRAMA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="GLICEMIA"> GLICEMIA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TGO/TGP"> TGO/TGP</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="GAMAGT"> GAMA GT</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ABELHA/MARIMBONDO"> ABELHA/MARIMBONDO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="GOTA-ESPESSA"> GOTA ESPESSA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="CROPOCULTURA"> COPROCULTURA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TIPAGEM"> TIPAGEM</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EAS"> EAS</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EPF"> EPF</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TOXICOLÓGICO"> TOXICOLÓGICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="HEMOG.-GLICADA"> HEMOG. GLICADA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="MICOLOGICO"> MICOLOGICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-HIPURICO"> ACIDO HIPÚRICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-METIL-HIPURICO"> ÁCIDO METIL HIPÚRICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="PSA"> PSA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-DELTA-AMINOLEVULINICO"> ACIDO DELTA AMINOLEVULINICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TRICLOROCOMPOSTOS-TOTAIS"> TRICOLOROCOMPOSTOS TOTAIS</label>
+                                    
+                                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                                        <label style="font-size: 12px; color: #555;">Adicionar Exame Extra:</label>
+                                        <div style="display: flex; gap: 5px; margin-top: 5px;">
+                                            <input type="text" id="input-exame-extra" placeholder="Nome do exame..." style="padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; flex: 1;">
+                                            <button type="button" id="btn-add-exame" style="background: #004080; color: white; border: none; border-radius: 4px; padding: 0 10px; cursor: pointer; font-weight: bold;">Inserir</button>
+                                        </div>
+                                        <div id="lista-extras-painel" style="margin-top: 10px;"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </fieldset>
 
-                   <div style="display: flex; gap: 15px; margin-top: 20px;">
-    <button type="button" id="btn-salvar-imprimir" class="btn-imprimir">Salvar na Planilha e Imprimir</button>
-</div>
-<p id="msg-status" style="color: #004080; font-weight: bold; margin-top: 10px; display: none;">Salvando dados no Google Planilhas...</p>
+                    <div style="display: flex; gap: 15px; margin-top: 20px;">
+                        <button type="button" id="btn-salvar-imprimir" class="btn-imprimir">Salvar na Planilha e Imprimir</button>
+                    </div>
+                    <p id="msg-status" style="color: #004080; font-weight: bold; margin-top: 10px; display: none;">Salvando dados no Google Planilhas...</p>
                 </form>
             </div>
 
@@ -116,10 +143,10 @@
                     <div class="cabecalho-setor">
                         <h2>AVALIAÇÃO CLÍNICA / NEUROLÓGICA</h2>
                         <div class="dados-espelhados">
-                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span> <span class="out-tipo-exame"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
                             <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
-                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span></span></div>
-                            <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span> <span class="info-menor"><strong>Peso:</strong> <span class="out-peso"></span>kg | <strong>Alt:</strong> <span class="out-altura"></span>m</span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span> <span class="info-menor"><strong>Peso:</strong> _______ kg | <strong>Alt:</strong> _______ m</span></div>
                         </div>
                     </div>
                     <div class="corpo-setor">
@@ -137,9 +164,9 @@
                     <div class="cabecalho-setor">
                         <h2>RADIOLOGIA (RAIO-X)</h2>
                         <div class="dados-espelhados">
-                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span> <span class="out-tipo-exame"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
                             <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
-                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
                         </div>
                     </div>
                     <div class="corpo-setor">
@@ -157,9 +184,9 @@
                     <div class="cabecalho-setor">
                         <h2>FONOAUDIOLOGIA</h2>
                         <div class="dados-espelhados">
-                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span> <span class="out-tipo-exame"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
                             <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
-                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
                         </div>
                     </div>
                     <div class="corpo-setor">
@@ -185,9 +212,9 @@
                     <div class="cabecalho-setor">
                         <h2>LABORATÓRIO (COLETAS)</h2>
                         <div class="dados-espelhados">
-                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span> <span class="out-tipo-exame"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
                             <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
-                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
                         </div>
                     </div>
                     <div class="corpo-setor">
