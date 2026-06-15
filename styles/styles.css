@@ -1,15 +1,21 @@
 /* =========================================
    ESTILOS GERAIS DO SISTEMA (TELA)
    ========================================= */
-body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; color: #333; }
+*, *::before, *::after { box-sizing: border-box; }
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; color: #333; line-height: 1.5; min-height: 100vh; }
 header { background-color: #004080; color: white; padding: 20px; text-align: center; }
 header h1 { margin: 0; font-size: 24px; }
 header h2 { margin: 5px 0 15px 0; font-size: 16px; font-weight: normal; color: #cce0ff; }
-nav ul { list-style: none; padding: 0; margin: 0; display: flex; justify-content: center; gap: 20px; }
-nav a { color: white; text-decoration: none; font-weight: bold; padding: 5px 10px; border-radius: 4px; }
+main h2, .painel-recepcao h2 { color: #004080; margin: 0 0 16px 0; }
+nav ul { list-style: none; padding: 0; margin: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; }
+nav a { color: white; text-decoration: none; font-weight: bold; padding: 8px 12px; border-radius: 4px; }
 nav a:hover { background-color: #003366; }
 main { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-footer { text-align: center; padding: 20px; background-color: #e6e6e6; margin-top: 40px; font-size: 14px; color: #666; }
+footer { text-align: center; padding: 20px; background-color: #e6e6e6; margin-top: 40px; font-size: 14px; color: #666; margin: 0; }
+
+button, input, select, textarea { font: inherit; }
+label { font-size: 14px; color: #333; }
+input[type="checkbox"], input[type="radio"] { margin-right: 8px; }
 
 /* PAINEL DA RECEPÇÃO */
 .painel-recepcao { background: #ffffff; padding: 25px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 40px; }
@@ -17,11 +23,56 @@ footer { text-align: center; padding: 20px; background-color: #e6e6e6; margin-to
 fieldset { border: 1px solid #ccc; border-radius: 5px; padding: 15px; margin-bottom: 20px; }
 legend { font-weight: bold; background: #fff; padding: 0 10px; color: #004080; }
 .form-group { margin-bottom: 15px; }
-.row { display: flex; gap: 20px; }
+.form-group label { display: flex; flex-direction: column; gap: 6px; font-weight: bold; font-size: 14px; color: #555; }
+.row { display: flex; gap: 20px; flex-wrap: wrap; }
 .row label { flex: 1; display: flex; flex-direction: column; font-weight: bold; font-size: 14px; color: #555; }
-.master-input { padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
-.exames-grid-master { display: flex; gap: 30px; justify-content: space-between; }
-.btn-imprimir { background-color: #28a745; color: white; padding: 15px; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; }
+.master-input { padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; width: 100%; }
+.exames-grid-master { display: flex; flex-wrap: wrap; gap: 30px; justify-content: space-between; }
+.btn-imprimir { background-color: #28a745; color: white; padding: 15px 22px; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; width: auto; min-width: 180px; }
+
+/* ==============================================
+   TIPO DE EXAME E CAIXA DE ROLAGEM
+   ============================================== */
+.tipo-exame-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 10px 0;
+}
+.tipo-exame-grid label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #444;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    background-color: #fafafa;
+    cursor: pointer;
+}
+.tipo-exame-grid input {
+    margin: 0;
+}
+.exames-grid-master label {
+    display: block;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+.scroll-box {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 12px;
+    background-color: #fafafa;
+}
+.scroll-box::-webkit-scrollbar { width: 8px; }
+.scroll-box::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+.scroll-box::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+.scroll-box::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
 
 /* FICHAS SETORIAIS (TELA) */
 .area-impressao { display: flex; flex-direction: column; gap: 30px; }
@@ -36,14 +87,104 @@ legend { font-weight: bold; background: #fff; padding: 0 10px; color: #004080; }
 .corpo-setor h3 { margin-top: 0; font-size: 15px; text-decoration: underline; margin-bottom: 10px; }
 .lista-exames-print { margin: 0; padding-left: 20px; column-width: 250px; column-gap: 30px; }
 .lista-exames-print li { font-size: 14px; margin-bottom: 6px; list-style-type: square; font-weight: bold; break-inside: avoid; }
-.lista-exames-print li.vazio { color: #999; list-style-type: none; margin-left: -20px; font-style: italic; font-weight: normal; column-span: all; }
+.lista-exames-print li.vazio { color: #999; list-style-type: none; margin-left: 0; font-style: italic; font-weight: normal; display: block; width: 100%; }
 .tabela-audiometria { width: 100%; border-collapse: collapse; margin-top: 5px; }
-.tabela-audiometria th, .tabela-audiometria td { border: 1px solid #000; padding: 5px; text-align: center; font-size: 13px; box-sizing: border-box; }
+.tabela-audiometria th, .tabela-audiometria td { border: 1px solid #000; padding: 5px; text-align: center; font-size: 13px; }
 .rodape-setor { margin-top: 20px; display: flex; justify-content: flex-end; }
 .area-assinatura { border-top: 1px solid #000; width: 300px; text-align: center; padding-top: 5px; font-size: 13px; }
 
+
+/* =======================================================
+   RESPONSIVIDADE (CELULARES E TABLETS)
+   ======================================================= */
+
+/* Telas médias (Tablets e celulares deitados) */
+@media (max-width: 850px) {
+    /* Empilha os blocos principais de exames (Clínicos, Raio-X, Lab) */
+    .exames-grid-master {
+        flex-direction: column;
+        gap: 25px;
+    }
+}
+
+/* Telas pequenas (Celulares em pé) */
+@media (max-width: 768px) {
+    /* Menu flexível */
+    nav ul {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    nav a {
+        font-size: 14px;
+    }
+
+    /* Transforma os campos da Recepção de linhas para colunas */
+    .row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .painel-recepcao {
+        padding: 20px;
+    }
+
+    .btn-imprimir {
+        width: 100%;
+    }
+
+    .exames-grid-master {
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    /* Reduz o grid de Tipo de Exame para 2 colunas */
+    .tipo-exame-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Organiza as informações do cabeçalho da Ficha espelhada na tela */
+    .linha-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+        margin-bottom: 12px;
+    }
+    .info-menor {
+        text-align: left;
+    }
+
+    /* Impede que a tabela de Audiometria quebre para fora do site */
+    .tabela-audiometria {
+        width: 100%;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+/* Telas muito pequenas (Smartphones menores) */
+@media (max-width: 480px) {
+    /* Tipo de exame fica em 1 coluna (lista corrida) */
+    .tipo-exame-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .painel-recepcao {
+        padding: 15px;
+    }
+    
+    header h1 {
+        font-size: 20px;
+    }
+    header h2 {
+        font-size: 13px;
+    }
+}
+
+
 /* =======================================================
    REGRAS DE IMPRESSÃO - LAYOUT INTELIGENTE DEFINITIVO
+   (As regras abaixo mantêm as fichas perfeitas no papel A4)
    ======================================================= */
 @media print {
     *, *::before, *::after { box-sizing: border-box !important; }
@@ -56,7 +197,7 @@ legend { font-weight: bold; background: #fff; padding: 0 10px; color: #004080; }
         display: flex;
         flex-direction: column;
         justify-content: flex-start; 
-        height: 282mm; /* Trava estrita da folha A4 */
+        height: 282mm; 
         gap: 3mm; 
         margin: 0; padding: 0;
         overflow: hidden;
@@ -72,30 +213,14 @@ legend { font-weight: bold; background: #fff; padding: 0 10px; color: #004080; }
         flex-direction: column;
     }
 
-    /* === A NOVA LÓGICA DE DISTRIBUIÇÃO DE ESPAÇO === */
+    /* LOGICA DE DISTRIBUIÇÃO A4 */
+    #setor-audio { flex: 0 0 80mm; }
+    #setor-raiox { flex: 0 1 auto; min-height: 45mm; }
+    #setor-clinico, #setor-lab { flex: 1 1 auto; min-height: 55mm; }
     
-    /* 1. Audiometria: Tamanho Fixo e Confortável */
-    #setor-audio { 
-        flex: 0 0 80mm; /* Exatos 8 cm de altura. Não cresce, não diminui. */
-    }
-
-    /* 2. Raio-X: Ocupa apenas o mínimo necessário */
-    #setor-raiox { 
-        flex: 0 1 auto; 
-        min-height: 45mm;
-    }
-
-    /* 3. Clínico e Laboratório: Flexíveis e Variáveis */
-    #setor-clinico, #setor-lab { 
-        flex: 1 1 auto; /* Eles dividem todo o espaço que a Audiometria e o RX deixarem sobrar */
-        min-height: 55mm;
-    }
-    
-    /* =============================================== */
-
     .cabecalho-setor { border-bottom: 1px solid #000; padding-bottom: 4px; margin-bottom: 6px; }
-    .cabecalho-setor h2 { background: #f0f0f0 !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; font-size: 12px; padding: 3px; margin: 0 0 6px 0; border: 1px solid #000; }
-    .linha-info { margin-bottom: 3px; font-size: 11px; }
+    .cabecalho-setor h2 { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 12px; padding: 3px; margin: 0 0 6px 0; border: 1px solid #000; }
+    .linha-info { margin-bottom: 3px; font-size: 11px; flex-direction: row; align-items: center; } /* Força a linha a continuar lado a lado no papel */
     .dados-espelhados span { color: #000; }
     .corpo-setor h3 { font-size: 11px; margin: 4px 0; }
     
@@ -106,16 +231,14 @@ legend { font-weight: bold; background: #fff; padding: 0 10px; color: #004080; }
     
     .lista-exames-print li { font-size: 11px; margin-bottom: 2px; break-inside: avoid; page-break-inside: avoid; }
     
-    .tabela-audiometria { margin-top: 4px; }
-    .tabela-audiometria th { padding: 4px; font-size: 11px; background-color: #e0e0e0 !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; box-sizing: border-box; }
-    
-    /* Ajuste da tabela para caber perfeitamente nos 80mm fixos */
-    .tabela-audiometria td { padding: 4px; font-size: 11px; height: 35px; box-sizing: border-box; } 
+    .tabela-audiometria { margin-top: 4px; display: table; }
+    .tabela-audiometria th { padding: 4px; font-size: 11px; background-color: #e0e0e0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .tabela-audiometria td { padding: 4px; font-size: 11px; height: 35px; } 
     
     .rodape-setor { margin-top: auto; } 
     .area-assinatura { font-size: 10px; width: 240px; margin-top: 8px; border-top: 1px solid #000; text-align: center; }
 
-    /* MODO COMPACTO DE EMERGÊNCIA (Ativado pelo JavaScript se houver muitos exames) */
+    /* MODO COMPACTO DE EMERGÊNCIA */
     body.print-compacto .lista-exames-print li { font-size: 9px; margin-bottom: 1px; }
     body.print-compacto .corpo-setor h3 { font-size: 10px; margin: 2px 0; }
     body.print-compacto .cabecalho-setor h2 { margin-bottom: 4px; padding: 2px; }
