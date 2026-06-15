@@ -2,22 +2,106 @@ document.addEventListener("DOMContentLoaded", function() {
     // ====================================================================
     // CONFIGURAÇÕES, SELETORES E VARIÁVEIS GERAIS
     // ====================================================================
-    // ATENÇÃO: COLOQUE AQUI A URL QUE VOCÊ GEROU NO PASSO 1 DO APPS SCRIPT
+    // ATENÇÃO: COLOQUE AQUI A URL QUE VOCÊ GEROU DO APPS SCRIPT
     const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
 
     const masterInputs = document.querySelectorAll('.master-input');
     const masterCheckboxes = document.querySelectorAll('.master-checkbox');
-    const btnAddExame = document.getElementById('btn-add-exame');
-    const inputExameExtra = document.getElementById('input-exame-extra');
-    const listaExtrasPainel = document.getElementById('lista-extras-painel');
     const btnSalvarImprimir = document.getElementById('btn-salvar-imprimir');
     const msgStatus = document.getElementById('msg-status');
+
+    // ====================================================================
+    // 0. MÁSCARAS E VALIDAÇÃO DE CPF E TELEFONE
+    // ====================================================================
+    const cpfInput = document.querySelector('input[name="cpf"]');
+    const telefoneInput = document.querySelector('input[name="telefone"]');
+    const cpfError = document.getElementById('cpf-error');
+
+    // MÁSCARA DE CPF
+    if (cpfInput) {
+        cpfInput.addEventListener('input', function(e) {
+            let v = e.target.value.replace(/\D/g, ''); // Remove tudo que não for dígito
+            if (v.length > 11) v = v.slice(0, 11);
+            if (v.length > 9) {
+                v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+            } else if (v.length > 6) {
+                v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+            } else if (v.length > 3) {
+                v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+            }
+            e.target.value = v;
+            
+            // Esconde o erro enquanto está digitando
+            cpfError.style.display = 'none';
+            cpfInput.style.borderColor = '#ccc';
+            
+            // Dispara evento manual para espelhar as mudanças na ficha impressa
+            cpfInput.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
+        // VALIDAÇÃO QUANDO O USUÁRIO SAI DO CAMPO
+        cpfInput.addEventListener('blur', function() {
+            if (this.value && !validarCPF(this.value)) {
+                cpfError.style.display = 'block';
+                this.style.borderColor = 'red';
+            }
+        });
+    }
+
+    // MÁSCARA DE TELEFONE
+    if (telefoneInput) {
+        telefoneInput.addEventListener('input', function(e) {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v.length > 11) v = v.slice(0, 11);
+            if (v.length > 10) {
+                v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
+            } else if (v.length > 5) {
+                v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
+            } else if (v.length > 2) {
+                v = v.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
+            } else if (v.length > 0) {
+                v = v.replace(/^(\d*)/, "($1");
+            }
+            e.target.value = v;
+            
+            telefoneInput.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+    }
+
+    // FUNÇÃO MATEMÁTICA DE VALIDAÇÃO DE CPF
+    function validarCPF(cpf) {
+        cpf = cpf.replace(/[^\d]+/g,'');
+        if(cpf == '') return false;
+        if (cpf.length != 11 ||
+            cpf == "00000000000" || cpf == "11111111111" || cpf == "22222222222" ||
+            cpf == "33333333333" || cpf == "44444444444" || cpf == "55555555555" ||
+            cpf == "66666666666" || cpf == "77777777777" || cpf == "88888888888" ||
+            cpf == "99999999999") return false;
+        
+        let add = 0;
+        for (let i=0; i < 9; i ++) add += parseInt(cpf.charAt(i)) * (10 - i);
+        let rev = 11 - (add % 11);
+        if (rev == 10 || rev == 11) rev = 0;
+        if (rev != parseInt(cpf.charAt(9))) return false;
+        
+        add = 0;
+        for (let i = 0; i < 10; i ++) add += parseInt(cpf.charAt(i)) * (11 - i);
+        rev = 11 - (add % 11);
+        if (rev == 10 || rev == 11) rev = 0;
+        if (rev != parseInt(cpf.charAt(10))) return false;
+        
+        return true;
+    }
 
     // ====================================================================
     // 1. ESPELHAMENTO DE TEXTO E DATAS
     // ====================================================================
     masterInputs.forEach(input => {
+        // Usa blur e input para não bugar o cursor
         input.addEventListener('input', function(e) {
+            // Se for CPF ou Telefone com foco, não espelha a cada tecla para não pular cursor
+            if ((e.target.name === 'cpf' || e.target.name === 'telefone') && document.activeElement === e.target && e.isTrusted) return;
+            
             const campoNome = e.target.name; 
             let valorDigitado = e.target.value;
 
@@ -33,6 +117,38 @@ document.addEventListener("DOMContentLoaded", function() {
                 span.textContent = valorDigitado;
             });
         });
+
+        // Força a atualização do espelhamento quando sai do campo
+        input.addEventListener('blur', function(e) {
+            const campoNome = e.target.name; 
+            let valorDigitado = e.target.value;
+            const elementosDestino = document.querySelectorAll(`.out-${campoNome}`);
+            elementosDestino.forEach(span => {
+                span.textContent = valorDigitado;
+            });
+        });
+    });
+
+    // ====================================================================
+    // 1.5 ESPELHAMENTO DO TIPO DE EXAME (COM PARÊNTESES)
+    // ====================================================================
+    const masterTipos = document.querySelectorAll('.master-tipo');
+    
+    function atualizarTipoExame() {
+        const tiposSelecionados = [];
+        document.querySelectorAll('.master-tipo:checked').forEach(cb => {
+            tiposSelecionados.push(cb.value);
+        });
+
+        const textoParaExibir = tiposSelecionados.length > 0 ? `(${tiposSelecionados.join(' / ')})` : '';
+
+        document.querySelectorAll('.out-tipo-exame').forEach(span => {
+            span.textContent = textoParaExibir;
+        });
+    }
+
+    masterTipos.forEach(checkbox => {
+        checkbox.addEventListener('change', atualizarTipoExame);
     });
 
     // ====================================================================
@@ -68,16 +184,27 @@ document.addEventListener("DOMContentLoaded", function() {
         renderizarLista('lista-lab', examesLab);
     }
 
-    // Atrela o evento de mudança aos checkboxes nativos
     masterCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', atualizarListaExames);
     });
 
     // ====================================================================
-    // 3. INSERÇÃO DE EXAMES EXTRAS NO LABORATÓRIO
+    // 3. INSERÇÃO DE EXAMES EXTRAS (LABORATÓRIO E RAIO-X)
     // ====================================================================
-    function adicionarExameExtra() {
-        const nomeExame = inputExameExtra.value.trim();
+    
+    // Elementos do Laboratório
+    const btnAddExameLab = document.getElementById('btn-add-exame');
+    const inputExameExtraLab = document.getElementById('input-exame-extra');
+    const listaExtrasPainelLab = document.getElementById('lista-extras-painel');
+
+    // Elementos do Raio-X
+    const btnAddExameRaiox = document.getElementById('btn-add-exame-raiox');
+    const inputExameExtraRaiox = document.getElementById('input-exame-extra-raiox');
+    const listaExtrasPainelRaiox = document.getElementById('lista-extras-painel-raiox');
+
+    // Função genérica que adiciona exames em qualquer setor
+    function adicionarExameExtra(inputElement, painelElement, setor) {
+        const nomeExame = inputElement.value.trim();
         
         if (nomeExame !== '') {
             const novoLabel = document.createElement('label');
@@ -87,7 +214,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const novoCheckbox = document.createElement('input');
             novoCheckbox.type = 'checkbox';
             novoCheckbox.className = 'master-checkbox';
-            novoCheckbox.setAttribute('data-setor', 'lab');
+            novoCheckbox.setAttribute('data-setor', setor);
             novoCheckbox.setAttribute('data-nome', nomeExame);
             novoCheckbox.checked = true; 
             
@@ -95,22 +222,33 @@ document.addEventListener("DOMContentLoaded", function() {
             
             novoLabel.appendChild(novoCheckbox);
             novoLabel.appendChild(document.createTextNode(' ' + nomeExame));
-            listaExtrasPainel.appendChild(novoLabel);
+            painelElement.appendChild(novoLabel);
             
-            inputExameExtra.value = '';
+            inputElement.value = '';
             atualizarListaExames();
         }
     }
 
-    if (btnAddExame) {
-        btnAddExame.addEventListener('click', adicionarExameExtra);
+    if (btnAddExameLab) {
+        btnAddExameLab.addEventListener('click', () => adicionarExameExtra(inputExameExtraLab, listaExtrasPainelLab, 'lab'));
     }
-    
-    if (inputExameExtra) {
-        inputExameExtra.addEventListener('keypress', function(e) {
+    if (inputExameExtraLab) {
+        inputExameExtraLab.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault(); 
-                adicionarExameExtra();
+                adicionarExameExtra(inputExameExtraLab, listaExtrasPainelLab, 'lab');
+            }
+        });
+    }
+
+    if (btnAddExameRaiox) {
+        btnAddExameRaiox.addEventListener('click', () => adicionarExameExtra(inputExameExtraRaiox, listaExtrasPainelRaiox, 'raiox'));
+    }
+    if (inputExameExtraRaiox) {
+        inputExameExtraRaiox.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); 
+                adicionarExameExtra(inputExameExtraRaiox, listaExtrasPainelRaiox, 'raiox');
             }
         });
     }
@@ -120,6 +258,15 @@ document.addEventListener("DOMContentLoaded", function() {
     // ====================================================================
     if (btnSalvarImprimir) {
         btnSalvarImprimir.addEventListener('click', function() {
+            
+            // BLOQUEIO DE SEGURANÇA: NÃO SALVAR/IMPRIMIR SE O CPF FOR INVÁLIDO
+            const cpfAtual = cpfInput ? cpfInput.value : '';
+            if (cpfAtual && !validarCPF(cpfAtual)) {
+                alert("O CPF informado é inválido. Por favor, corrija antes de prosseguir.");
+                cpfInput.focus();
+                return; // Para o código aqui
+            }
+
             btnSalvarImprimir.disabled = true;
             btnSalvarImprimir.style.opacity = "0.5";
             msgStatus.style.display = "block";
@@ -133,8 +280,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 dn: document.querySelector('[name="dn"]').value,
                 rg: document.querySelector('[name="rg"]').value,
                 cpf: document.querySelector('[name="cpf"]').value,
-                peso: document.querySelector('[name="peso"]').value,
-                altura: document.querySelector('[name="altura"]').value,
+                
+                // Telefone adicionado à carga de envio para a planilha
+                telefone: document.querySelector('[name="telefone"]').value,
+                
+                peso: "", 
+                altura: "", 
+                
                 dataExame: document.querySelector('[name="data"]').value,
                 
                 examesClinicos: pegarExamesSelecionadosPorSetor('clinico'),
