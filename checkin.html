@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liberação de Setores - Clínica Monad</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/checkin.css">
+</head>
+<body>
+    <header>
+        <h1>Sistema Interno</h1>
+        <h2>Clínica Monad Ocupacional - Oriximiná</h2>
+        <nav>
+            <ul>
+                <li><a href="index.html">Recepção</a></li>
+                <li><a href="checkin.html">Check-in Pacientes</a></li>
+                <li><a href="#">Relatórios</a></li>
+                <li><a href="#">Impressão de ASO's</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <div class="painel-recepcao">
+            <div class="painel-topo">
+                <h2>Controle de Liberação</h2>
+
+                <div class="painel-filtros">
+                    <label class="filtro-item">
+                        <span>Data</span>
+                        <input type="date" id="filtro-data">
+                    </label>
+
+                    <label class="filtro-item filtro-pesquisa">
+                        <span class="sr-only">Filtrar por nome ou empresa</span>
+                        <input type="text" id="pesquisa-paciente" placeholder="Filtrar por nome ou empresa...">
+                    </label>
+
+                    <button id="btn-buscar-data" class="btn-primario">Buscar</button>
+                </div>
+            </div>
+
+            <p class="texto-ajuda">Marque a caixa correspondente quando o paciente finalizar o atendimento no setor.</p>
+            
+            <div id="msg-carregando" class="msg-status">
+                ⏳ Buscando pacientes na base de dados...
+            </div>
+
+            <div class="table-responsive">
+                <table class="tabela-liberacao">
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Nome do Colaborador</th>
+                            <th>Função</th>
+                            <th class="text-center">Exames Fisícos</th>
+                            <th class="text-center">Raio-X</th>
+                            <th class="text-center">Audiometria</th>
+                            <th class="text-center">Laboratório</th>
+                            <th class="text-center">Status Geral</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-liberacao">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="msg-vazio" class="msg-vazio">
+                Nenhum paciente encontrado para esta data.
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>&copy; 2026 Clínica Monad Ocupacional - Oriximiná.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // ==========================================================
+            // COLE A SUA URL DO GOOGLE APPS SCRIPT AQUI ABAIXO!
+            // ==========================================================
+            const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
+
+            const tabela = document.getElementById('lista-liberacao');
+            const inputPesquisa = document.getElementById('pesquisa-paciente');
+            const inputData = document.getElementById('filtro-data');
+            const btnBuscarData = document.getElementById('btn-buscar-data');
+            const msgCarregando = document.getElementById('msg-carregando');
+            const msgVazio = document.getElementById('msg-vazio');
+
+            // 1. Configura a data de hoje ao abrir a página
+            const hoje = new Date();
+            const ano = hoje.getFullYear();
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            const dia = String(hoje.getDate()).padStart(2, '0');
+            inputData.value = `${ano}-${mes}-${dia}`;
+
+            // 2. Função principal para buscar dados na planilha
+            function buscarPacientesDaPlanilha() {
+                tabela.innerHTML = ""; 
+                msgVazio.style.display = "none";
+                msgCarregando.style.display = "block";
+
+                // Envia a data crua diretamente para a API blindada resolver
+                const dataFormatada = inputData.value;
+                if(!dataFormatada) return;
+
+                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${dataFormatada}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        msgCarregando.style.display = "none";
+                        
+                        if (data.status === "sucesso" && data.pacientes.length > 0) {
+                            renderizarTabela(data.pacientes);
+                        } else {
+                            msgVazio.style.display = "block";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro ao buscar dados:', error);
+                        msgCarregando.style.display = "none";
+                        msgVazio.innerHTML = "❌ Erro ao conectar com a base de dados.";
+                        msgVazio.style.display = "block";
+                        msgVazio.style.color = "red";
+                    });
+            }
+
+            // 3. Monta a tabela com os dados recebidos
+            function renderizarTabela(pacientes) {
+                pacientes.forEach(pac => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'linha-paciente';
+                    tr.innerHTML = `
+                        <td class="col-empresa">${pac.empresa || '-'}</td>
+                        <td class="col-nome">${pac.nome || '-'}</td>
+                        <td>${pac.funcao || '-'}</td>
+                        <td class="text-center"><input type="checkbox" class="check-setor"></td>
+                        <td class="text-center"><input type="checkbox" class="check-setor"></td>
+                        <td class="text-center"><input type="checkbox" class="check-setor"></td>
+                        <td class="text-center"><input type="checkbox" class="check-setor"></td>
+                        <td class="text-center"><span class="badge-status pendente">EM ATENDIMENTO</span></td>
+                    `;
+                    tabela.appendChild(tr);
+                });
+            }
+
+            // 4. Lógica de atualizar o status
+            tabela.addEventListener('change', function(e) {
+                if (e.target.classList.contains('check-setor')) {
+                    const linha = e.target.closest('tr');
+                    const checkboxes = linha.querySelectorAll('.check-setor');
+                    const badge = linha.querySelector('.badge-status');
+                    
+                    let todosMarcados = true;
+                    checkboxes.forEach(cb => {
+                        if (!cb.checked) todosMarcados = false;
+                    });
+
+                    if (todosMarcados) {
+                        badge.textContent = 'LIBERADO (A)';
+                        badge.className = 'badge-status liberado';
+                        linha.style.backgroundColor = '#f0fdf4'; 
+                    } else {
+                        badge.textContent = 'EM ATENDIMENTO';
+                        badge.className = 'badge-status pendente';
+                        linha.style.backgroundColor = ''; 
+                    }
+                }
+            });
+
+            // 5. Filtro de digitação rápida
+            inputPesquisa.addEventListener('input', function(e) {
+                const termo = e.target.value.toLowerCase();
+                const linhas = tabela.querySelectorAll('.linha-paciente');
+
+                linhas.forEach(linha => {
+                    const nome = linha.querySelector('.col-nome').textContent.toLowerCase();
+                    const empresa = linha.querySelector('.col-empresa').textContent.toLowerCase();
+
+                    if (nome.includes(termo) || empresa.includes(termo)) {
+                        linha.style.display = '';
+                    } else {
+                        linha.style.display = 'none';
+                    }
+                });
+            });
+
+            btnBuscarData.addEventListener('click', buscarPacientesDaPlanilha);
+            buscarPacientesDaPlanilha();
+        });
+    </script>
+</body>
+</html>
