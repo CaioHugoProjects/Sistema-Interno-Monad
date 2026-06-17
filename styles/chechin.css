@@ -262,11 +262,179 @@
 
 @media (max-width: 720px) {
     .tabela-liberacao {
-        min-width: 720px;
+        min-width: 0;
     }
 
     .tabela-liberacao th,
     .tabela-liberacao td {
         padding: 12px 14px;
     }
+}
+
+@media (max-width: 620px) {
+    .painel-topo,
+    .painel-recepcao > div {
+        width: 100%;
+    }
+
+    .tabs-setores {
+        gap: 8px;
+        padding-bottom: 8px;
+    }
+
+    .tab-btn {
+        flex: 1 1 120px;
+        min-width: 120px;
+        padding: 10px 14px;
+        font-size: 0.92rem;
+    }
+
+    .tabela-liberacao {
+        min-width: 0;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .tabela-liberacao thead {
+        display: none;
+    }
+
+    .tabela-liberacao tr {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 12px;
+        background: var(--surface);
+        box-shadow: none;
+    }
+
+    .tabela-liberacao td {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        white-space: normal;
+        border: none;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .tabela-liberacao td:last-child {
+        border-bottom: none;
+    }
+
+    .tabela-liberacao td span,
+    .tabela-liberacao td .badge-status {
+        width: 100%;
+        text-align: left;
+    }
+
+    .perfil-paciente {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .perfil-paciente .avatar {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+    }
+
+    .detalhe-exame {
+        max-width: 100%;
+        text-align: left;
+    }
+
+    .celula-exame {
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .text-na {
+        font-size: 14px;
+    }
+}
+/* ==============================================
+   ESTILOS DOS EXAMES NA TABELA DE LIBERAÇÃO
+   ============================================== */
+
+/* Centraliza o checkbox e os exames em uma coluna flexível */
+.celula-exame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Espaço entre o checkbox e o texto */
+}
+
+/* O traço discreto para quando o exame não for daquele paciente */
+.text-na {
+    color: #cbd5e1;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* O texto dos exames agora quebra linha para não esticar a tabela */
+.detalhe-exame {
+    font-size: 10px;
+    color: #64748b;
+    line-height: 1.3;
+    max-width: 140px; /* Impede a coluna de ficar gigante */
+    word-wrap: break-word; /* Quebra palavras muito longas */
+    white-space: normal;
+    text-align: center;
+}
+
+/* Ajuste no perfil agora que a função foi removida */
+.perfil-paciente {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.col-nome {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 14px;
+    margin-top: 2px;
+}   /* ==============================================
+   NAVEGAÇÃO POR ABAS (SETORES)
+   ============================================== */
+.tabs-setores {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    overflow-x: auto; /* Permite arrastar no celular se não couber */
+    padding-bottom: 5px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.tab-btn {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    border-bottom: none;
+    padding: 12px 24px;
+    border-radius: 8px 8px 0 0; /* Arredonda só em cima */
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    position: relative;
+    top: 2px; /* Encaixa a aba na linha inferior */
+}
+
+.tab-btn:hover {
+    background-color: #e2e8f0;
+    color: #0f172a;
+}
+
+.tab-btn.active {
+    background-color: #ffffff;
+    color: #004080;
+    border-color: #e2e8f0;
+    border-top: 3px solid #004080; /* Linha azul forte em cima */
+    border-bottom: 2px solid #ffffff; /* Apaga a linha da base */
 }
