@@ -17,10 +17,9 @@ document.addEventListener("DOMContentLoaded", function() {
     const telefoneInput = document.querySelector('input[name="telefone"]');
     const cpfError = document.getElementById('cpf-error');
 
-    // MÁSCARA DE CPF
     if (cpfInput) {
         cpfInput.addEventListener('input', function(e) {
-            let v = e.target.value.replace(/\D/g, ''); // Remove tudo que não for dígito
+            let v = e.target.value.replace(/\D/g, ''); 
             if (v.length > 11) v = v.slice(0, 11);
             if (v.length > 9) {
                 v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
@@ -31,15 +30,11 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             e.target.value = v;
             
-            // Esconde o erro enquanto está digitando
             cpfError.style.display = 'none';
             cpfInput.style.borderColor = '#ccc';
-            
-            // Dispara evento manual para espelhar as mudanças na ficha impressa
             cpfInput.dispatchEvent(new Event('input', { bubbles: true }));
         });
 
-        // VALIDAÇÃO QUANDO O USUÁRIO SAI DO CAMPO
         cpfInput.addEventListener('blur', function() {
             if (this.value && !validarCPF(this.value)) {
                 cpfError.style.display = 'block';
@@ -48,7 +43,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // MÁSCARA DE TELEFONE
     if (telefoneInput) {
         telefoneInput.addEventListener('input', function(e) {
             let v = e.target.value.replace(/\D/g, '');
@@ -68,7 +62,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // FUNÇÃO MATEMÁTICA DE VALIDAÇÃO DE CPF
     function validarCPF(cpf) {
         cpf = cpf.replace(/[^\d]+/g,'');
         if(cpf == '') return false;
@@ -97,9 +90,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // 1. ESPELHAMENTO DE TEXTO E DATAS
     // ====================================================================
     masterInputs.forEach(input => {
-        // Usa blur e input para não bugar o cursor
         input.addEventListener('input', function(e) {
-            // Se for CPF ou Telefone com foco, não espelha a cada tecla para não pular cursor
             if ((e.target.name === 'cpf' || e.target.name === 'telefone') && document.activeElement === e.target && e.isTrusted) return;
             
             const campoNome = e.target.name; 
@@ -118,7 +109,6 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
 
-        // Força a atualização do espelhamento quando sai do campo
         input.addEventListener('blur', function(e) {
             const campoNome = e.target.name; 
             let valorDigitado = e.target.value;
@@ -191,18 +181,14 @@ document.addEventListener("DOMContentLoaded", function() {
     // ====================================================================
     // 3. INSERÇÃO DE EXAMES EXTRAS (LABORATÓRIO E RAIO-X)
     // ====================================================================
-    
-    // Elementos do Laboratório
     const btnAddExameLab = document.getElementById('btn-add-exame');
     const inputExameExtraLab = document.getElementById('input-exame-extra');
     const listaExtrasPainelLab = document.getElementById('lista-extras-painel');
 
-    // Elementos do Raio-X
     const btnAddExameRaiox = document.getElementById('btn-add-exame-raiox');
     const inputExameExtraRaiox = document.getElementById('input-exame-extra-raiox');
     const listaExtrasPainelRaiox = document.getElementById('lista-extras-painel-raiox');
 
-    // Função genérica que adiciona exames em qualquer setor
     function adicionarExameExtra(inputElement, painelElement, setor) {
         const nomeExame = inputElement.value.trim();
         
@@ -229,42 +215,44 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    if (btnAddExameLab) {
-        btnAddExameLab.addEventListener('click', () => adicionarExameExtra(inputExameExtraLab, listaExtrasPainelLab, 'lab'));
-    }
-    if (inputExameExtraLab) {
-        inputExameExtraLab.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault(); 
-                adicionarExameExtra(inputExameExtraLab, listaExtrasPainelLab, 'lab');
-            }
-        });
-    }
+    if (btnAddExameLab) btnAddExameLab.addEventListener('click', () => adicionarExameExtra(inputExameExtraLab, listaExtrasPainelLab, 'lab'));
+    if (inputExameExtraLab) inputExameExtraLab.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); adicionarExameExtra(inputExameExtraLab, listaExtrasPainelLab, 'lab'); } });
 
-    if (btnAddExameRaiox) {
-        btnAddExameRaiox.addEventListener('click', () => adicionarExameExtra(inputExameExtraRaiox, listaExtrasPainelRaiox, 'raiox'));
-    }
-    if (inputExameExtraRaiox) {
-        inputExameExtraRaiox.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault(); 
-                adicionarExameExtra(inputExameExtraRaiox, listaExtrasPainelRaiox, 'raiox');
-            }
-        });
+    if (btnAddExameRaiox) btnAddExameRaiox.addEventListener('click', () => adicionarExameExtra(inputExameExtraRaiox, listaExtrasPainelRaiox, 'raiox'));
+    if (inputExameExtraRaiox) inputExameExtraRaiox.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); adicionarExameExtra(inputExameExtraRaiox, listaExtrasPainelRaiox, 'raiox'); } });
+
+    // ====================================================================
+    // 6. CONTROLE DA FICHA DE AUDIOMETRIA (FONOAUDIOLOGIA)
+    // ====================================================================
+    const checkAudiometria = document.getElementById('check-audiometria');
+    const setorAudio = document.getElementById('setor-audio');
+
+    if (checkAudiometria && setorAudio) {
+        function toggleAudiometria() {
+            setorAudio.style.display = checkAudiometria.checked ? 'flex' : 'none';
+        }
+        checkAudiometria.addEventListener('change', toggleAudiometria);
+        toggleAudiometria(); 
     }
 
     // ====================================================================
     // 4. INTEGRAÇÃO COM O GOOGLE PLANILHAS E IMPRESSÃO
     // ====================================================================
+    function pegarExamesSelecionadosPorSetor(setor) {
+        let exames = [];
+        document.querySelectorAll(`.master-checkbox[data-setor="${setor}"]:checked`).forEach(cb => {
+            exames.push(cb.getAttribute('data-nome'));
+        });
+        return exames.length > 0 ? exames.join(', ') : 'Nenhum';
+    }
+
     if (btnSalvarImprimir) {
         btnSalvarImprimir.addEventListener('click', function() {
-            
-            // BLOQUEIO DE SEGURANÇA: NÃO SALVAR/IMPRIMIR SE O CPF FOR INVÁLIDO
             const cpfAtual = cpfInput ? cpfInput.value : '';
             if (cpfAtual && !validarCPF(cpfAtual)) {
                 alert("O CPF informado é inválido. Por favor, corrija antes de prosseguir.");
                 cpfInput.focus();
-                return; // Para o código aqui
+                return;
             }
 
             btnSalvarImprimir.disabled = true;
@@ -273,6 +261,7 @@ document.addEventListener("DOMContentLoaded", function() {
             msgStatus.style.color = "#004080";
             msgStatus.textContent = "Salvando dados de " + document.querySelector('[name="nome"]').value + " no sistema...";
 
+            // AGORA COM A AUDIOMETRIA ENVIANDO TRUE/FALSE NATIVO
             const dadosParaPlanilha = {
                 empresa: document.querySelector('[name="empresa"]').value,
                 nome: document.querySelector('[name="nome"]').value,
@@ -280,18 +269,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 dn: document.querySelector('[name="dn"]').value,
                 rg: document.querySelector('[name="rg"]').value,
                 cpf: document.querySelector('[name="cpf"]').value,
-                
-                // Telefone adicionado à carga de envio para a planilha
                 telefone: document.querySelector('[name="telefone"]').value,
-                
                 peso: "", 
                 altura: "", 
-                
                 dataExame: document.querySelector('[name="data"]').value,
-                
                 examesClinicos: pegarExamesSelecionadosPorSetor('clinico'),
                 examesRaioX: pegarExamesSelecionadosPorSetor('raiox'),
-                examesLab: pegarExamesSelecionadosPorSetor('lab')
+                examesLab: pegarExamesSelecionadosPorSetor('lab'),
+                
+                // Manda 'true' se marcado, e 'false' se desmarcado
+                audiometria: checkAudiometria ? checkAudiometria.checked : false
             };
 
             fetch(URL_GOOGLE_SCRIPT, {
@@ -322,14 +309,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 btnSalvarImprimir.style.opacity = "1";
             });
         });
-    }
-
-    function pegarExamesSelecionadosPorSetor(setor) {
-        let exames = [];
-        document.querySelectorAll(`.master-checkbox[data-setor="${setor}"]:checked`).forEach(cb => {
-            exames.push(cb.getAttribute('data-nome'));
-        });
-        return exames.length > 0 ? exames.join(', ') : 'Nenhum';
     }
 
     // ====================================================================
