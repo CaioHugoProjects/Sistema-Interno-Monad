@@ -22,21 +22,21 @@
     
     <main>
         <div class="painel-recepcao">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="margin: 0; color: #004080;">Painel de Atendimentos</h2>
-                
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
-                        <button id="btn-buscar-data" style="background-color: #004080; color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Buscar</button>
+            <div class="painel-topo">
+                <h2>Painel de Atendimentos</h2>
+                <div class="painel-filtros">
+                    <div class="filtro-item">
+                        <label for="filtro-data" class="sr-only">Data</label>
+                        <input type="date" id="filtro-data">
+                        <button id="btn-buscar-data" class="btn-primario" type="button">Buscar</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Buscar na aba atual..." style="padding: 8px; width: 220px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+                    <input type="text" id="pesquisa-paciente" class="filtro-pesquisa" placeholder="Buscar na aba atual...">
                 </div>
             </div>
 
             <div class="tabs-setores">
                 <button class="tab-btn active" data-aba="todos">Visão Geral</button>
-                <button class="tab-btn" data-aba="clinico">Exames Físicos</button>
+                <button class="tab-btn" data-aba="clinico">Exames Fís.</button>
                 <button class="tab-btn" data-aba="raiox">Raio-X</button>
                 <button class="tab-btn" data-aba="fono">Audiometria</button>
                 <button class="tab-btn" data-aba="lab">Coleta</button>
@@ -70,7 +70,9 @@
             </div>
         </div>
     </main>
-
+    <footer>
+        <p>&copy; 2026 Clínica Monad Ocupacional - Oriximiná.</p>
+    </footer>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             
