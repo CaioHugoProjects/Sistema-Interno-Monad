@@ -6,6 +6,7 @@
     <title>Liberação de Setores - Clínica Monad</title>
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
+
 </head>
 <body>
     <header>
@@ -91,7 +92,6 @@
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
-            // LÓGICA DAS ABAS
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -129,26 +129,20 @@
 
             function renderizarTabela(pacientes) {
                 pacientes.forEach(pac => {
-                    const temClinico = pac.examesClinicos && pac.examesClinicos !== "Nenhum" && pac.examesClinicos !== "";
-                    const temRaiox = pac.examesRaioX && pac.examesRaioX !== "Nenhum" && pac.examesRaioX !== "";
-                    const temLab = pac.examesLab && pac.examesLab !== "Nenhum" && pac.examesLab !== "";
-                    const temFono = pac.hasAudio === true;
+                    if (!pac.temClinico && !pac.temRaiox && !pac.temLab && !pac.temFono) return;
 
-                    if (!temClinico && !temRaiox && !temLab && !temFono) return;
-
-                    // Estrutura em coluna para o Checkbox ficar em cima e o texto embaixo
-                    const cellTemplate = (exameText) => `
+                    // Cria os blocos injetando o status correto ("checked" se já estiver salvo como TRUE na planilha)
+                    const cellTemplate = (exameText, isChecked, setorNome) => `
                         <div class="celula-exame">
-                            <input type="checkbox" class="check-setor">
+                            <input type="checkbox" class="check-setor" data-setor="${setorNome}" ${isChecked ? 'checked' : ''}>
                             <div class="detalhe-exame">${exameText}</div>
                         </div>
                     `;
 
-                    // Se não tiver exame, exibe apenas um traço "—" para não poluir a tela
-                    const tdClinico = temClinico ? cellTemplate(pac.examesClinicos) : `<span class="text-na">—</span>`;
-                    const tdRaiox = temRaiox ? cellTemplate(pac.examesRaioX) : `<span class="text-na">—</span>`;
-                    const tdLab = temLab ? cellTemplate(pac.examesLab) : `<span class="text-na">—</span>`;
-                    const tdFono = temFono ? cellTemplate("Audiometria Ocupacional") : `<span class="text-na">—</span>`;
+                    const tdClinico = pac.temClinico ? cellTemplate(pac.examesClinicos, pac.liberadoClinico, "clinico") : `<span class="text-na">—</span>`;
+                    const tdRaiox   = pac.temRaiox   ? cellTemplate(pac.examesRaioX, pac.liberadoRaiox, "raiox") : `<span class="text-na">—</span>`;
+                    const tdLab     = pac.temLab     ? cellTemplate(pac.examesLab, pac.liberadoLab, "lab") : `<span class="text-na">—</span>`;
+                    const tdFono    = pac.temFono    ? cellTemplate("Audiometria Ocupacional", pac.liberadoFono, "fono") : `<span class="text-na">—</span>`;
 
                     const nomeStr = pac.nome || '-';
                     let iniciais = "-";
@@ -161,10 +155,11 @@
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
-                    tr.dataset.clinico = temClinico;
-                    tr.dataset.raiox = temRaiox;
-                    tr.dataset.fono = temFono;
-                    tr.dataset.lab = temLab;
+                    tr.dataset.cpf = pac.cpf; // Guarda o CPF na linha para a API saber quem atualizar
+                    tr.dataset.clinico = pac.temClinico;
+                    tr.dataset.raiox = pac.temRaiox;
+                    tr.dataset.fono = pac.temFono;
+                    tr.dataset.lab = pac.temLab;
 
                     tr.innerHTML = `
                         <td><span class="tag-empresa">${pac.empresa || '-'}</span></td>
@@ -181,6 +176,9 @@
                         <td style="text-align: center;"><span class="badge-status pendente">EM ATENDIMENTO</span></td>
                     `;
                     tabela.appendChild(tr);
+                    
+                    // Roda a verificação de status inicial da linha para pintar de verde caso já tenha vindo tudo liberado
+                    verificarFimAtendimentoLinha(tr);
                 });
                 
                 aplicarFiltrosDeAbaEPesquisa();
@@ -202,7 +200,6 @@
                 linhas.forEach(linha => {
                     const nome = linha.querySelector('.col-nome').textContent.toLowerCase();
                     const empresa = linha.querySelector('.tag-empresa').textContent.toLowerCase();
-                    
                     const passouPesquisa = nome.includes(termoPesquisa) || empresa.includes(termoPesquisa);
                     
                     let passouAba = false;
@@ -220,24 +217,62 @@
                 msgVazio.style.display = totalVisivel === 0 ? 'block' : 'none';
             }
 
+            // EVENTO: Captura quando um checkbox é marcado/desmarcado e envia em tempo real para a planilha
             tabela.addEventListener('change', function(e) {
                 if (e.target.classList.contains('check-setor')) {
-                    const linha = e.target.closest('tr');
-                    const checkboxes = linha.querySelectorAll('.check-setor');
-                    const marcados = linha.querySelectorAll('.check-setor:checked');
-                    const badge = linha.querySelector('.badge-status');
-                    
-                    if (checkboxes.length > 0 && checkboxes.length === marcados.length) {
-                        badge.textContent = 'LIBERADO (A)';
-                        badge.className = 'badge-status liberado';
-                        linha.classList.add('paciente-liberado-fade');
-                    } else {
-                        badge.textContent = 'EM ATENDIMENTO';
-                        badge.className = 'badge-status pendente';
-                        linha.classList.remove('paciente-liberado-fade');
-                    }
+                    const cb = e.target;
+                    const linha = cb.closest('tr');
+                    const cpfPaciente = linha.dataset.cpf;
+                    const nomeSetor = cb.dataset.setor;
+                    const estadoLiberado = cb.checked;
+
+                    // Desabilita temporariamente para dar feedback visual de carregamento rápido
+                    cb.style.opacity = "0.4";
+
+                    // Prepara o pacote de dados para enviar via POST para a API
+                    const pacoteAtualizacao = {
+                        acao: "ATUALIZAR_SETOR",
+                        cpf: cpfPaciente,
+                        setor: nomeSetor,
+                        liberado: estadoLiberado
+                    };
+
+                    fetch(URL_GOOGLE_SCRIPT, {
+                        method: 'POST',
+                        mode: 'no-cors', // Evita bloqueios de navegadores
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(pacoteAtualizacao)
+                    })
+                    .then(() => {
+                        // Sucesso silencioso na gravação do Sheets
+                        cb.style.opacity = "1";
+                        verificarFimAtendimentoLinha(linha);
+                    })
+                    .catch(error => {
+                        console.error('Erro ao salvar status do setor:', error);
+                        alert("Erro de conexão. O status não pôde ser salvo na planilha.");
+                        cb.checked = !estadoLiberado; // Destona a caixinha em caso de erro real
+                        cb.style.opacity = "1";
+                    });
                 }
             });
+
+            // Função auxiliar que gerencia a etiqueta final da linha (EM ATENDIMENTO / LIBERADO)
+            function verificarFimAtendimentoLinha(linha) {
+                const checkboxes = linha.querySelectorAll('.check-setor');
+                const marcados = linha.querySelectorAll('.check-setor:checked');
+                const badge = linha.querySelector('.badge-status');
+                
+                if (checkboxes.length > 0 && checkboxes.length === marcados.length) {
+                    badge.textContent = 'LIBERADO (A)';
+                    badge.className = 'badge-status liberado';
+                    linha.classList.add('paciente-liberado-fade');
+                } else {
+                    badge.textContent = 'EM ATENDIMENTO';
+                    badge.className = 'badge-status pendente';
+                    linha.classList.remove('paciente-liberado-fade');
+                }
+            }
 
             inputPesquisa.addEventListener('input', aplicarFiltrosDeAbaEPesquisa);
             btnBuscarData.addEventListener('click', buscarPacientesDaPlanilha);
