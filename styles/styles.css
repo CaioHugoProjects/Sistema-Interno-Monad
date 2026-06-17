@@ -10,7 +10,7 @@ main h2, .painel-recepcao h2 { color: #004080; margin: 0 0 16px 0; }
 nav ul { list-style: none; padding: 0; margin: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; }
 nav a { color: white; text-decoration: none; font-weight: bold; padding: 8px 12px; border-radius: 4px; }
 nav a:hover { background-color: #003366; }
-main { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+main { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
 footer { text-align: center; padding: 20px; background-color: #e6e6e6; margin-top: 40px; font-size: 14px; color: #666; margin: 0; }
 
 button, input, select, textarea { font: inherit; }
