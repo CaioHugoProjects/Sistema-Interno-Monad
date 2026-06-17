@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liberação de Setores - Clínica Monad</title>
     <link rel="stylesheet" href="styles/styles.css">
-    <link rel="stylesheet" href="styles/chechin.css">
+    <link rel="stylesheet" href="styles/checkin.css">
 </head>
 <body>
     <header>
@@ -14,37 +14,36 @@
         <nav>
             <ul>
                 <li><a href="index.html">Recepção</a></li>
-                <li><a href="checkin.html">Check-in Pacientes</a></li>
+                <li><a href="checkin.html" style="background-color: #003366;">Check-in Pacientes</a></li>
                 <li><a href="#">Relatórios</a></li>
-                <li><a href="#">Impressão de ASO's</a></li>
             </ul>
         </nav>
     </header>
     
     <main>
         <div class="painel-recepcao">
-            <div class="painel-topo">
-                <h2>Controle de Liberação</h2>
-
-                <div class="painel-filtros">
-                    <label class="filtro-item">
-                        <span>Data</span>
-                        <input type="date" id="filtro-data">
-                    </label>
-
-                    <label class="filtro-item filtro-pesquisa">
-                        <span class="sr-only">Filtrar por nome ou empresa</span>
-                        <input type="text" id="pesquisa-paciente" placeholder="Filtrar por nome ou empresa...">
-                    </label>
-
-                    <button id="btn-buscar-data" class="btn-primario">Buscar</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
+                <h2 style="margin: 0; color: #004080;">Painel de Atendimentos</h2>
+                
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                        <button id="btn-buscar-data" style="background-color: #004080; color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Buscar</button>
+                    </div>
+                    <input type="text" id="pesquisa-paciente" placeholder="Buscar na aba atual..." style="padding: 8px; width: 220px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
                 </div>
             </div>
 
-            <p class="texto-ajuda">Marque a caixa correspondente quando o paciente finalizar o atendimento no setor.</p>
+            <div class="tabs-setores">
+                <button class="tab-btn active" data-aba="todos">Visão Geral</button>
+                <button class="tab-btn" data-aba="clinico">Clínico</button>
+                <button class="tab-btn" data-aba="raiox">Raio-X</button>
+                <button class="tab-btn" data-aba="fono">Fonoaudiologia</button>
+                <button class="tab-btn" data-aba="lab">Laboratório</button>
+            </div>
             
-            <div id="msg-carregando" class="msg-status">
-                ⏳ Buscando pacientes na base de dados...
+            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: #004080; display: none;">
+                ⏳ Buscando fila de pacientes...
             </div>
 
             <div class="table-responsive">
@@ -52,29 +51,25 @@
                     <thead>
                         <tr>
                             <th>Empresa</th>
-                            <th>Nome do Colaborador</th>
-                            <th>Função</th>
-                            <th class="text-center">Exames Fisícos</th>
-                            <th class="text-center">Raio-X</th>
-                            <th class="text-center">Audiometria</th>
-                            <th class="text-center">Laboratório</th>
-                            <th class="text-center">Status Geral</th>
+                            <th>Colaborador</th>
+                            <th class="col-clinico" style="text-align: center;">Clínico</th>
+                            <th class="col-raiox" style="text-align: center;">Raio-X</th>
+                            <th class="col-fono" style="text-align: center;">Fono</th>
+                            <th class="col-lab" style="text-align: center;">Laboratório</th>
+                            <th style="text-align: center;">Status</th>
                         </tr>
                     </thead>
                     <tbody id="lista-liberacao">
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
             
-            <div id="msg-vazio" class="msg-vazio">
-                Nenhum paciente encontrado para esta data.
+            <div id="msg-vazio" style="text-align: center; padding: 30px; color: #64748b; display: none; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; margin-top: 10px;">
+                <strong>Nenhum paciente pendente para este setor!</strong><br>
+                Verifique se escolheu a data correta ou altere a aba do setor.
             </div>
         </div>
     </main>
-    
-    <footer>
-        <p>&copy; 2026 Clínica Monad Ocupacional - Oriximiná.</p>
-    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -90,21 +85,27 @@
             const btnBuscarData = document.getElementById('btn-buscar-data');
             const msgCarregando = document.getElementById('msg-carregando');
             const msgVazio = document.getElementById('msg-vazio');
+            
+            let abaAtiva = 'todos'; 
 
-            // 1. Configura a data de hoje ao abrir a página
             const hoje = new Date();
-            const ano = hoje.getFullYear();
-            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-            const dia = String(hoje.getDate()).padStart(2, '0');
-            inputData.value = `${ano}-${mes}-${dia}`;
+            inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
-            // 2. Função principal para buscar dados na planilha
+            // LÓGICA DAS ABAS
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    abaAtiva = this.getAttribute('data-aba');
+                    aplicarFiltrosDeAbaEPesquisa();
+                });
+            });
+
             function buscarPacientesDaPlanilha() {
                 tabela.innerHTML = ""; 
                 msgVazio.style.display = "none";
                 msgCarregando.style.display = "block";
 
-                // Envia a data crua diretamente para a API blindada resolver
                 const dataFormatada = inputData.value;
                 if(!dataFormatada) return;
 
@@ -112,7 +113,6 @@
                     .then(response => response.json())
                     .then(data => {
                         msgCarregando.style.display = "none";
-                        
                         if (data.status === "sucesso" && data.pacientes.length > 0) {
                             renderizarTabela(data.pacientes);
                         } else {
@@ -120,74 +120,126 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Erro ao buscar dados:', error);
+                        console.error('Erro:', error);
                         msgCarregando.style.display = "none";
-                        msgVazio.innerHTML = "❌ Erro ao conectar com a base de dados.";
+                        msgVazio.innerHTML = "❌ Erro ao conectar. Tente novamente.";
                         msgVazio.style.display = "block";
-                        msgVazio.style.color = "red";
                     });
             }
 
-            // 3. Monta a tabela com os dados recebidos
             function renderizarTabela(pacientes) {
                 pacientes.forEach(pac => {
+                    const temClinico = pac.examesClinicos && pac.examesClinicos !== "Nenhum" && pac.examesClinicos !== "";
+                    const temRaiox = pac.examesRaioX && pac.examesRaioX !== "Nenhum" && pac.examesRaioX !== "";
+                    const temLab = pac.examesLab && pac.examesLab !== "Nenhum" && pac.examesLab !== "";
+                    const temFono = pac.hasAudio === true;
+
+                    if (!temClinico && !temRaiox && !temLab && !temFono) return;
+
+                    // Estrutura em coluna para o Checkbox ficar em cima e o texto embaixo
+                    const cellTemplate = (exameText) => `
+                        <div class="celula-exame">
+                            <input type="checkbox" class="check-setor">
+                            <div class="detalhe-exame">${exameText}</div>
+                        </div>
+                    `;
+
+                    // Se não tiver exame, exibe apenas um traço "—" para não poluir a tela
+                    const tdClinico = temClinico ? cellTemplate(pac.examesClinicos) : `<span class="text-na">—</span>`;
+                    const tdRaiox = temRaiox ? cellTemplate(pac.examesRaioX) : `<span class="text-na">—</span>`;
+                    const tdLab = temLab ? cellTemplate(pac.examesLab) : `<span class="text-na">—</span>`;
+                    const tdFono = temFono ? cellTemplate("Audiometria Ocupacional") : `<span class="text-na">—</span>`;
+
+                    const nomeStr = pac.nome || '-';
+                    let iniciais = "-";
+                    if (nomeStr !== '-') {
+                        const partesNome = nomeStr.trim().split(" ");
+                        iniciais = partesNome[0][0];
+                        if (partesNome.length > 1) iniciais += partesNome[partesNome.length - 1][0];
+                        iniciais = iniciais.toUpperCase();
+                    }
+
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
+                    tr.dataset.clinico = temClinico;
+                    tr.dataset.raiox = temRaiox;
+                    tr.dataset.fono = temFono;
+                    tr.dataset.lab = temLab;
+
                     tr.innerHTML = `
-                        <td class="col-empresa">${pac.empresa || '-'}</td>
-                        <td class="col-nome">${pac.nome || '-'}</td>
-                        <td>${pac.funcao || '-'}</td>
-                        <td class="text-center"><input type="checkbox" class="check-setor"></td>
-                        <td class="text-center"><input type="checkbox" class="check-setor"></td>
-                        <td class="text-center"><input type="checkbox" class="check-setor"></td>
-                        <td class="text-center"><input type="checkbox" class="check-setor"></td>
-                        <td class="text-center"><span class="badge-status pendente">EM ATENDIMENTO</span></td>
+                        <td><span class="tag-empresa">${pac.empresa || '-'}</span></td>
+                        <td>
+                            <div class="perfil-paciente">
+                                <div class="avatar">${iniciais}</div>
+                                <span class="col-nome">${nomeStr}</span>
+                            </div>
+                        </td>
+                        <td class="col-clinico" style="text-align: center;">${tdClinico}</td>
+                        <td class="col-raiox" style="text-align: center;">${tdRaiox}</td>
+                        <td class="col-fono" style="text-align: center;">${tdFono}</td>
+                        <td class="col-lab" style="text-align: center;">${tdLab}</td>
+                        <td style="text-align: center;"><span class="badge-status pendente">EM ATENDIMENTO</span></td>
                     `;
                     tabela.appendChild(tr);
                 });
+                
+                aplicarFiltrosDeAbaEPesquisa();
             }
 
-            // 4. Lógica de atualizar o status
-            tabela.addEventListener('change', function(e) {
-                if (e.target.classList.contains('check-setor')) {
-                    const linha = e.target.closest('tr');
-                    const checkboxes = linha.querySelectorAll('.check-setor');
-                    const badge = linha.querySelector('.badge-status');
-                    
-                    let todosMarcados = true;
-                    checkboxes.forEach(cb => {
-                        if (!cb.checked) todosMarcados = false;
+            function aplicarFiltrosDeAbaEPesquisa() {
+                const termoPesquisa = inputPesquisa.value.toLowerCase();
+                const linhas = document.querySelectorAll('.linha-paciente');
+                
+                const setoresCols = ['clinico', 'raiox', 'fono', 'lab'];
+                setoresCols.forEach(setorNome => {
+                    const elementosDaColuna = document.querySelectorAll(`.col-${setorNome}`);
+                    elementosDaColuna.forEach(el => {
+                        el.style.display = (abaAtiva === 'todos' || abaAtiva === setorNome) ? '' : 'none';
                     });
+                });
 
-                    if (todosMarcados) {
-                        badge.textContent = 'LIBERADO (A)';
-                        badge.className = 'badge-status liberado';
-                        linha.style.backgroundColor = '#f0fdf4'; 
-                    } else {
-                        badge.textContent = 'EM ATENDIMENTO';
-                        badge.className = 'badge-status pendente';
-                        linha.style.backgroundColor = ''; 
-                    }
-                }
-            });
-
-            // 5. Filtro de digitação rápida
-            inputPesquisa.addEventListener('input', function(e) {
-                const termo = e.target.value.toLowerCase();
-                const linhas = tabela.querySelectorAll('.linha-paciente');
-
+                let totalVisivel = 0;
                 linhas.forEach(linha => {
                     const nome = linha.querySelector('.col-nome').textContent.toLowerCase();
-                    const empresa = linha.querySelector('.col-empresa').textContent.toLowerCase();
+                    const empresa = linha.querySelector('.tag-empresa').textContent.toLowerCase();
+                    
+                    const passouPesquisa = nome.includes(termoPesquisa) || empresa.includes(termoPesquisa);
+                    
+                    let passouAba = false;
+                    if (abaAtiva === 'todos') passouAba = true;
+                    else if (linha.dataset[abaAtiva] === 'true') passouAba = true;
 
-                    if (nome.includes(termo) || empresa.includes(termo)) {
+                    if (passouPesquisa && passouAba) {
                         linha.style.display = '';
+                        totalVisivel++;
                     } else {
                         linha.style.display = 'none';
                     }
                 });
+
+                msgVazio.style.display = totalVisivel === 0 ? 'block' : 'none';
+            }
+
+            tabela.addEventListener('change', function(e) {
+                if (e.target.classList.contains('check-setor')) {
+                    const linha = e.target.closest('tr');
+                    const checkboxes = linha.querySelectorAll('.check-setor');
+                    const marcados = linha.querySelectorAll('.check-setor:checked');
+                    const badge = linha.querySelector('.badge-status');
+                    
+                    if (checkboxes.length > 0 && checkboxes.length === marcados.length) {
+                        badge.textContent = 'LIBERADO (A)';
+                        badge.className = 'badge-status liberado';
+                        linha.classList.add('paciente-liberado-fade');
+                    } else {
+                        badge.textContent = 'EM ATENDIMENTO';
+                        badge.className = 'badge-status pendente';
+                        linha.classList.remove('paciente-liberado-fade');
+                    }
+                }
             });
 
+            inputPesquisa.addEventListener('input', aplicarFiltrosDeAbaEPesquisa);
             btnBuscarData.addEventListener('click', buscarPacientesDaPlanilha);
             buscarPacientesDaPlanilha();
         });
