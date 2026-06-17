@@ -6,7 +6,6 @@
     <title>Liberação de Setores - Clínica Monad</title>
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
-
 </head>
 <body>
     <header>
@@ -75,9 +74,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             
-            // ==========================================================
-            // COLE A SUA URL DO GOOGLE APPS SCRIPT AQUI ABAIXO!
-            // ==========================================================
+            // SUA URL DO GOOGLE APPS SCRIPT
             const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
 
             const tabela = document.getElementById('lista-liberacao');
@@ -131,7 +128,7 @@
                 pacientes.forEach(pac => {
                     if (!pac.temClinico && !pac.temRaiox && !pac.temLab && !pac.temFono) return;
 
-                    // Cria os blocos injetando o status correto ("checked" se já estiver salvo como TRUE na planilha)
+                    // Template padrão para Clínico, Raio-X e Fono
                     const cellTemplate = (exameText, isChecked, setorNome) => `
                         <div class="celula-exame">
                             <input type="checkbox" class="check-setor" data-setor="${setorNome}" ${isChecked ? 'checked' : ''}>
@@ -139,10 +136,21 @@
                         </div>
                     `;
 
+                    // Template exclusivo para o Laboratório com a caixa de Observações
+                    const cellTemplateLab = (exameText, isChecked, obsText) => `
+                        <div class="celula-exame">
+                            <input type="checkbox" class="check-setor" data-setor="lab" ${isChecked ? 'checked' : ''}>
+                            <div class="detalhe-exame">${exameText}</div>
+                            <textarea class="obs-input" data-cpf="${pac.cpf}" placeholder="Obs (ex: Faltou EPF)" rows="2">${obsText || ''}</textarea>
+                        </div>
+                    `;
+
                     const tdClinico = pac.temClinico ? cellTemplate(pac.examesClinicos, pac.liberadoClinico, "clinico") : `<span class="text-na">—</span>`;
                     const tdRaiox   = pac.temRaiox   ? cellTemplate(pac.examesRaioX, pac.liberadoRaiox, "raiox") : `<span class="text-na">—</span>`;
-                    const tdLab     = pac.temLab     ? cellTemplate(pac.examesLab, pac.liberadoLab, "lab") : `<span class="text-na">—</span>`;
                     const tdFono    = pac.temFono    ? cellTemplate("Audiometria Ocupacional", pac.liberadoFono, "fono") : `<span class="text-na">—</span>`;
+                    
+                    // Aplica o template com caixa de texto no Lab
+                    const tdLab     = pac.temLab     ? cellTemplateLab(pac.examesLab, pac.liberadoLab, pac.obsLab) : `<span class="text-na">—</span>`;
 
                     const nomeStr = pac.nome || '-';
                     let iniciais = "-";
@@ -155,7 +163,7 @@
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
-                    tr.dataset.cpf = pac.cpf; // Guarda o CPF na linha para a API saber quem atualizar
+                    tr.dataset.cpf = pac.cpf; 
                     tr.dataset.clinico = pac.temClinico;
                     tr.dataset.raiox = pac.temRaiox;
                     tr.dataset.fono = pac.temFono;
@@ -177,7 +185,6 @@
                     `;
                     tabela.appendChild(tr);
                     
-                    // Roda a verificação de status inicial da linha para pintar de verde caso já tenha vindo tudo liberado
                     verificarFimAtendimentoLinha(tr);
                 });
                 
@@ -217,8 +224,10 @@
                 msgVazio.style.display = totalVisivel === 0 ? 'block' : 'none';
             }
 
-            // EVENTO: Captura quando um checkbox é marcado/desmarcado e envia em tempo real para a planilha
+            // EVENTO: Captura interações (Checkbox e Textarea)
             tabela.addEventListener('change', function(e) {
+                
+                // 1. SE O CHECKBOX FOI ALTERADO
                 if (e.target.classList.contains('check-setor')) {
                     const cb = e.target;
                     const linha = cb.closest('tr');
@@ -226,38 +235,62 @@
                     const nomeSetor = cb.dataset.setor;
                     const estadoLiberado = cb.checked;
 
-                    // Desabilita temporariamente para dar feedback visual de carregamento rápido
                     cb.style.opacity = "0.4";
-
-                    // Prepara o pacote de dados para enviar via POST para a API
-                    const pacoteAtualizacao = {
-                        acao: "ATUALIZAR_SETOR",
-                        cpf: cpfPaciente,
-                        setor: nomeSetor,
-                        liberado: estadoLiberado
-                    };
 
                     fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST',
-                        mode: 'no-cors', // Evita bloqueios de navegadores
+                        mode: 'no-cors', 
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify(pacoteAtualizacao)
+                        body: JSON.stringify({
+                            acao: "ATUALIZAR_SETOR",
+                            cpf: cpfPaciente,
+                            setor: nomeSetor,
+                            liberado: estadoLiberado
+                        })
                     })
                     .then(() => {
-                        // Sucesso silencioso na gravação do Sheets
                         cb.style.opacity = "1";
                         verificarFimAtendimentoLinha(linha);
                     })
                     .catch(error => {
-                        console.error('Erro ao salvar status do setor:', error);
-                        alert("Erro de conexão. O status não pôde ser salvo na planilha.");
-                        cb.checked = !estadoLiberado; // Destona a caixinha em caso de erro real
+                        console.error('Erro ao salvar status:', error);
+                        alert("Erro de conexão. O status não pôde ser salvo.");
+                        cb.checked = !estadoLiberado; 
                         cb.style.opacity = "1";
+                    });
+                }
+
+                // 2. SE A OBSERVAÇÃO DO LABORATÓRIO FOI ALTERADA
+                if (e.target.classList.contains('obs-input')) {
+                    const textarea = e.target;
+                    const cpfPaciente = textarea.dataset.cpf;
+                    const textoObs = textarea.value;
+
+                    textarea.style.opacity = "0.6";
+
+                    fetch(URL_GOOGLE_SCRIPT, {
+                        method: 'POST', 
+                        mode: 'no-cors', 
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            acao: "ATUALIZAR_OBS", 
+                            cpf: cpfPaciente, 
+                            obs: textoObs 
+                        })
+                    })
+                    .then(() => {
+                        textarea.style.opacity = "1";
+                        textarea.style.borderColor = "#10b981"; // Borda verde sucesso
+                        setTimeout(() => textarea.style.borderColor = "#cbd5e1", 2000);
+                    })
+                    .catch(() => {
+                        textarea.style.opacity = "1";
+                        textarea.style.borderColor = "red";
+                        alert("Erro ao salvar a observação!");
                     });
                 }
             });
 
-            // Função auxiliar que gerencia a etiqueta final da linha (EM ATENDIMENTO / LIBERADO)
             function verificarFimAtendimentoLinha(linha) {
                 const checkboxes = linha.querySelectorAll('.check-setor');
                 const marcados = linha.querySelectorAll('.check-setor:checked');
