@@ -22,24 +22,25 @@
     
     <main>
         <div class="painel-recepcao">
-            <div class="painel-topo">
-                <h2>Painel de Atendimentos</h2>
-                <div class="painel-filtros">
-                    <div class="filtro-item">
-                        <label for="filtro-data" class="sr-only">Data</label>
-                        <input type="date" id="filtro-data">
-                        <button id="btn-buscar-data" class="btn-primario" type="button">Buscar</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
+                <h2 style="margin: 0; color: #004080;">Painel de Atendimentos</h2>
+                
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                        <button id="btn-buscar-data" style="background-color: #004080; color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Buscar</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" class="filtro-pesquisa" placeholder="Buscar na aba atual...">
+                    <input type="text" id="pesquisa-paciente" placeholder="Buscar na aba atual..." style="padding: 8px; width: 220px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
                 </div>
             </div>
 
             <div class="tabs-setores">
                 <button class="tab-btn active" data-aba="todos">Visão Geral</button>
-                <button class="tab-btn" data-aba="clinico">Exames Fís.</button>
+                <button class="tab-btn" data-aba="clinico">Clínico</button>
                 <button class="tab-btn" data-aba="raiox">Raio-X</button>
-                <button class="tab-btn" data-aba="fono">Audiometria</button>
-                <button class="tab-btn" data-aba="lab">Coleta</button>
+                <button class="tab-btn" data-aba="fono">Fonoaudiologia</button>
+                <button class="tab-btn" data-aba="lab">Laboratório</button>
+                <button class="tab-btn" data-aba="consulta">Consulta Médica</button>
             </div>
             
             <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: #004080; display: none;">
@@ -52,10 +53,11 @@
                         <tr>
                             <th>Empresa</th>
                             <th>Colaborador</th>
-                            <th class="col-clinico" style="text-align: center;">Exames Físicos</th>
+                            <th class="col-clinico" style="text-align: center;">Clínico</th>
                             <th class="col-raiox" style="text-align: center;">Raio-X</th>
-                            <th class="col-fono" style="text-align: center;">Audiometria</th>
-                            <th class="col-lab" style="text-align: center;">Coleta</th>
+                            <th class="col-fono" style="text-align: center;">Fono</th>
+                            <th class="col-lab" style="text-align: center;">Laboratório</th>
+                            <th class="col-consulta" style="text-align: center;">Consulta</th>
                             <th style="text-align: center;">Status</th>
                         </tr>
                     </thead>
@@ -70,13 +72,9 @@
             </div>
         </div>
     </main>
-    <footer>
-        <p>&copy; 2026 Clínica Monad Ocupacional - Oriximiná.</p>
-    </footer>
-   <script>
+
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
-            
-            // SUA URL DO GOOGLE APPS SCRIPT
             const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
 
             const tabela = document.getElementById('lista-liberacao');
@@ -88,11 +86,9 @@
             
             let abaAtiva = 'todos'; 
 
-            // Configura data de hoje
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
-            // Lógica de Abas
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -102,9 +98,6 @@
                 });
             });
 
-            // =================================================================
-            // 1. CARREGAMENTO INICIAL (MÁQUINA PESADA)
-            // =================================================================
             function buscarPacientesDaPlanilha() {
                 tabela.innerHTML = ""; 
                 msgVazio.style.display = "none";
@@ -131,10 +124,13 @@
                     });
             }
 
-            // =================================================================
-            // 2. O RADAR DE TEMPO REAL (ATUALIZAÇÃO SILENCIOSA A CADA 8s)
-            // =================================================================
-            setInterval(atualizacaoSilenciosa, 4000); // 4000 milissegundos = 4 segundos
+            // RADAR AUTOMÁTICO DE SILENCIOSO A CADA 8 SEGUNDOS
+            setInterval(atualizacaoSilenciosa, 8000);
+
+            function updatedCheckboxes(linha, selector, val) {
+                const cb = linha.querySelector(selector);
+                if (cb) cb.checked = val;
+            }
 
             function atualizacaoSilenciosa() {
                 const dataFormatada = inputData.value;
@@ -144,54 +140,39 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.status === "sucesso" && data.pacientes.length > 0) {
-                            
-                            // Verifica se chegaram novos pacientes da recepção
                             const totalLinhasAtuais = document.querySelectorAll('.linha-paciente').length;
-                            const pacientesValidos = data.pacientes.filter(p => p.temClinico || p.temRaiox || p.temLab || p.temFono);
+                            const pacientesValidos = data.pacientes.filter(p => p.temClinico || p.temRaiox || p.temLab || p.temFono || p.temConsulta);
                             
-                            // Se alguém novo chegou, recarrega a tabela toda
                             if (pacientesValidos.length !== totalLinhasAtuais) {
                                 tabela.innerHTML = "";
                                 renderizarTabela(data.pacientes);
                                 return;
                             }
 
-                            // Atualiza os checkboxes e textos sem piscar a tela
                             data.pacientes.forEach(pac => {
                                 const linha = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
                                 if (linha) {
-                                    const cbClinico = linha.querySelector('.check-setor[data-setor="clinico"]');
-                                    if (cbClinico) cbClinico.checked = pac.liberadoClinico;
+                                    updatedCheckboxes(linha, '.check-setor[data-setor="clinico"]', pac.liberadoClinico);
+                                    updatedCheckboxes(linha, '.check-setor[data-setor="raiox"]', pac.liberadoRaiox);
+                                    updatedCheckboxes(linha, '.check-setor[data-setor="fono"]', pac.liberadoFono);
+                                    updatedCheckboxes(linha, '.check-setor[data-setor="lab"]', pac.liberadoLab);
+                                    updatedCheckboxes(linha, '.check-setor[data-setor="consulta"]', pac.liberadoConsulta);
 
-                                    const cbRaiox = linha.querySelector('.check-setor[data-setor="raiox"]');
-                                    if (cbRaiox) cbRaiox.checked = pac.liberadoRaiox;
-
-                                    const cbFono = linha.querySelector('.check-setor[data-setor="fono"]');
-                                    if (cbFono) cbFono.checked = pac.liberadoFono;
-
-                                    const cbLab = linha.querySelector('.check-setor[data-setor="lab"]');
-                                    if (cbLab) cbLab.checked = pac.liberadoLab;
-
-                                    // Só atualiza a observação se ninguém estiver digitando nela
                                     const obsInput = linha.querySelector('.obs-input');
                                     if (obsInput && document.activeElement !== obsInput) {
                                         obsInput.value = pac.obsLab || '';
                                     }
-
                                     verificarFimAtendimentoLinha(linha);
                                 }
                             });
                         }
                     })
-                    .catch(error => console.log("Radar silenciado (falha de rede ignorada):", error));
+                    .catch(err => console.log("Radar aguardando sinal...", err));
             }
 
-            // =================================================================
-            // 3. RENDERIZAÇÃO DA TABELA (CONSTRUÇÃO DO HTML)
-            // =================================================================
             function renderizarTabela(pacientes) {
                 pacientes.forEach(pac => {
-                    if (!pac.temClinico && !pac.temRaiox && !pac.temLab && !pac.temFono) return;
+                    if (!pac.temClinico && !pac.temRaiox && !pac.temLab && !pac.temFono && !pac.temConsulta) return;
 
                     const cellTemplate = (exameText, isChecked, setorNome) => `
                         <div class="celula-exame">
@@ -208,10 +189,11 @@
                         </div>
                     `;
 
-                    const tdClinico = pac.temClinico ? cellTemplate(pac.examesClinicos, pac.liberadoClinico, "clinico") : `<span class="text-na">—</span>`;
-                    const tdRaiox   = pac.temRaiox   ? cellTemplate(pac.examesRaioX, pac.liberadoRaiox, "raiox") : `<span class="text-na">—</span>`;
-                    const tdFono    = pac.temFono    ? cellTemplate("Audiometria Ocupacional", pac.liberadoFono, "fono") : `<span class="text-na">—</span>`;
-                    const tdLab     = pac.temLab     ? cellTemplateLab(pac.examesLab, pac.liberadoLab, pac.obsLab) : `<span class="text-na">—</span>`;
+                    const tdClinico  = pac.temClinico  ? cellTemplate(pac.examesClinicos, pac.liberadoClinico, "clinico") : `<span class="text-na">—</span>`;
+                    const tdRaiox    = pac.temRaiox    ? cellTemplate(pac.examesRaioX, pac.liberadoRaiox, "raiox") : `<span class="text-na">—</span>`;
+                    const tdFono     = pac.temFono     ? cellTemplate("Audiometria Ocupacional", pac.liberadoFono, "fono") : `<span class="text-na">—</span>`;
+                    const tdLab      = pac.temLab      ? cellTemplateLab(pac.examesLab, pac.liberadoLab, pac.obsLab) : `<span class="text-na">—</span>`;
+                    const tdConsulta = pac.temConsulta ? cellTemplate("Médico do Trabalho", pac.liberadoConsulta, "consulta") : `<span class="text-na">—</span>`;
 
                     const nomeStr = pac.nome || '-';
                     let iniciais = "-";
@@ -229,6 +211,7 @@
                     tr.dataset.raiox = pac.temRaiox;
                     tr.dataset.fono = pac.temFono;
                     tr.dataset.lab = pac.temLab;
+                    tr.dataset.consulta = pac.temConsulta;
 
                     tr.innerHTML = `
                         <td><span class="tag-empresa">${pac.empresa || '-'}</span></td>
@@ -242,13 +225,12 @@
                         <td class="col-raiox" style="text-align: center;">${tdRaiox}</td>
                         <td class="col-fono" style="text-align: center;">${tdFono}</td>
                         <td class="col-lab" style="text-align: center;">${tdLab}</td>
+                        <td class="col-consulta" style="text-align: center;">${tdConsulta}</td>
                         <td style="text-align: center;"><span class="badge-status pendente">EM ATENDIMENTO</span></td>
                     `;
                     tabela.appendChild(tr);
-                    
                     verificarFimAtendimentoLinha(tr);
                 });
-                
                 aplicarFiltrosDeAbaEPesquisa();
             }
 
@@ -256,7 +238,7 @@
                 const termoPesquisa = inputPesquisa.value.toLowerCase();
                 const linhas = document.querySelectorAll('.linha-paciente');
                 
-                const setoresCols = ['clinico', 'raiox', 'fono', 'lab'];
+                const setoresCols = ['clinico', 'raiox', 'fono', 'lab', 'consulta'];
                 setoresCols.forEach(setorNome => {
                     const elementosDaColuna = document.querySelectorAll(`.col-${setorNome}`);
                     elementosDaColuna.forEach(el => el.style.display = (abaAtiva === 'todos' || abaAtiva === setorNome) ? '' : 'none');
@@ -264,7 +246,7 @@
 
                 let totalVisivel = 0;
                 linhas.forEach(linha => {
-                    const nome = linha.querySelector('.col-nome').textContent.toLowerCase();
+                    const nome = App = linha.querySelector('.col-nome').textContent.toLowerCase();
                     const empresa = linha.querySelector('.tag-empresa').textContent.toLowerCase();
                     const passouPesquisa = nome.includes(termoPesquisa) || empresa.includes(termoPesquisa);
                     
@@ -279,16 +261,10 @@
                         linha.style.display = 'none';
                     }
                 });
-
                 msgVazio.style.display = totalVisivel === 0 ? 'block' : 'none';
             }
 
-            // =================================================================
-            // 4. EVENTOS DE CLIQUE E DIGITAÇÃO PARA SALVAR
-            // =================================================================
             tabela.addEventListener('change', function(e) {
-                
-                // SE O CHECKBOX FOI ALTERADO
                 if (e.target.classList.contains('check-setor')) {
                     const cb = e.target;
                     const linha = cb.closest('tr');
@@ -309,7 +285,6 @@
                     .catch(() => { cb.checked = !estadoLiberado; cb.style.opacity = "1"; });
                 }
 
-                // SE A OBSERVAÇÃO DO LABORATÓRIO FOI ALTERADA
                 if (e.target.classList.contains('obs-input')) {
                     const textarea = e.target;
                     const cpfPaciente = textarea.dataset.cpf;
@@ -351,5 +326,3 @@
             buscarPacientesDaPlanilha();
         });
     </script>
-</body>
-</html>

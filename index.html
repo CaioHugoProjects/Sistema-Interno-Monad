@@ -66,11 +66,19 @@
                     <fieldset>
                         <legend>Exames Solicitados</legend>
                         
-                        <div style="margin-bottom: 20px; padding: 12px; background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 6px;">
-                            <label style="font-weight: bold; color: #0369a1; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 15px;">
-                                <input type="checkbox" id="check-audiometria" checked style="transform: scale(1.5);"> 
-                                INCLUIR FICHA DE FONOAUDIOLOGIA (Exame de Audiometria)
-                            </label>
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                            <div style="padding: 12px; background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 6px;">
+                                <label style="font-weight: bold; color: #0369a1; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 15px;">
+                                    <input type="checkbox" id="check-audiometria" checked style="transform: scale(1.5);"> 
+                                    INCLUIR FICHA DE FONOAUDIOLOGIA (Exame de Audiometria)
+                                </label>
+                            </div>
+                            <div style="padding: 12px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 6px;">
+                                <label style="font-weight: bold; color: #b45309; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 15px;">
+                                    <input type="checkbox" id="check-consulta" checked style="transform: scale(1.5);"> 
+                                    ENCAMINHAR PARA CONSULTA CLÍNICA (Médico do Trabalho)
+                                </label>
+                            </div>
                         </div>
 
                         <div class="exames-grid-master">
@@ -145,7 +153,6 @@
             </div>
 
             <div class="area-impressao">
-                
                 <div class="ficha-setor" id="setor-clinico">
                     <div class="cabecalho-setor">
                         <h2>AVALIAÇÃO CLÍNICA / NEUROLÓGICA</h2>
