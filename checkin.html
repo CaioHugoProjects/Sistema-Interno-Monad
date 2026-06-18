@@ -73,7 +73,7 @@
     <footer>
         <p>&copy; 2026 Clínica Monad Ocupacional - Oriximiná.</p>
     </footer>
-    <script>
+   <script>
         document.addEventListener('DOMContentLoaded', function() {
             
             // SUA URL DO GOOGLE APPS SCRIPT
@@ -88,9 +88,11 @@
             
             let abaAtiva = 'todos'; 
 
+            // Configura data de hoje
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
+            // Lógica de Abas
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -100,6 +102,9 @@
                 });
             });
 
+            // =================================================================
+            // 1. CARREGAMENTO INICIAL (MÁQUINA PESADA)
+            // =================================================================
             function buscarPacientesDaPlanilha() {
                 tabela.innerHTML = ""; 
                 msgVazio.style.display = "none";
@@ -126,11 +131,68 @@
                     });
             }
 
+            // =================================================================
+            // 2. O RADAR DE TEMPO REAL (ATUALIZAÇÃO SILENCIOSA A CADA 8s)
+            // =================================================================
+            setInterval(atualizacaoSilenciosa, 8000); // 8000 milissegundos = 8 segundos
+
+            function atualizacaoSilenciosa() {
+                const dataFormatada = inputData.value;
+                if(!dataFormatada) return;
+
+                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${dataFormatada}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "sucesso" && data.pacientes.length > 0) {
+                            
+                            // Verifica se chegaram novos pacientes da recepção
+                            const totalLinhasAtuais = document.querySelectorAll('.linha-paciente').length;
+                            const pacientesValidos = data.pacientes.filter(p => p.temClinico || p.temRaiox || p.temLab || p.temFono);
+                            
+                            // Se alguém novo chegou, recarrega a tabela toda
+                            if (pacientesValidos.length !== totalLinhasAtuais) {
+                                tabela.innerHTML = "";
+                                renderizarTabela(data.pacientes);
+                                return;
+                            }
+
+                            // Atualiza os checkboxes e textos sem piscar a tela
+                            data.pacientes.forEach(pac => {
+                                const linha = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
+                                if (linha) {
+                                    const cbClinico = linha.querySelector('.check-setor[data-setor="clinico"]');
+                                    if (cbClinico) cbClinico.checked = pac.liberadoClinico;
+
+                                    const cbRaiox = linha.querySelector('.check-setor[data-setor="raiox"]');
+                                    if (cbRaiox) cbRaiox.checked = pac.liberadoRaiox;
+
+                                    const cbFono = linha.querySelector('.check-setor[data-setor="fono"]');
+                                    if (cbFono) cbFono.checked = pac.liberadoFono;
+
+                                    const cbLab = linha.querySelector('.check-setor[data-setor="lab"]');
+                                    if (cbLab) cbLab.checked = pac.liberadoLab;
+
+                                    // Só atualiza a observação se ninguém estiver digitando nela
+                                    const obsInput = linha.querySelector('.obs-input');
+                                    if (obsInput && document.activeElement !== obsInput) {
+                                        obsInput.value = pac.obsLab || '';
+                                    }
+
+                                    verificarFimAtendimentoLinha(linha);
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => console.log("Radar silenciado (falha de rede ignorada):", error));
+            }
+
+            // =================================================================
+            // 3. RENDERIZAÇÃO DA TABELA (CONSTRUÇÃO DO HTML)
+            // =================================================================
             function renderizarTabela(pacientes) {
                 pacientes.forEach(pac => {
                     if (!pac.temClinico && !pac.temRaiox && !pac.temLab && !pac.temFono) return;
 
-                    // Template padrão para Clínico, Raio-X e Fono
                     const cellTemplate = (exameText, isChecked, setorNome) => `
                         <div class="celula-exame">
                             <input type="checkbox" class="check-setor" data-setor="${setorNome}" ${isChecked ? 'checked' : ''}>
@@ -138,7 +200,6 @@
                         </div>
                     `;
 
-                    // Template exclusivo para o Laboratório com a caixa de Observações
                     const cellTemplateLab = (exameText, isChecked, obsText) => `
                         <div class="celula-exame">
                             <input type="checkbox" class="check-setor" data-setor="lab" ${isChecked ? 'checked' : ''}>
@@ -150,8 +211,6 @@
                     const tdClinico = pac.temClinico ? cellTemplate(pac.examesClinicos, pac.liberadoClinico, "clinico") : `<span class="text-na">—</span>`;
                     const tdRaiox   = pac.temRaiox   ? cellTemplate(pac.examesRaioX, pac.liberadoRaiox, "raiox") : `<span class="text-na">—</span>`;
                     const tdFono    = pac.temFono    ? cellTemplate("Audiometria Ocupacional", pac.liberadoFono, "fono") : `<span class="text-na">—</span>`;
-                    
-                    // Aplica o template com caixa de texto no Lab
                     const tdLab     = pac.temLab     ? cellTemplateLab(pac.examesLab, pac.liberadoLab, pac.obsLab) : `<span class="text-na">—</span>`;
 
                     const nomeStr = pac.nome || '-';
@@ -200,9 +259,7 @@
                 const setoresCols = ['clinico', 'raiox', 'fono', 'lab'];
                 setoresCols.forEach(setorNome => {
                     const elementosDaColuna = document.querySelectorAll(`.col-${setorNome}`);
-                    elementosDaColuna.forEach(el => {
-                        el.style.display = (abaAtiva === 'todos' || abaAtiva === setorNome) ? '' : 'none';
-                    });
+                    elementosDaColuna.forEach(el => el.style.display = (abaAtiva === 'todos' || abaAtiva === setorNome) ? '' : 'none');
                 });
 
                 let totalVisivel = 0;
@@ -226,10 +283,12 @@
                 msgVazio.style.display = totalVisivel === 0 ? 'block' : 'none';
             }
 
-            // EVENTO: Captura interações (Checkbox e Textarea)
+            // =================================================================
+            // 4. EVENTOS DE CLIQUE E DIGITAÇÃO PARA SALVAR
+            // =================================================================
             tabela.addEventListener('change', function(e) {
                 
-                // 1. SE O CHECKBOX FOI ALTERADO
+                // SE O CHECKBOX FOI ALTERADO
                 if (e.target.classList.contains('check-setor')) {
                     const cb = e.target;
                     const linha = cb.closest('tr');
@@ -240,29 +299,17 @@
                     cb.style.opacity = "0.4";
 
                     fetch(URL_GOOGLE_SCRIPT, {
-                        method: 'POST',
-                        mode: 'no-cors', 
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({
-                            acao: "ATUALIZAR_SETOR",
-                            cpf: cpfPaciente,
-                            setor: nomeSetor,
-                            liberado: estadoLiberado
-                        })
+                        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ acao: "ATUALIZAR_SETOR", cpf: cpfPaciente, setor: nomeSetor, liberado: estadoLiberado })
                     })
                     .then(() => {
                         cb.style.opacity = "1";
                         verificarFimAtendimentoLinha(linha);
                     })
-                    .catch(error => {
-                        console.error('Erro ao salvar status:', error);
-                        alert("Erro de conexão. O status não pôde ser salvo.");
-                        cb.checked = !estadoLiberado; 
-                        cb.style.opacity = "1";
-                    });
+                    .catch(() => { cb.checked = !estadoLiberado; cb.style.opacity = "1"; });
                 }
 
-                // 2. SE A OBSERVAÇÃO DO LABORATÓRIO FOI ALTERADA
+                // SE A OBSERVAÇÃO DO LABORATÓRIO FOI ALTERADA
                 if (e.target.classList.contains('obs-input')) {
                     const textarea = e.target;
                     const cpfPaciente = textarea.dataset.cpf;
@@ -271,25 +318,15 @@
                     textarea.style.opacity = "0.6";
 
                     fetch(URL_GOOGLE_SCRIPT, {
-                        method: 'POST', 
-                        mode: 'no-cors', 
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({
-                            acao: "ATUALIZAR_OBS", 
-                            cpf: cpfPaciente, 
-                            obs: textoObs 
-                        })
+                        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ acao: "ATUALIZAR_OBS", cpf: cpfPaciente, obs: textoObs })
                     })
                     .then(() => {
                         textarea.style.opacity = "1";
-                        textarea.style.borderColor = "#10b981"; // Borda verde sucesso
+                        textarea.style.borderColor = "#10b981"; 
                         setTimeout(() => textarea.style.borderColor = "#cbd5e1", 2000);
                     })
-                    .catch(() => {
-                        textarea.style.opacity = "1";
-                        textarea.style.borderColor = "red";
-                        alert("Erro ao salvar a observação!");
-                    });
+                    .catch(() => { textarea.style.opacity = "1"; textarea.style.borderColor = "red"; });
                 }
             });
 
