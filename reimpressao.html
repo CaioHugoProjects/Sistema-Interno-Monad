@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reimpressão e Agendamentos - Clínica Monad</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/checkin.css">
+</head>
+<body>
+    <header>
+        <h1>Sistema Interno</h1>
+        <h2>Clínica Monad Ocupacional - Oriximiná</h2>
+        <nav>
+            <ul>
+                <li><a href="index.html">Recepção</a></li>
+                <li><a href="checkin.html">Check-in Pacientes</a></li>
+                <li><a href="reimpressao.html" style="background-color: #003366;">Reimpressão / Agendados</a></li>
+                <li><a href="#">Relatórios</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <div class="painel-recepcao no-print">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
+                <h2 style="margin: 0; color: #004080;">Arquivo e Reimpressão de Fichas</h2>
+                
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                        <button id="btn-buscar-data" style="background-color: #004080; color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Buscar</button>
+                    </div>
+                    <input type="text" id="pesquisa-paciente" placeholder="Filtrar por nome ou CPF..." style="padding: 8px; width: 220px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <p style="font-size: 14px; color: #666; margin-bottom: 20px;">Selecione a data de atendimento (passada ou futura) para visualizar a lista de colaboradores e emitir a segunda via da ficha de impressão.</p>
+            
+            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: #004080; display: none;">
+                ⏳ Buscando base de dados...
+            </div>
+
+            <div class="table-responsive">
+                <table class="tabela-liberacao">
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Colaborador / Dados</th>
+                            <th>Contato / Docs</th>
+                            <th>Resumo de Setores</th>
+                            <th style="text-align: center;">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-reimpressao">
+                        </tbody>
+                </table>
+            </div>
+            
+            <div id="msg-vazio" style="text-align: center; padding: 30px; color: #64748b; display: none; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; margin-top: 10px;">
+                <strong>Nenhum paciente encontrado para esta data!</strong>
+            </div>
+        </div>
+
+        <div class="area-impressao">
+            <div class="ficha-setor" id="setor-clinico">
+                <div class="cabecalho-setor">
+                    <h2>AVALIAÇÃO CLÍNICA / NEUROLÓGICA</h2>
+                    <div class="dados-espelhados">
+                        <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                        <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
+                        <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
+                        <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span> <span class="info-menor"><strong>Peso:</strong> _______ kg | <strong>Alt:</strong> _______ m</span></div>
+                    </div>
+                </div>
+                <div class="corpo-setor">
+                    <h3>Exames Solicitados:</h3>
+                    <ul class="lista-exames-print" id="lista-clinico"></ul>
+                </div>
+                <div class="rodape-setor"><div class="area-assinatura">Assinatura do Profissional / Laudo</div></div>
+            </div>
+
+            <div class="ficha-setor" id="setor-raiox">
+                <div class="cabecalho-setor">
+                    <h2>RADIOLOGIA (RAIO-X)</h2>
+                    <div class="dados-espelhados">
+                        <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                        <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
+                        <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
+                        <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span></div>
+                    </div>
+                </div>
+                <div class="corpo-setor">
+                    <h3>Exames Solicitados:</h3>
+                    <ul class="lista-exames-print" id="lista-raiox"></ul>
+                </div>
+                <div class="rodape-setor"><div class="area-assinatura">Assinatura do Técnico / Laudo</div></div>
+            </div>
+
+            <div class="ficha-setor" id="setor-audio">
+                <div class="cabecalho-setor">
+                    <h2>FONOAUDIOLOGIA</h2>
+                    <div class="dados-espelhados">
+                        <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                        <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
+                        <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
+                        <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span></div>
+                    </div>
+                </div>
+                <div class="corpo-setor">
+                    <h3>Registro Audiométrico:</h3>
+                    <table class="tabela-audiometria">
+                        <thead><tr><th>Hz</th><th>500</th><th>1K</th><th>2K</th><th>3K</th><th>4K</th><th>6K</th><th>8K</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>OD</strong></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                            <tr><td><strong>OE</strong></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="rodape-setor"><div class="area-assinatura">Assinatura do Fonoaudiólogo / CRM</div></div>
+            </div>
+
+            <div class="ficha-setor" id="setor-lab">
+                <div class="cabecalho-setor">
+                    <h2>LABORATÓRIO (COLETAS)</h2>
+                    <div class="dados-espelhados">
+                        <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                        <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
+                        <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
+                        <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span></div>
+                    </div>
+                </div>
+                <div class="corpo-setor">
+                    <h3>Exames Solicitados:</h3>
+                    <ul class="lista-exames-print" id="lista-lab"></ul>
+                </div>
+                <div class="rodape-setor"><div class="area-assinatura">Responsável pela Coleta</div></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ==========================================================
+            // COLE A SUA URL DO GOOGLE APPS SCRIPT AQUI ABAIXO!
+            // ==========================================================
+            const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
+
+            const tabela = document.getElementById('lista-reimpressao');
+            const inputPesquisa = document.getElementById('pesquisa-paciente');
+            const inputData = document.getElementById('filtro-data');
+            const btnBuscarData = document.getElementById('btn-buscar-data');
+            const msgCarregando = document.getElementById('msg-carregando');
+            const msgVazio = document.getElementById('msg-vazio');
+            
+            let databasePacientes = []; // Guarda os dados globalmente para usar na hora de imprimir
+
+            const hoje = new Date();
+            inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+
+            function buscarPacientesDaPlanilha() {
+                tabela.innerHTML = ""; 
+                msgVazio.style.display = "none";
+                msgCarregando.style.display = "block";
+
+                const dataFormatada = inputData.value;
+                if(!dataFormatada) return;
+
+                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${dataFormatada}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        msgCarregando.style.display = "none";
+                        if (data.status === "sucesso" && data.pacientes.length > 0) {
+                            databasePacientes = data.pacientes; // Salva para o botão imprimir
+                            renderizarTabela(databasePacientes);
+                        } else {
+                            databasePacientes = [];
+                            msgVazio.style.display = "block";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        msgCarregando.style.display = "none";
+                        msgVazio.innerHTML = "❌ Erro ao conectar. Tente novamente.";
+                        msgVazio.style.display = "block";
+                    });
+            }
+
+            function renderizarTabela(pacientes) {
+                tabela.innerHTML = "";
+                pacientes.forEach((pac, index) => {
+                    
+                    const setores = [];
+                    if(pac.temClinico) setores.push("Clínicos");
+                    if(pac.temRaiox) setores.push("Raio-X");
+                    if(pac.temFono) setores.push("Audiometria");
+                    if(pac.temLab) setores.push("Laboratório");
+                    if(pac.temConsulta) setores.push("Consulta Médica");
+                    
+                    const resumoSetores = setores.length > 0 ? setores.join(", ") : "Nenhum exame marcado";
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'linha-paciente';
+                    tr.innerHTML = `
+                        <td><span class="tag-empresa" style="background:#e2e8f0; color:#1e293b; padding:6px 10px; border-radius:6px; font-weight:bold;">${pac.empresa}</span></td>
+                        <td>
+                            <div style="font-weight: bold; font-size: 15px; color:#0f172a;">${pac.nome}</div>
+                            <div style="font-size: 12px; color:#64748b;">${pac.funcao} • Nasc: ${pac.dn}</div>
+                        </td>
+                        <td>
+                            <div style="font-size: 13px; color:#334155;"><strong>CPF:</strong> ${pac.cpf}</div>
+                            <div style="font-size: 12px; color:#64748b;"><strong>RG:</strong> ${pac.rg} • <strong>Tel:</strong> ${pac.telefone}</div>
+                        </td>
+                        <td style="font-size: 12px; color:#475569; max-width: 200px; white-space: normal;">
+                            ${resumoSetores}
+                        </td>
+                        <td style="text-align: center;">
+                            <button onclick="imprimirFicha(${index})" style="background-color: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto;">
+                                🖨️ Imprimir
+                            </button>
+                        </td>
+                    `;
+                    tabela.appendChild(tr);
+                });
+            }
+
+            inputPesquisa.addEventListener('input', function(e) {
+                const termo = e.target.value.toLowerCase();
+                const filtrados = databasePacientes.filter(pac => 
+                    pac.nome.toLowerCase().includes(termo) || 
+                    pac.cpf.toLowerCase().includes(termo)
+                );
+                renderizarTabela(filtrados);
+            });
+
+            btnBuscarData.addEventListener('click', buscarPacientesDaPlanilha);
+            buscarPacientesDaPlanilha();
+
+            // FUNÇÃO GLOBAL DE IMPRESSÃO
+            window.imprimirFicha = function(index) {
+                const pac = databasePacientes[index];
+
+                // 1. Espelha as informações de Texto
+                document.querySelectorAll('.out-empresa').forEach(el => el.textContent = pac.empresa);
+                document.querySelectorAll('.out-nome').forEach(el => el.textContent = pac.nome);
+                document.querySelectorAll('.out-funcao').forEach(el => el.textContent = pac.funcao);
+                document.querySelectorAll('.out-dn').forEach(el => el.textContent = pac.dn);
+                document.querySelectorAll('.out-cpf').forEach(el => el.textContent = pac.cpf);
+                document.querySelectorAll('.out-rg').forEach(el => el.textContent = pac.rg);
+                document.querySelectorAll('.out-telefone').forEach(el => el.textContent = pac.telefone);
+                document.querySelectorAll('.out-data').forEach(el => el.textContent = pac.dataExame);
+
+                // 2. Transforma as strings separadas por vírgula em <li>
+                function renderizarLista(idElemento, stringExames) {
+                    const ul = document.getElementById(idElemento);
+                    if (!stringExames || stringExames === "Nenhum" || stringExames.trim() === "") {
+                        ul.innerHTML = '<li class="vazio">Nenhum exame selecionado</li>';
+                    } else {
+                        const arr = stringExames.split(',').map(e => e.trim()).filter(e => e);
+                        ul.innerHTML = arr.map(e => `<li>${e}</li>`).join('');
+                    }
+                }
+
+                renderizarLista('lista-clinico', pac.examesClinicos);
+                renderizarLista('lista-raiox', pac.examesRaioX);
+                renderizarLista('lista-lab', pac.examesLab);
+
+                // 3. Esconde/Mostra Audiometria com base no True/False do Google Sheets
+                document.getElementById('setor-audio').style.display = pac.temFono ? 'flex' : 'none';
+
+                // 4. Modo compacto caso tenha exames demais
+                let totalExames = (pac.examesClinicos.match(/,/g) || []).length + (pac.examesLab.match(/,/g) || []).length;
+                if(totalExames > 10) document.body.classList.add('print-compacto');
+                else document.body.classList.remove('print-compacto');
+
+                // 5. Dispara a impressora
+                setTimeout(() => window.print(), 300);
+            };
+        });
+    </script>
+</body>
+</html>
