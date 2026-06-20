@@ -16,7 +16,6 @@
                 <li><a href="index.html">Recepção</a></li>
                 <li><a href="checkin.html" style="background-color: #003366;">Check-in Pacientes</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
-                <li><a href="#">Relatórios</a></li>
             </ul>
         </nav>
     </header>
@@ -37,11 +36,11 @@
 
             <div class="tabs-setores">
                 <button class="tab-btn active" data-aba="todos">Visão Geral</button>
-                <button class="tab-btn" data-aba="clinico">Exames Fis.</button>
+                <button class="tab-btn" data-aba="clinico">Clínico</button>
                 <button class="tab-btn" data-aba="raiox">Raio-X</button>
-                <button class="tab-btn" data-aba="fono">Audiometria</button>
-                <button class="tab-btn" data-aba="lab">Coleta</button>
-                <button class="tab-btn" data-aba="consulta">Clínico</button>
+                <button class="tab-btn" data-aba="fono">Fonoaudiologia</button>
+                <button class="tab-btn" data-aba="lab">Laboratório</button>
+                <button class="tab-btn" data-aba="consulta">Consulta Médica</button>
             </div>
             
             <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: #004080; display: none;">
@@ -54,11 +53,11 @@
                         <tr>
                             <th>Empresa</th>
                             <th>Colaborador</th>
-                            <th class="col-clinico" style="text-align: center;">Exames Físicos</th>
+                            <th class="col-clinico" style="text-align: center;">Clínico</th>
                             <th class="col-raiox" style="text-align: center;">Raio-X</th>
-                            <th class="col-fono" style="text-align: center;">Audiometria</th>
-                            <th class="col-lab" style="text-align: center;">Coleta</th>
-                            <th class="col-consulta" style="text-align: center;">Clínico</th>
+                            <th class="col-fono" style="text-align: center;">Fono</th>
+                            <th class="col-lab" style="text-align: center;">Laboratório</th>
+                            <th class="col-consulta" style="text-align: center;">Consulta</th>
                             <th style="text-align: center;">Status</th>
                         </tr>
                     </thead>
@@ -125,8 +124,8 @@
                     });
             }
 
-            // RADAR AUTOMÁTICO DE SILENCIOSO A CADA 8 SEGUNDOS
-            setInterval(atualizacaoSilenciosa, 8000);
+            // INSTALAÇÃO DO RADAR AUTOMÁTICO SILENCIOSO (3 SEGUNDOS)
+            setInterval(atualizacaoSilenciosa, 3000);
 
             function updatedCheckboxes(linha, selector, val) {
                 const cb = linha.querySelector(selector);
@@ -175,26 +174,32 @@
                 pacientes.forEach(pac => {
                     if (!pac.temClinico && !pac.temRaiox && !pac.temLab && !pac.temFono && !pac.temConsulta) return;
 
-                    const cellTemplate = (exameText, isChecked, setorNome) => `
+                    const cellTemplate = (exameText, isChecked, setorNome, setorNomeAmigavel) => `
                         <div class="celula-exame">
-                            <input type="checkbox" class="check-setor" data-setor="${setorNome}" ${isChecked ? 'checked' : ''}>
+                            <div style="display:flex; align-items:center;">
+                                <input type="checkbox" class="check-setor" data-setor="${setorNome}" ${isChecked ? 'checked' : ''}>
+                                <button class="btn-chamar" onclick="chamarNaTV('${pac.cpf}', '${setorNomeAmigavel}')">📣 Chamar</button>
+                            </div>
                             <div class="detalhe-exame">${exameText}</div>
                         </div>
                     `;
 
                     const cellTemplateLab = (exameText, isChecked, obsText) => `
                         <div class="celula-exame">
-                            <input type="checkbox" class="check-setor" data-setor="lab" ${isChecked ? 'checked' : ''}>
+                            <div style="display:flex; align-items:center;">
+                                <input type="checkbox" class="check-setor" data-setor="lab" ${isChecked ? 'checked' : ''}>
+                                <button class="btn-chamar" onclick="chamarNaTV('${pac.cpf}', 'Laboratório de Coleta')">📣 Chamar</button>
+                            </div>
                             <div class="detalhe-exame">${exameText}</div>
                             <textarea class="obs-input" data-cpf="${pac.cpf}" placeholder="Obs (ex: Faltou EPF)" rows="2">${obsText || ''}</textarea>
                         </div>
                     `;
 
-                    const tdClinico  = pac.temClinico  ? cellTemplate(pac.examesClinicos, pac.liberadoClinico, "clinico") : `<span class="text-na">—</span>`;
-                    const tdRaiox    = pac.temRaiox    ? cellTemplate(pac.examesRaioX, pac.liberadoRaiox, "raiox") : `<span class="text-na">—</span>`;
-                    const tdFono     = pac.temFono     ? cellTemplate("Audiometria Ocupacional", pac.liberadoFono, "fono") : `<span class="text-na">—</span>`;
+                    const tdClinico  = pac.temClinico  ? cellTemplate(pac.examesClinicos, pac.liberadoClinico, "clinico", "Avaliação Clínica") : `<span class="text-na">—</span>`;
+                    const tdRaiox    = pac.temRaiox    ? cellTemplate(pac.examesRaioX, pac.liberadoRaiox, "raiox", "Sala de Raio-X") : `<span class="text-na">—</span>`;
+                    const tdFono     = pac.temFono     ? cellTemplate("Audiometria Ocupacional", pac.liberadoFono, "fono", "Fonoaudiologia") : `<span class="text-na">—</span>`;
                     const tdLab      = pac.temLab      ? cellTemplateLab(pac.examesLab, pac.liberadoLab, pac.obsLab) : `<span class="text-na">—</span>`;
-                    const tdConsulta = pac.temConsulta ? cellTemplate("Médico do Trabalho", pac.liberadoConsulta, "consulta") : `<span class="text-na">—</span>`;
+                    const tdConsulta = pac.temConsulta ? cellTemplate("Médico do Trabalho", pac.liberadoConsulta, "consulta", "Consultório Médico") : `<span class="text-na">—</span>`;
 
                     const nomeStr = pac.nome || '-';
                     let iniciais = "-";
@@ -237,7 +242,7 @@
 
             function aplicarFiltrosDeAbaEPesquisa() {
                 const termoPesquisa = inputPesquisa.value.toLowerCase();
-                const linhas = document.querySelectorAll('.linha-paciente');
+                const líneas = document.querySelectorAll('.linha-paciente');
                 
                 const setoresCols = ['clinico', 'raiox', 'fono', 'lab', 'consulta'];
                 setoresCols.forEach(setorNome => {
@@ -246,8 +251,8 @@
                 });
 
                 let totalVisivel = 0;
-                linhas.forEach(linha => {
-                    const nome = App = linha.querySelector('.col-nome').textContent.toLowerCase();
+                líneas.forEach(linha => {
+                    const nome = linha.querySelector('.col-nome').textContent.toLowerCase();
                     const empresa = linha.querySelector('.tag-empresa').textContent.toLowerCase();
                     const passouPesquisa = nome.includes(termoPesquisa) || empresa.includes(termoPesquisa);
                     
@@ -265,6 +270,7 @@
                 msgVazio.style.display = totalVisivel === 0 ? 'block' : 'none';
             }
 
+            // GESTÃO DE EVENTOS COMBINADOS DE ESCUTA
             tabela.addEventListener('change', function(e) {
                 if (e.target.classList.contains('check-setor')) {
                     const cb = e.target;
@@ -306,6 +312,26 @@
                 }
             });
 
+            // DISPARO DE CHAMADA NA TV DA RECEPÇÃO
+            window.chamarNaTV = function(cpf, setorApresentacao) {
+                if(event) {
+                    const btn = event.target;
+                    btn.textContent = "⏳ Chamando...";
+                    btn.style.backgroundColor = "#94a3b8";
+                    
+                    fetch(URL_GOOGLE_SCRIPT, {
+                        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ acao: "CHAMAR_PACIENTE", cpf: cpf, setorApresentacao: setorApresentacao })
+                    }).then(() => {
+                        setTimeout(() => {
+                            btn.textContent = "✔️ Chamado";
+                            btn.style.backgroundColor = "#10b981";
+                            setTimeout(() => { btn.textContent = "📣 Chamar"; btn.style.backgroundColor = "#3b82f6"; }, 3000);
+                        }, 500);
+                    });
+                }
+            };
+
             function verificarFimAtendimentoLinha(linha) {
                 const checkboxes = linha.querySelectorAll('.check-setor');
                 const marcados = linha.querySelectorAll('.check-setor:checked');
@@ -327,3 +353,5 @@
             buscarPacientesDaPlanilha();
         });
     </script>
+</body>
+</html>
