@@ -6,17 +6,23 @@
     <title>Reimpressão e Agendamentos - Clínica Monad</title>
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
+    <script>
+        const sec_setor = localStorage.getItem('monad_setor');
+        if (!sec_setor || (sec_setor !== 'recepcao' && sec_setor !== 'todos')) { window.location.href = "login.html"; }
+    </script>
 </head>
 <body>
     <header>
+        <div style="float: right; margin-top: 10px;" class="no-print">
+            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:#dc2626; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
+        </div>
         <h1>Sistema Interno</h1>
         <h2>Clínica Monad Ocupacional - Oriximiná</h2>
-        <nav>
+        <nav class="no-print">
             <ul>
                 <li><a href="index.html">Recepção</a></li>
-                <li><a href="checkin.html">Check-in Pacientes</a></li>
+                <li><a href="checkin.html">Visão Geral</a></li>
                 <li><a href="reimpressao.html" style="background-color: #003366;">Reimpressão / Agendados</a></li>
-                <li><a href="#">Relatórios</a></li>
             </ul>
         </nav>
     </header>
@@ -31,14 +37,14 @@
                         <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
                         <button id="btn-buscar-data" style="background-color: #004080; color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Buscar</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Filtrar por nome ou CPF..." style="padding: 8px; width: 220px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar..." style="padding: 8px; width: 220px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
                 </div>
             </div>
 
-            <p style="font-size: 14px; color: #666; margin-bottom: 20px;">Selecione a data de atendimento (passada ou futura) para visualizar a lista de colaboradores e emitir a segunda via da ficha de impressão.</p>
+            <p style="font-size: 14px; color: #666; margin-bottom: 20px;">Selecione a data de atendimento (passada ou futura) para visualizar a lista de colaboradores e emitir a segunda via da ficha.</p>
             
             <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: #004080; display: none;">
-                ⏳ Buscando base de dados...
+                ⏳ A consultar base de dados...
             </div>
 
             <div class="table-responsive">
@@ -47,13 +53,13 @@
                         <tr>
                             <th>Empresa</th>
                             <th>Colaborador / Dados</th>
-                            <th>Contato / Docs</th>
+                            <th>Contacto / Docs</th>
                             <th>Resumo de Setores</th>
                             <th style="text-align: center;">Ação</th>
                         </tr>
                     </thead>
                     <tbody id="lista-reimpressao">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
             
@@ -108,7 +114,7 @@
                     </div>
                 </div>
                 <div class="corpo-setor">
-                    <h3>Registro Audiométrico:</h3>
+                    <h3>Registo Audiométrico:</h3>
                     <table class="tabela-audiometria">
                         <thead><tr><th>Hz</th><th>500</th><th>1K</th><th>2K</th><th>3K</th><th>4K</th><th>6K</th><th>8K</th></tr></thead>
                         <tbody>
@@ -141,10 +147,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ==========================================================
-            // COLE A SUA URL DO GOOGLE APPS SCRIPT AQUI ABAIXO!
-            // ==========================================================
+            // ==========================================
             const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
+            // ==========================================
 
             const tabela = document.getElementById('lista-reimpressao');
             const inputPesquisa = document.getElementById('pesquisa-paciente');
@@ -153,7 +158,7 @@
             const msgCarregando = document.getElementById('msg-carregando');
             const msgVazio = document.getElementById('msg-vazio');
             
-            let databasePacientes = []; // Guarda os dados globalmente para usar na hora de imprimir
+            let databasePacientes = []; 
 
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
@@ -171,7 +176,7 @@
                     .then(data => {
                         msgCarregando.style.display = "none";
                         if (data.status === "sucesso" && data.pacientes.length > 0) {
-                            databasePacientes = data.pacientes; // Salva para o botão imprimir
+                            databasePacientes = data.pacientes; 
                             renderizarTabela(databasePacientes);
                         } else {
                             databasePacientes = [];
@@ -179,9 +184,8 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Erro:', error);
                         msgCarregando.style.display = "none";
-                        msgVazio.innerHTML = "❌ Erro ao conectar. Tente novamente.";
+                        msgVazio.innerHTML = "❌ Erro ao ligar ao servidor.";
                         msgVazio.style.display = "block";
                     });
             }
@@ -189,7 +193,6 @@
             function renderizarTabela(pacientes) {
                 tabela.innerHTML = "";
                 pacientes.forEach((pac, index) => {
-                    
                     const setores = [];
                     if(pac.temClinico) setores.push("Clínicos");
                     if(pac.temRaiox) setores.push("Raio-X");
@@ -233,14 +236,12 @@
                 renderizarTabela(filtrados);
             });
 
-            btnBuscarData.addEventListener('click', buscarPacientesDaPlanilha);
+            document.getElementById('btn-buscar-data').addEventListener('click', buscarPacientesDaPlanilha);
             buscarPacientesDaPlanilha();
 
-            // FUNÇÃO GLOBAL DE IMPRESSÃO
             window.imprimirFicha = function(index) {
                 const pac = databasePacientes[index];
 
-                // 1. Espelha as informações de Texto
                 document.querySelectorAll('.out-empresa').forEach(el => el.textContent = pac.empresa);
                 document.querySelectorAll('.out-nome').forEach(el => el.textContent = pac.nome);
                 document.querySelectorAll('.out-funcao').forEach(el => el.textContent = pac.funcao);
@@ -250,7 +251,6 @@
                 document.querySelectorAll('.out-telefone').forEach(el => el.textContent = pac.telefone);
                 document.querySelectorAll('.out-data').forEach(el => el.textContent = pac.dataExame);
 
-                // 2. Transforma as strings separadas por vírgula em <li>
                 function renderizarLista(idElemento, stringExames) {
                     const ul = document.getElementById(idElemento);
                     if (!stringExames || stringExames === "Nenhum" || stringExames.trim() === "") {
@@ -265,15 +265,12 @@
                 renderizarLista('lista-raiox', pac.examesRaioX);
                 renderizarLista('lista-lab', pac.examesLab);
 
-                // 3. Esconde/Mostra Audiometria com base no True/False do Google Sheets
                 document.getElementById('setor-audio').style.display = pac.temFono ? 'flex' : 'none';
 
-                // 4. Modo compacto caso tenha exames demais
                 let totalExames = (pac.examesClinicos.match(/,/g) || []).length + (pac.examesLab.match(/,/g) || []).length;
                 if(totalExames > 10) document.body.classList.add('print-compacto');
                 else document.body.classList.remove('print-compacto');
 
-                // 5. Dispara a impressora
                 setTimeout(() => window.print(), 300);
             };
         });

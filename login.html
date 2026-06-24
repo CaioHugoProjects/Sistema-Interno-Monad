@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Interno - Clínica Monad</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <style>
+        .login-container { max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 4px solid #004080; }
+        .form-login { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .form-login label { font-weight: bold; color: #475569; font-size: 14px; }
+        .form-login input { padding: 10px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 16px; background-color: #f8fafc; }
+        .form-login input:focus { border-color: #2563eb; outline: none; background-color: white; }
+        .btn-login { background-color: #004080; color: white; border: none; padding: 12px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
+        .btn-login:hover { background-color: #002d62; }
+        .btn-login:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .msg-erro { color: #dc2626; font-weight: bold; font-size: 14px; text-align: center; display: none; background: #fee2e2; padding: 8px; border-radius: 4px; border: 1px solid #fca5a5; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Sistema de Gestão Interna</h1>
+        <h2>Clínica Monad Ocupacional - Oriximiná</h2>
+    </header>
+
+    <main>
+        <div class="login-container">
+            <h3 style="margin:0; text-align:center; color:#004080; font-size:20px;">Autenticação de Setor</h3>
+            <div class="msg-erro" id="erro-box"></div>
+            
+            <form id="loginForm" class="form-login">
+                <label>Usuário do Setor:
+                    <input type="text" id="username" required autocomplete="username" placeholder="Ex: raiox, lab, fono...">
+                </label>
+                
+                <label>Senha de Acesso:
+                    <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••">
+                </label>
+                
+                <button type="submit" class="btn-login" id="submitBtn">Entrar no Painel</button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // ==========================================================
+            const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
+            // ==========================================================
+            
+            const btn = document.getElementById('submitBtn');
+            const erroBox = document.getElementById('erro-box');
+            const user = document.getElementById('username').value;
+            const senha = document.getElementById('password').value;
+            
+            erroBox.style.display = "none";
+            btn.disabled = true;
+            btn.textContent = "Autenticando...";
+            
+            fetch(URL_GOOGLE_SCRIPT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ acao: "EFETUAR_LOGIN", usuario: user, senha: senha })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.status === "sucesso") {
+                    // Armazena as credenciais de sessão na máquina local
+                    localStorage.setItem('monad_token', res.token);
+                    localStorage.setItem('monad_setor', res.setor);
+                    
+                    // Redireciona o usuário estritamente para o arquivo correspondente
+                    if (res.setor === "recepcao") {
+                        window.location.href = "index.html";
+                    } else if (res.setor === "todos") {
+                        window.location.href = "checkin.html"; // Visão Geral
+                    } else {
+                        window.location.href = "setor.html"; // Painel Único de Especialidade
+                    }
+                } else {
+                    throw new Error(res.mensagem || "Credenciais incorretas.");
+                }
+            })
+            .catch(err => {
+                erroBox.textContent = err.message || "Erro ao conectar com o servidor.";
+                erroBox.style.display = "block";
+                btn.disabled = false;
+                btn.textContent = "Entrar no Painel";
+            });
+        });
+    </script>
+</body>
+</html>

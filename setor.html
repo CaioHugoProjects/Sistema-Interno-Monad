@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Setor - Clínica Monad</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/checkin.css">
+    <script>
+        const tokenAtivo = localStorage.getItem('monad_token');
+        const setorLogado = localStorage.getItem('monad_setor');
+        if (!tokenAtivo || !setorLogado || setorLogado === "todos" || setorLogado === "recepcao") {
+            window.location.href = "login.html";
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div style="float: right; margin-top: 10px;" class="no-print">
+            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:#dc2626; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
+        </div>
+        <h1>Área Técnica Especializada</h1>
+        <h2 id="nome-painel-setor">Carregando Especialidade...</h2>
+    </header>
+    
+    <main>
+        <div class="painel-recepcao">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
+                <h2 style="margin: 0; color: #004080;">Fila de Atendimento do Setor</h2>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                        <button id="btn-buscar-data" style="background-color: #004080; color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Buscar</button>
+                    </div>
+                    <input type="text" id="pesquisa-paciente" placeholder="Buscar colaborador..." style="padding: 8px; width: 220px; border: 1px solid #ccc; border-radius: 5px;">
+                </div>
+            </div>
+            
+            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: #004080; display: none;">⏳ Carregando Fila...</div>
+
+            <div class="table-responsive">
+                <table class="tabela-liberacao">
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Colaborador</th>
+                            <th style="text-align: center;" id="th-dinamico">Procedimentos</th>
+                            <th style="text-align: center;">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-liberacao"></tbody>
+                </table>
+            </div>
+            
+            <div id="msg-vazio" style="text-align: center; padding: 30px; color: #64748b; display: none; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; margin-top: 10px;">
+                <strong>Nenhum paciente pendente para este setor hoje!</strong>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ==========================================================
+            const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
+            // ==========================================================
+
+            const mapNomes = { "clinico": "Avaliações Clínicas", "raiox": "Radiologia", "fono": "Fonoaudiologia", "lab": "Laboratório", "consulta": "Consultório Médico" };
+            document.getElementById('nome-painel-setor').textContent = mapNomes[setorLogado] || "Painel Restrito";
+
+            const tabela = document.getElementById('lista-liberacao');
+            const inputData = document.getElementById('filtro-data');
+            const msgVazio = document.getElementById('msg-vazio');
+            let fetchController = null;
+
+            const hoje = new Date();
+            inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+
+            function buscar() {
+                if(!inputData.value) return;
+                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.status === "sucesso") renderizar(data.pacientes);
+                    }).catch(()=>{});
+            }
+
+            setInterval(() => {
+                if(!inputData.value) return;
+                if(fetchController) fetchController.abort();
+                fetchController = new AbortController();
+                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.status === "sucesso") {
+                            const filtrados = data.pacientes.filter(p => p[`tem${setorLogado.charAt(0).toUpperCase() + setorLogado.slice(1)}`]);
+                            if (filtrados.length !== document.querySelectorAll('.linha-paciente').length) return renderizar(data.pacientes);
+
+                            filtrados.forEach(pac => {
+                                const l = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
+                                if (l && l.dataset.syncing !== "true") {
+                                    const cb = l.querySelector('.check-setor'); 
+                                    if(cb) cb.checked = pac[`liberado${setorLogado.charAt(0).toUpperCase() + setorLogado.slice(1)}`];
+                                    const obs = l.querySelector('.obs-input'); 
+                                    if(obs && document.activeElement !== obs) obs.value = pac.obsLab || '';
+                                    verificarFila(l);
+                                }
+                            });
+                        }
+                    }).catch(()=>{});
+            }, 15000);
+
+            function renderizar(pacientes) {
+                tabela.innerHTML = ""; let visiveis = 0;
+                pacientes.forEach(pac => {
+                    const mapa = {
+                        clinico: { tem: pac.temClinico, txt: pac.examesClinicos, lib: pac.liberadoClinico },
+                        raiox: { tem: pac.temRaiox, txt: pac.examesRaioX, lib: pac.liberadoRaiox },
+                        fono: { tem: pac.temFono, txt: "Audiometria", lib: pac.liberadoFono },
+                        lab: { tem: pac.temLab, txt: pac.examesLab, lib: pac.liberadoLab },
+                        consulta: { tem: pac.temConsulta, txt: "Consulta Médica", lib: pac.liberadoConsulta }
+                    };
+
+                    const atual = mapa[setorLogado];
+                    if(!atual || !atual.tem) return;
+                    visiveis++;
+
+                    let exames = `<input type="checkbox" class="check-setor" ${atual.lib ? 'checked' : ''}><div class="detalhe-exame" style="text-align:left; margin-top:5px;">${atual.txt}</div>`;
+                    if (setorLogado === "lab") exames += `<textarea class="obs-input" data-cpf="${pac.cpf}" placeholder="Observação da coleta..." rows="2" style="width:100%; border:1px solid #ccc; border-radius:4px; padding:4px;">${pac.obsLab || ''}</textarea>`;
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'linha-paciente'; tr.dataset.cpf = pac.cpf; tr.dataset.syncing = "false";
+                    tr.innerHTML = `
+                        <td><span class="tag-empresa">${pac.empresa || '-'}</span></td>
+                        <td><div style="font-weight:bold; color:#1e293b;">${pac.nome}</div></td>
+                        <td>${exames}</td>
+                        <td style="text-align: center;"><span class="badge-status pendente">AGUARDANDO</span></td>
+                    `;
+                    tabela.appendChild(tr); verificarFila(tr);
+                });
+                msgVazio.style.display = visiveis === 0 ? 'block' : 'none';
+            }
+
+            tabela.addEventListener('change', function(e) {
+                const tr = e.target.closest('tr');
+                tr.dataset.syncing = "true";
+
+                if (e.target.classList.contains('check-setor')) {
+                    e.target.style.opacity = "0.4";
+                    fetch(URL_GOOGLE_SCRIPT, {
+                        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ acao: "ATUALIZAR_SETOR", cpf: tr.dataset.cpf, setor: setorLogado, liberado: e.target.checked })
+                    }).then(r => r.json()).then(res => {
+                        if(res.status !== "sucesso") throw new Error();
+                        e.target.style.opacity = "1"; verificarFila(tr);
+                        setTimeout(() => tr.dataset.syncing = "false", 1500);
+                    }).catch(() => { e.target.checked = !e.target.checked; e.target.style.opacity = "1"; tr.dataset.syncing = "false"; });
+                }
+
+                if (e.target.classList.contains('obs-input')) {
+                    e.target.style.opacity = "0.6";
+                    fetch(URL_GOOGLE_SCRIPT, {
+                        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ acao: "ATUALIZAR_OBS", cpf: tr.dataset.cpf, obs: e.target.value })
+                    }).then(r => r.json()).then(res => {
+                        if(res.status !== "sucesso") throw new Error();
+                        e.target.style.opacity = "1"; e.target.style.borderColor = "#10b981";
+                        setTimeout(() => e.target.style.borderColor = "#ccc", 2000);
+                        setTimeout(() => tr.dataset.syncing = "false", 1500);
+                    }).catch(() => { e.target.style.opacity = "1"; e.target.style.borderColor = "red"; tr.dataset.syncing = "false"; });
+                }
+            });
+
+            function verificarFila(l) {
+                const cb = l.querySelector('.check-setor'); const b = l.querySelector('.badge-status');
+                if(cb && cb.checked) { b.textContent = 'CONCLUÍDO'; b.className = 'badge-status liberado'; l.style.opacity="0.5"; }
+                else { b.textContent = 'AGUARDANDO'; b.className = 'badge-status pendente'; l.style.opacity="1"; }
+            }
+
+            document.getElementById('btn-buscar-data').addEventListener('click', buscar);
+            document.getElementById('pesquisa-paciente').addEventListener('input', (e) => {
+                const termo = e.target.value.toLowerCase();
+                document.querySelectorAll('.linha-paciente').forEach(l => l.style.display = l.textContent.toLowerCase().includes(termo) ? '' : 'none');
+            });
+            buscar();
+        });
+    </script>
+</body>
+</html>

@@ -3,19 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monad Sistema Interno - Home</title>
+    <title>Monad Sistema Interno - Recepção</title>
     <link rel="stylesheet" href="styles/styles.css">
+    <script>
+        const s = localStorage.getItem('monad_setor');
+        if (!s || (s !== 'recepcao' && s !== 'todos')) { window.location.href = "login.html"; }
+    </script>
 </head>
 <body>
     <header>
+        <div style="float: right; margin-top: 10px;" class="no-print">
+            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:#dc2626; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
+        </div>
         <h1>Sistema Interno</h1>
         <h2>Clínica Monad Ocupacional - Oriximiná</h2>
-        <nav>
+        <nav class="no-print">
             <ul>
-                <li><a href="index.html">Recepção</a></li>
-                <li><a href="checkin.html">Check-in Pacientes</a></li>
-                <li><a href="reimpressao.html" style="background-color: #003366;">Reimpressão / Agendados</a></li>
-                <li><a href="#">Relatórios</a></li>
+                <li><a href="index.html" style="background-color: #003366;">Recepção</a></li>
+                <li><a href="checkin.html">Visão Geral</a></li>
+                <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
             </ul>   
         </nav>
     </header>
@@ -24,8 +30,6 @@
         <div class="sistema-fichas">
             <div class="no-print painel-recepcao">
                 <h2>Painel de Cadastro (Recepção)</h2>
-                <p>Preencha os dados e marque os exames. Apenas os exames marcados aparecerão nas fichas.</p>
-                
                 <form id="masterForm">
                     <fieldset>
                         <legend>Dados do Colaborador</legend>
@@ -41,7 +45,7 @@
                             <label>RG: <input type="text" class="master-input" name="rg"></label>
                             <label>CPF: 
                                 <input type="text" class="master-input" name="cpf" placeholder="000.000.000-00">
-                                <span id="cpf-error" style="color: red; font-size: 12px; display: none; margin-top: 4px;">⚠️ CPF Inválido</span>
+                                <span id="cpf-error" style="color: red; font-size: 12px; display: none;">⚠️ CPF Inválido</span>
                             </label>
                         </div>
                         <div class="form-group row">
@@ -66,18 +70,17 @@
 
                     <fieldset>
                         <legend>Exames Solicitados</legend>
-                        
                         <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
                             <div style="padding: 12px; background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 6px;">
                                 <label style="font-weight: bold; color: #0369a1; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 15px;">
                                     <input type="checkbox" id="check-audiometria" checked style="transform: scale(1.5);"> 
-                                    INCLUIR FICHA DE FONOAUDIOLOGIA (Exame de Audiometria)
+                                    INCLUIR FICHA DE FONOAUDIOLOGIA
                                 </label>
                             </div>
                             <div style="padding: 12px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 6px;">
                                 <label style="font-weight: bold; color: #b45309; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 15px;">
                                     <input type="checkbox" id="check-consulta" checked style="transform: scale(1.5);"> 
-                                    ENCAMINHAR PARA CONSULTA CLÍNICA (Médico do Trabalho)
+                                    ENCAMINHAR PARA CONSULTA CLÍNICA
                                 </label>
                             </div>
                         </div>
@@ -100,15 +103,6 @@
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Total"> Raio-x Coluna Total</label><br>
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombar"> Raio-x coluna lombar</label><br>
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombo-Sacra"> Raio-x Coluna Lombo-Sacra</label>
-                                
-                                <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc;">
-                                    <label style="font-size: 12px; color: #555;">Adicionar Raio-X Extra:</label>
-                                    <div style="display: flex; gap: 5px; margin-top: 5px;">
-                                        <input type="text" id="input-exame-extra-raiox" placeholder="Nome do Raio-X..." style="padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; flex: 1;">
-                                        <button type="button" id="btn-add-exame-raiox" style="background: #004080; color: white; border: none; border-radius: 4px; padding: 0 10px; cursor: pointer; font-weight: bold;">Inserir</button>
-                                    </div>
-                                    <div id="lista-extras-painel-raiox" style="margin-top: 10px;"></div>
-                                </div>
                             </div>
 
                             <div>
@@ -125,22 +119,6 @@
                                     <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EAS"> EAS</label><br>
                                     <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EPF"> EPF</label><br>
                                     <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TOXICOLÓGICO"> TOXICOLÓGICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="HEMOG.-GLICADA"> HEMOG. GLICADA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="MICOLOGICO"> MICOLOGICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-HIPURICO"> ACIDO HIPÚRICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-METIL-HIPURICO"> ÁCIDO METIL HIPÚRICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="PSA"> PSA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-DELTA-AMINOLEVULINICO"> ACIDO DELTA AMINOLEVULINICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TRICLOROCOMPOSTOS-TOTAIS"> TRICOLOROCOMPOSTOS TOTAIS</label>
-                                    
-                                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc;">
-                                        <label style="font-size: 12px; color: #555;">Adicionar Exame Extra:</label>
-                                        <div style="display: flex; gap: 5px; margin-top: 5px;">
-                                            <input type="text" id="input-exame-extra" placeholder="Nome do exame..." style="padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; flex: 1;">
-                                            <button type="button" id="btn-add-exame" style="background: #004080; color: white; border: none; border-radius: 4px; padding: 0 10px; cursor: pointer; font-weight: bold;">Inserir</button>
-                                        </div>
-                                        <div id="lista-extras-painel" style="margin-top: 10px;"></div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -149,10 +127,11 @@
                     <div style="display: flex; gap: 15px; margin-top: 20px;">
                         <button type="button" id="btn-salvar-imprimir" class="btn-imprimir">Salvar na Planilha e Imprimir</button>
                     </div>
-                    <p id="msg-status" style="color: #004080; font-weight: bold; margin-top: 10px; display: none;">Salvando dados no Google Planilhas...</p>
+                    <p id="msg-status" style="color: #004080; font-weight: bold; margin-top: 10px; display: none;">A gravar dados...</p>
                 </form>
             </div>
 
+            <!-- ÁREA DE IMPRESSÃO (Oculta na tela) -->
             <div class="area-impressao">
                 <div class="ficha-setor" id="setor-clinico">
                     <div class="cabecalho-setor">
@@ -166,13 +145,9 @@
                     </div>
                     <div class="corpo-setor">
                         <h3>Exames Solicitados:</h3>
-                        <ul class="lista-exames-print" id="lista-clinico">
-                            <li class="vazio">Nenhum exame selecionado</li>
-                        </ul>
+                        <ul class="lista-exames-print" id="lista-clinico"><li class="vazio">Nenhum exame</li></ul>
                     </div>
-                    <div class="rodape-setor">
-                        <div class="area-assinatura">Assinatura do Profissional / Laudo</div>
-                    </div>
+                    <div class="rodape-setor"><div class="area-assinatura">Assinatura do Profissional</div></div>
                 </div>
 
                 <div class="ficha-setor" id="setor-raiox">
@@ -187,13 +162,9 @@
                     </div>
                     <div class="corpo-setor">
                         <h3>Exames Solicitados:</h3>
-                        <ul class="lista-exames-print" id="lista-raiox">
-                            <li class="vazio">Nenhum exame selecionado</li>
-                        </ul>
+                        <ul class="lista-exames-print" id="lista-raiox"><li class="vazio">Nenhum exame</li></ul>
                     </div>
-                    <div class="rodape-setor">
-                        <div class="area-assinatura">Assinatura do Técnico / Laudo</div>
-                    </div>
+                    <div class="rodape-setor"><div class="area-assinatura">Assinatura do Técnico</div></div>
                 </div>
 
                 <div class="ficha-setor" id="setor-audio">
@@ -209,20 +180,14 @@
                     <div class="corpo-setor">
                         <h3>Registro Audiométrico:</h3>
                         <table class="tabela-audiometria">
-                            <thead>
-                                <tr>
-                                    <th>Hz</th><th>500</th><th>1K</th><th>2K</th><th>3K</th><th>4K</th><th>6K</th><th>8K</th>
-                                </tr>
-                            </thead>
+                            <thead><tr><th>Hz</th><th>500</th><th>1K</th><th>2K</th><th>3K</th><th>4K</th><th>6K</th><th>8K</th></tr></thead>
                             <tbody>
                                 <tr><td><strong>OD</strong></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
                                 <tr><td><strong>OE</strong></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="rodape-setor">
-                        <div class="area-assinatura">Assinatura do Fonoaudiólogo / CRM</div>
-                    </div>
+                    <div class="rodape-setor"><div class="area-assinatura">Fonoaudiólogo / CRM</div></div>
                 </div>
 
                 <div class="ficha-setor" id="setor-lab">
@@ -237,23 +202,13 @@
                     </div>
                     <div class="corpo-setor">
                         <h3>Exames Solicitados:</h3>
-                        <ul class="lista-exames-print" id="lista-lab">
-                            <li class="vazio">Nenhum exame selecionado</li>
-                        </ul>
+                        <ul class="lista-exames-print" id="lista-lab"><li class="vazio">Nenhum exame</li></ul>
                     </div>
-                    <div class="rodape-setor">
-                        <div class="area-assinatura">Responsável pela Coleta</div>
-                    </div>
+                    <div class="rodape-setor"><div class="area-assinatura">Responsável pela Coleta</div></div>
                 </div>
-
             </div>
         </div>
     </main>
-    
-    <footer>
-        <p>&copy; 2026 Clínica Monad Ocupacional - Oriximiná.</p>
-    </footer>
-
     <script src="js/script.js"></script>
 </body>
 </html>

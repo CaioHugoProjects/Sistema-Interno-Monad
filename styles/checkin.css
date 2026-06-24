@@ -550,18 +550,3 @@
     color: #94a3b8;
     font-style: italic;
 }
-/* BOTÃO DE CHAMAR (TV) */
-.btn-chamar {
-    background-color: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-    margin-left: 8px;
-    transition: background 0.2s;
-}
-.btn-chamar:hover { background-color: #2563eb; }
-.btn-chamar:active { transform: scale(0.95); }
