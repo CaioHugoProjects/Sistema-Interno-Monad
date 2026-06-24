@@ -6,6 +6,7 @@
     <title>Monad Sistema Interno - Recepção</title>
     <link rel="stylesheet" href="styles/styles.css">
     <script>
+        // GATEKEEPER DE SEGURANÇA
         const s = localStorage.getItem('monad_setor');
         if (!s || (s !== 'recepcao' && s !== 'todos')) { window.location.href = "login.html"; }
     </script>
@@ -103,6 +104,15 @@
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Total"> Raio-x Coluna Total</label><br>
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombar"> Raio-x coluna lombar</label><br>
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombo-Sacra"> Raio-x Coluna Lombo-Sacra</label>
+                                
+                                <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                                    <label style="font-size: 12px; color: #555;">Adicionar Raio-X Extra:</label>
+                                    <div style="display: flex; gap: 5px; margin-top: 5px;">
+                                        <input type="text" id="input-exame-extra-raiox" placeholder="Nome do Raio-X..." style="padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; flex: 1;">
+                                        <button type="button" id="btn-add-exame-raiox" style="background: #004080; color: white; border: none; border-radius: 4px; padding: 0 10px; cursor: pointer; font-weight: bold;">Inserir</button>
+                                    </div>
+                                    <div id="lista-extras-painel-raiox" style="margin-top: 10px;"></div>
+                                </div>
                             </div>
 
                             <div>
@@ -119,6 +129,22 @@
                                     <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EAS"> EAS</label><br>
                                     <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EPF"> EPF</label><br>
                                     <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TOXICOLÓGICO"> TOXICOLÓGICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="HEMOG.-GLICADA"> HEMOG. GLICADA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="MICOLOGICO"> MICOLOGICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-HIPURICO"> ACIDO HIPÚRICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-METIL-HIPURICO"> ÁCIDO METIL HIPÚRICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="PSA"> PSA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-DELTA-AMINOLEVULINICO"> ACIDO DELTA AMINOLEVULINICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TRICLOROCOMPOSTOS-TOTAIS"> TRICOLOROCOMPOSTOS TOTAIS</label>
+                                    
+                                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                                        <label style="font-size: 12px; color: #555;">Adicionar Exame Extra:</label>
+                                        <div style="display: flex; gap: 5px; margin-top: 5px;">
+                                            <input type="text" id="input-exame-extra" placeholder="Nome do exame..." style="padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; flex: 1;">
+                                            <button type="button" id="btn-add-exame" style="background: #004080; color: white; border: none; border-radius: 4px; padding: 0 10px; cursor: pointer; font-weight: bold;">Inserir</button>
+                                        </div>
+                                        <div id="lista-extras-painel" style="margin-top: 10px;"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

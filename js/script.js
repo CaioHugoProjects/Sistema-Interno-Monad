@@ -85,7 +85,9 @@ document.addEventListener("DOMContentLoaded", function() {
     function atualizarListaExames() {
         const exames = { clinico: [], raiox: [], lab: [] };
         document.querySelectorAll('.master-checkbox:checked').forEach(cb => {
-            exames[cb.dataset.setor].push(cb.dataset.nome);
+            if (exames[cb.dataset.setor]) {
+                exames[cb.dataset.setor].push(cb.dataset.nome);
+            }
         });
 
         Object.keys(exames).forEach(setor => {
@@ -93,7 +95,51 @@ document.addEventListener("DOMContentLoaded", function() {
             if (ul) ul.innerHTML = exames[setor].length === 0 ? '<li class="vazio">Nenhum exame selecionado</li>' : exames[setor].map(e => `<li>${e}</li>`).join('');
         });
     }
-    masterCheckboxes.forEach(cb => cb.addEventListener('change', atualizarListaExames));
+    
+    // Atualiza a lista quando muda qualquer checkbox existente
+    document.body.addEventListener('change', function(e) {
+        if (e.target.classList.contains('master-checkbox')) {
+            atualizarListaExames();
+        }
+    });
+
+    // ==========================================================
+    // LÓGICA DE INSERÇÃO DE EXAMES EXTRAS
+    // ==========================================================
+    const btnAddExameLab = document.getElementById('btn-add-exame');
+    const inputExameExtraLab = document.getElementById('input-exame-extra');
+    const listaExtrasPainelLab = document.getElementById('lista-extras-painel');
+    
+    const btnAddExameRaiox = document.getElementById('btn-add-exame-raiox');
+    const inputExameExtraRaiox = document.getElementById('input-exame-extra-raiox');
+    const listaExtrasPainelRaiox = document.getElementById('lista-extras-painel-raiox');
+
+    function adicionarExameExtra(inputElement, painelElement, setor) {
+        const nomeExame = inputElement.value.trim();
+        if (nomeExame !== '') {
+            const novoLabel = document.createElement('label');
+            novoLabel.style.display = 'block';
+            novoLabel.style.color = '#d9534f'; 
+            
+            const novoCheckbox = document.createElement('input');
+            novoCheckbox.type = 'checkbox';
+            novoCheckbox.className = 'master-checkbox';
+            novoCheckbox.dataset.setor = setor;
+            novoCheckbox.dataset.nome = nomeExame;
+            novoCheckbox.checked = true; 
+            
+            novoLabel.appendChild(novoCheckbox);
+            novoLabel.appendChild(document.createTextNode(' ' + nomeExame));
+            painelElement.appendChild(novoLabel);
+            
+            inputElement.value = '';
+            atualizarListaExames();
+        }
+    }
+
+    if (btnAddExameLab) btnAddExameLab.addEventListener('click', () => adicionarExameExtra(inputExameExtraLab, listaExtrasPainelLab, 'lab'));
+    if (btnAddExameRaiox) btnAddExameRaiox.addEventListener('click', () => adicionarExameExtra(inputExameExtraRaiox, listaExtrasPainelRaiox, 'raiox'));
+
 
     const checkAudio = document.getElementById('check-audiometria');
     const setorAudio = document.getElementById('setor-audio');
@@ -131,7 +177,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 consultaClinica: document.getElementById('check-consulta') ? document.getElementById('check-consulta').checked : false
             };
 
-            // FIM DO NO-CORS! COMUNICAÇÃO TOTALMENTE SEGURA:
             fetch(URL_GOOGLE_SCRIPT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -148,6 +193,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     btnSalvarImprimir.style.opacity = "1";
                     window.print(); 
                     document.getElementById("masterForm").reset();
+                    // Limpar as divs de exames extras ao salvar
+                    if (listaExtrasPainelLab) listaExtrasPainelLab.innerHTML = "";
+                    if (listaExtrasPainelRaiox) listaExtrasPainelRaiox.innerHTML = "";
                     atualizarListaExames(); 
                 }, 1500);
             })
