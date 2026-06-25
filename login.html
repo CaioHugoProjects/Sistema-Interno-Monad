@@ -47,6 +47,7 @@
             e.preventDefault();
             
             // ==========================================================
+            // NÃO SE ESQUEÇA DE COLAR A SUA URL AQUI ABAIXO:
             const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
             // ==========================================================
             
@@ -67,17 +68,19 @@
             .then(r => r.json())
             .then(res => {
                 if (res.status === "sucesso") {
-                    // Armazena as credenciais de sessão na máquina local
+                    // Armazena as credenciais
                     localStorage.setItem('monad_token', res.token);
                     localStorage.setItem('monad_setor', res.setor);
                     
-                    // Redireciona o usuário estritamente para o arquivo correspondente
+                    // ROTEAMENTO CORRETO:
                     if (res.setor === "recepcao") {
                         window.location.href = "index.html";
                     } else if (res.setor === "todos") {
                         window.location.href = "checkin.html"; // Visão Geral
+                    } else if (res.setor === "admin") {
+                        window.location.href = "admin.html";   // <--- O REDIRECIONAMENTO QUE FALTAVA
                     } else {
-                        window.location.href = "setor.html"; // Painel Único de Especialidade
+                        window.location.href = "setor.html";   // Painéis Técnicos
                     }
                 } else {
                     throw new Error(res.mensagem || "Credenciais incorretas.");

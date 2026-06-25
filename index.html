@@ -6,9 +6,9 @@
     <title>Monad Sistema Interno - Recepção</title>
     <link rel="stylesheet" href="styles/styles.css">
     <script>
-        // GATEKEEPER DE SEGURANÇA
+        // GATEKEEPER DE SEGURANÇA ATUALIZADO
         const s = localStorage.getItem('monad_setor');
-        if (!s || (s !== 'recepcao' && s !== 'todos')) { window.location.href = "login.html"; }
+        if (!s || (s !== 'recepcao' && s !== 'todos' && s !== 'admin')) { window.location.href = "login.html"; }
     </script>
 </head>
 <body>
@@ -23,8 +23,15 @@
                 <li><a href="index.html" style="background-color: #003366;">Recepção</a></li>
                 <li><a href="checkin.html">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
+                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: #7f1d1d;">Painel Admin</a></li>
             </ul>   
         </nav>
+        <script>
+            // Revela o botão do Admin apenas se quem estiver logado for o admin
+            if (localStorage.getItem('monad_setor') === 'admin') {
+                document.getElementById('menu-admin').style.display = 'block';
+            }
+        </script>
     </header>
     
     <main>
@@ -157,7 +164,6 @@
                 </form>
             </div>
 
-            <!-- ÁREA DE IMPRESSÃO (Oculta na tela) -->
             <div class="area-impressao">
                 <div class="ficha-setor" id="setor-clinico">
                     <div class="cabecalho-setor">
@@ -237,4 +243,4 @@
     </main>
     <script src="js/script.js"></script>
 </body>
-</html>
+</html> 

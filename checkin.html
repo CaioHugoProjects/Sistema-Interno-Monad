@@ -7,13 +7,12 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
+        // GATEKEEPER DE SEGURANÇA ATUALIZADO
         const tokenAtivo = localStorage.getItem('monad_token');
         const setorLogado = localStorage.getItem('monad_setor');
-        
-        // NOVA REGRA: Liberta a entrada para o Supervisor ('todos') E para a 'recepcao'
-        if (!tokenAtivo || !setorLogado || (setorLogado !== 'todos' && setorLogado !== 'recepcao')) { 
+        if (!tokenAtivo || !setorLogado || (setorLogado !== "todos" && setorLogado !== "recepcao" && setorLogado !== "admin")) {
             localStorage.clear();
-            window.location.href = "login.html"; 
+            window.location.href = "login.html";
         }
     </script>
 </head>
@@ -24,14 +23,20 @@
         </div>
         <h1>Sistema Interno</h1>
         <h2>Painel de Gestão (Visão Geral)</h2>
-        
-        <nav class="no-print">
+        <nav>
             <ul>
                 <li><a href="index.html">Recepção</a></li>
                 <li><a href="checkin.html" style="background-color: #003366;">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
-            </ul>   
+                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: #7f1d1d;">Painel Admin</a></li>
+            </ul>
         </nav>
+        <script>
+            // Revela o botão do Admin apenas se quem estiver logado for o admin
+            if (localStorage.getItem('monad_setor') === 'admin') {
+                document.getElementById('menu-admin').style.display = 'block';
+            }
+        </script>
     </header>
     
     <main>
@@ -50,11 +55,11 @@
 
             <div class="tabs-setores">
                 <button class="tab-btn active" data-aba="todos">Todos os Setores</button>
-                <button class="tab-btn" data-aba="clinico">Exames Físicos</button>
+                <button class="tab-btn" data-aba="clinico">Clínico</button>
                 <button class="tab-btn" data-aba="raiox">Raio-X</button>
-                <button class="tab-btn" data-aba="fono">Audiometria</button>
+                <button class="tab-btn" data-aba="fono">Fonoaudiologia</button>
                 <button class="tab-btn" data-aba="lab">Laboratório</button>
-                <button class="tab-btn" data-aba="consulta">Clínico Médico</button>
+                <button class="tab-btn" data-aba="consulta">Consulta Médica</button>
             </div>
             
             <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: #004080; display: none;">⏳ A procurar dados...</div>
@@ -65,11 +70,11 @@
                         <tr>
                             <th>Empresa</th>
                             <th>Colaborador</th>
-                            <th class="col-clinico" style="text-align: center;">Exames Físicos</th>
+                            <th class="col-clinico" style="text-align: center;">Clínico</th>
                             <th class="col-raiox" style="text-align: center;">Raio-X</th>
-                            <th class="col-fono" style="text-align: center;">Audiometria</th>
+                            <th class="col-fono" style="text-align: center;">Fono</th>
                             <th class="col-lab" style="text-align: center;">Laboratório</th>
-                            <th class="col-consulta" style="text-align: center;">Clínico Médico</th>
+                            <th class="col-consulta" style="text-align: center;">Consulta</th>
                             <th style="text-align: center;">Status Global</th>
                         </tr>
                     </thead>
@@ -167,7 +172,7 @@
                         <div class="celula-exame">
                             <input type="checkbox" class="c-lab" ${checked ? 'checked' : ''} onclick="return false;" style="cursor:not-allowed;">
                             <div class="detalhe-exame">${exame}</div>
-                            <div class="obs-read" style="font-size:10px; color:#ef4444; background:#fee2e2; padding:3px; border-radius:3px; width:100%; text-align:center;">${obs || ''}</div>
+                            <div class="obs-read" style="font-size:10px; color:#ef4444; background:#fee2e2; padding:3px; border-radius:3px; width:100%; text-align:center; min-height: 18px;">${obs || ''}</div>
                         </div>
                     `;
 

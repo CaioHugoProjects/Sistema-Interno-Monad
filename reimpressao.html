@@ -7,8 +7,11 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
+        // GATEKEEPER DE SEGURANÇA ATUALIZADO
         const sec_setor = localStorage.getItem('monad_setor');
-        if (!sec_setor || (sec_setor !== 'recepcao' && sec_setor !== 'todos')) { window.location.href = "login.html"; }
+        if (!sec_setor || (sec_setor !== 'recepcao' && sec_setor !== 'todos' && sec_setor !== 'admin')) { 
+            window.location.href = "login.html"; 
+        }
     </script>
 </head>
 <body>
@@ -18,13 +21,20 @@
         </div>
         <h1>Sistema Interno</h1>
         <h2>Clínica Monad Ocupacional - Oriximiná</h2>
-        <nav class="no-print">
+        <nav>
             <ul>
                 <li><a href="index.html">Recepção</a></li>
                 <li><a href="checkin.html">Visão Geral</a></li>
                 <li><a href="reimpressao.html" style="background-color: #003366;">Reimpressão / Agendados</a></li>
+                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: #7f1d1d;">Painel Admin</a></li>
             </ul>
         </nav>
+        <script>
+            // Revela o botão do Admin apenas se quem estiver logado for o admin
+            if (localStorage.getItem('monad_setor') === 'admin') {
+                document.getElementById('menu-admin').style.display = 'block';
+            }
+        </script>
     </header>
     
     <main>
