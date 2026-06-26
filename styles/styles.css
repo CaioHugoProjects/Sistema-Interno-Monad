@@ -24,7 +24,8 @@ header {
     background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
     color: white; 
     padding: 24px 20px; 
-    text-align: center; 
+    text-align: center;
+    justify-content: center; 
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
@@ -33,6 +34,8 @@ header h1 {
     font-size: 26px; 
     font-weight: 700;
     letter-spacing: -0.5px;
+    align-items: center;
+    text-align: center;
 }
 
 header h2 { 
@@ -40,6 +43,8 @@ header h2 {
     font-size: 15px; 
     font-weight: 500; 
     color: #bfdbfe; 
+    align-items: center;
+    text-align: center;
 }
 
 /* NAVEGAÇÃO FLUIDA */

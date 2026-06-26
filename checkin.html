@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
-        // GATEKEEPER DE SEGURANÇA ATUALIZADO
         const tokenAtivo = localStorage.getItem('monad_token');
         const setorLogado = localStorage.getItem('monad_setor');
         if (!tokenAtivo || !setorLogado || (setorLogado !== "todos" && setorLogado !== "recepcao" && setorLogado !== "admin")) {
@@ -32,7 +31,6 @@
             </ul>
         </nav>
         <script>
-            // Revela o botão do Admin apenas se quem estiver logado for o admin
             if (localStorage.getItem('monad_setor') === 'admin') {
                 document.getElementById('menu-admin').style.display = 'block';
             }
@@ -116,19 +114,24 @@
                 if(!inputData.value) return;
                 document.getElementById('msg-carregando').style.display = "block";
                 
-                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`)
+                if (fetchController) fetchController.abort();
+                fetchController = new AbortController();
+
+                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
                     .then(r => r.json())
                     .then(data => {
                         document.getElementById('msg-carregando').style.display = "none";
                         if (data.status === "sucesso" && data.pacientes.length > 0) renderizarTabela(data.pacientes);
                         else { tabela.innerHTML = ""; document.getElementById('msg-vazio').style.display = "block"; }
-                    }).catch(() => {});
+                    }).catch((err) => { if (err.name !== 'AbortError') console.error(err); });
             }
 
             setInterval(atualizacaoSilenciosa, 15000);
 
             function atualizacaoSilenciosa() {
-                if(!inputData.value) return;
+                // OTIMIZAÇÃO: Ignorar requisições se aba estiver inativa
+                if (document.hidden || !inputData.value) return; 
+                
                 if (fetchController) fetchController.abort();
                 fetchController = new AbortController();
 
@@ -141,20 +144,30 @@
                                 renderizarTabela(data.pacientes);
                                 return;
                             }
+                            
+                            // Soft-Update para não piscar a tabela da Visão Geral
                             data.pacientes.forEach(pac => {
                                 const linha = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
                                 if (linha) {
-                                    const cClinico = linha.querySelector('.c-clinico'); if(cClinico) cClinico.checked = pac.liberadoClinico;
-                                    const cRaiox = linha.querySelector('.c-raiox'); if(cRaiox) cRaiox.checked = pac.liberadoRaiox;
-                                    const cFono = linha.querySelector('.c-fono'); if(cFono) cFono.checked = pac.liberadoFono;
-                                    const cLab = linha.querySelector('.c-lab'); if(cLab) cLab.checked = pac.liberadoLab;
-                                    const cCons = linha.querySelector('.c-consulta'); if(cCons) cCons.checked = pac.liberadoConsulta;
-                                    const obs = linha.querySelector('.obs-read'); if(obs) obs.textContent = pac.obsLab;
+                                    const updateCheck = (cls, val) => {
+                                        const cb = linha.querySelector(cls);
+                                        if (cb && cb.checked !== val) cb.checked = val;
+                                    };
+                                    
+                                    updateCheck('.c-clinico', pac.liberadoClinico);
+                                    updateCheck('.c-raiox', pac.liberadoRaiox);
+                                    updateCheck('.c-fono', pac.liberadoFono);
+                                    updateCheck('.c-lab', pac.liberadoLab);
+                                    updateCheck('.c-consulta', pac.liberadoConsulta);
+                                    
+                                    const obs = linha.querySelector('.obs-read'); 
+                                    if(obs && obs.textContent !== (pac.obsLab || '')) obs.textContent = pac.obsLab;
+                                    
                                     verificarStatusFilaLocal(linha);
                                 }
                             });
                         }
-                    }).catch(() => {});
+                    }).catch((err) => { if (err.name !== 'AbortError') console.error(err); });
             }
 
             function renderizarTabela(pacientes) {

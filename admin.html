@@ -28,13 +28,13 @@
         <div style="float: right; margin-top: 10px;" class="no-print">
             <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:#dc2626; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair do Admin</button>
         </div>
-        <h1 style="color: #fca5a5;">Acesso Administrativo</h1>
+        <h1 style="color: #fca5a5;">Acesso Administrativo (God Mode)</h1>
         <h2>Supervisão, Edição e Exclusão de Registos</h2>
         <nav>
             <ul>
                 <li><a href="index.html">Recepção</a></li>
                 <li><a href="checkin.html">Visão Geral</a></li>
-                <li><a href="reimpressao.html">Reimpressão</a></li>
+                <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
                 <li><a href="admin.html" style="background-color: #7f1d1d;">Painel Admin</a></li>
             </ul>
         </nav>
@@ -118,15 +118,37 @@
             const inputData = document.getElementById('filtro-data');
             const inputPesq = document.getElementById('pesquisa-paciente');
             let databaseAdmin = [];
+            let fetchController = null; 
 
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+
+            // FUNÇÃO PARA VALIDAR CPF NO BACKSTAGE DO ADMIN
+            function validarCPF(cpf) {
+                cpf = cpf.replace(/[^\d]+/g,'');
+                if(cpf == '') return false;
+                if (/^(\d)\1{10}$/.test(cpf)) return false;
+                let add = 0;
+                for (let i=0; i < 9; i ++) add += parseInt(cpf.charAt(i)) * (10 - i);
+                let rev = 11 - (add % 11);
+                if (rev == 10 || rev == 11) rev = 0;
+                if (rev != parseInt(cpf.charAt(9))) return false;
+                add = 0;
+                for (let i = 0; i < 10; i ++) add += parseInt(cpf.charAt(i)) * (11 - i);
+                rev = 11 - (add % 11);
+                if (rev == 10 || rev == 11) rev = 0;
+                if (rev != parseInt(cpf.charAt(10))) return false;
+                return true;
+            }
 
             function buscarDados() {
                 if(!inputData.value) return;
                 document.getElementById('msg-carregando').style.display = "block";
                 
-                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`)
+                if (fetchController) fetchController.abort();
+                fetchController = new AbortController();
+
+                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
                     .then(r => r.json())
                     .then(data => {
                         document.getElementById('msg-carregando').style.display = "none";
@@ -137,10 +159,51 @@
                             tabela.innerHTML = ""; 
                             document.getElementById('msg-vazio').style.display = "block"; 
                         }
-                    }).catch(() => {});
+                    }).catch((err) => { if (err.name !== 'AbortError') console.error(err); });
             }
 
-            setInterval(buscarDados, 15000);
+            setInterval(() => {
+                if (document.hidden || !inputData.value) return; 
+                
+                if (fetchController) fetchController.abort();
+                fetchController = new AbortController();
+                
+                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.status === "sucesso" && data.pacientes.length > 0) {
+                            const pacValidos = data.pacientes.filter(p => p.temClinico || p.temRaiox || p.temLab || p.temFono || p.temConsulta);
+                            
+                            if (pacValidos.length !== document.querySelectorAll('.linha-paciente').length) {
+                                databaseAdmin = data.pacientes;
+                                renderizarTabela(databaseAdmin);
+                                return;
+                            }
+                            
+                            data.pacientes.forEach(pac => {
+                                const l = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
+                                if (l && document.getElementById('modal-editar').style.display === 'none') {
+                                    const updateCheck = (setor, valor) => {
+                                        const cb = l.querySelector(`.check-setor-admin[data-setor="${setor}"]`);
+                                        if(cb && cb.checked !== valor && !cb.disabled) cb.checked = valor;
+                                    };
+                                    
+                                    updateCheck('clinico', pac.liberadoClinico);
+                                    updateCheck('raiox', pac.liberadoRaiox);
+                                    updateCheck('fono', pac.liberadoFono);
+                                    updateCheck('lab', pac.liberadoLab);
+                                    updateCheck('consulta', pac.liberadoConsulta);
+                                    
+                                    const obs = l.querySelector('.obs-input-admin'); 
+                                    if(obs && document.activeElement !== obs && obs.value !== (pac.obsLab || '') && !obs.disabled) {
+                                        obs.value = pac.obsLab || '';
+                                    }
+                                }
+                            });
+                            databaseAdmin = data.pacientes; 
+                        }
+                    }).catch((err) => { if (err.name !== 'AbortError') console.error(err); });
+            }, 15000);
 
             function renderizarTabela(pacientes) {
                 tabela.innerHTML = "";
@@ -210,38 +273,59 @@
                 const cpf = tr.dataset.cpf;
 
                 if (e.target.classList.contains('check-setor-admin')) {
-                    const setor = e.target.dataset.setor;
-                    const liberado = e.target.checked;
-                    e.target.style.opacity = "0.4";
+                    const cb = e.target;
+                    const setor = cb.dataset.setor;
+                    const liberado = cb.checked;
+                    
+                    cb.disabled = true; // PREVENÇÃO DUPLO CLIQUE ADMIN
+                    cb.style.opacity = "0.4";
 
                     fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({ acao: "ATUALIZAR_SETOR", cpf: cpf, setor: setor, liberado: liberado })
                     }).then(r => r.json()).then(res => {
                         if(res.status !== "sucesso") throw new Error();
-                        e.target.style.opacity = "1";
-                    }).catch(() => { alert("Erro ao forçar atualização."); e.target.checked = !liberado; e.target.style.opacity = "1"; });
+                        cb.style.opacity = "1";
+                        cb.disabled = false;
+                    }).catch(() => { 
+                        alert("Erro ao forçar atualização."); 
+                        cb.checked = !liberado; 
+                        cb.style.opacity = "1"; 
+                        cb.disabled = false;
+                    });
                 }
 
                 if (e.target.classList.contains('obs-input-admin')) {
-                    e.target.style.opacity = "0.4";
+                    const obsInput = e.target;
+                    obsInput.disabled = true;
+                    obsInput.style.opacity = "0.4";
+                    
                     fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ acao: "ATUALIZAR_OBS", cpf: cpf, obs: e.target.value })
+                        body: JSON.stringify({ acao: "ATUALIZAR_OBS", cpf: cpf, obs: obsInput.value })
                     }).then(r => r.json()).then(res => {
                         if(res.status !== "sucesso") throw new Error();
-                        e.target.style.opacity = "1"; e.target.style.borderColor = "green";
-                    }).catch(() => { alert("Erro."); e.target.style.opacity = "1"; });
+                        obsInput.style.opacity = "1"; 
+                        obsInput.style.borderColor = "var(--success)";
+                        obsInput.disabled = false;
+                        setTimeout(() => obsInput.style.borderColor = "#ccc", 2000);
+                    }).catch(() => { 
+                        alert("Erro ao guardar observação."); 
+                        obsInput.style.opacity = "1"; 
+                        obsInput.disabled = false;
+                    });
                 }
             });
 
             tabela.addEventListener('click', function(e) {
                 if (e.target.classList.contains('btn-apagar')) {
-                    const tr = e.target.closest('tr');
+                    const btn = e.target;
+                    const tr = btn.closest('tr');
                     const nome = tr.querySelector('div').textContent;
+                    
                     if (confirm(`TEM A CERTEZA ABSOLUTA?\n\nDeseja excluir permanentemente o registo de:\n${nome}\n\nEsta ação não pode ser desfeita.`)) {
-                        e.target.textContent = "Apagando...";
-                        e.target.disabled = true;
+                        btn.textContent = "Apagando...";
+                        btn.disabled = true;
 
                         fetch(URL_GOOGLE_SCRIPT, {
                             method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -249,7 +333,11 @@
                         }).then(r => r.json()).then(res => {
                             if(res.status === "sucesso") tr.remove();
                             else throw new Error(res.detalhe || "Erro desconhecido");
-                        }).catch((err) => { alert("Falha na exclusão: " + err.message); e.target.textContent = "🗑️ Excluir"; e.target.disabled = false; });
+                        }).catch((err) => { 
+                            alert("Falha na exclusão: " + err.message); 
+                            btn.textContent = "🗑️ Excluir"; 
+                            btn.disabled = false; 
+                        });
                     }
                 }
 
@@ -260,9 +348,6 @@
                 }
             });
 
-            // ==========================================
-            // LÓGICA DO MODAL DE EDIÇÃO
-            // ==========================================
             window.abrirModalEdicao = function(pac) {
                 document.getElementById('edit-cpf-antigo').value = pac.cpf;
                 document.getElementById('edit-data-exame').value = pac.dataExame;
@@ -289,22 +374,28 @@
                 document.getElementById('modal-editar').style.display = 'none';
             };
 
-            // SISTEMA INTELIGENTE DE CAPTURA DE ERRO NA EDIÇÃO
             document.getElementById('btn-salvar-edicao').addEventListener('click', function(e) {
                 const btn = e.target;
-                btn.textContent = "A gravar...";
-                btn.disabled = true;
+                
+                // MÁSCARA E VALIDAÇÃO DE CPF PARA O ADMIN
+                const cpfNovo = document.getElementById('edit-cpf').value.trim();
+                if (cpfNovo && !validarCPF(cpfNovo)) {
+                    alert("AÇÃO BLOQUEADA: O CPF digitado é inválido. Por favor, corrija antes de salvar as alterações.");
+                    return;
+                }
 
+                let dataRaw = document.getElementById('edit-data-exame').value;
+                
                 const dadosEdicao = {
                     acao: "EDITAR_PACIENTE",
-                    cpfAntigo: document.getElementById('edit-cpf-antigo').value,
-                    dataExame: document.getElementById('edit-data-exame').value,
+                    cpfAntigo: document.getElementById('edit-cpf-antigo').value.trim(),
+                    dataExame: dataRaw.trim(),
                     nome: document.getElementById('edit-nome').value,
                     empresa: document.getElementById('edit-empresa').value,
                     funcao: document.getElementById('edit-funcao').value,
                     dn: document.getElementById('edit-dn').value,
                     rg: document.getElementById('edit-rg').value,
-                    cpfNovo: document.getElementById('edit-cpf').value,
+                    cpfNovo: cpfNovo,
                     telefone: document.getElementById('edit-tel').value,
                     examesClinicos: document.getElementById('edit-ex-clinico').value || "Nenhum",
                     examesRaioX: document.getElementById('edit-ex-raiox').value || "Nenhum",
@@ -312,6 +403,9 @@
                     audiometria: document.getElementById('edit-tem-fono').checked,
                     consultaClinica: document.getElementById('edit-tem-consulta').checked
                 };
+
+                btn.textContent = "A gravar...";
+                btn.disabled = true;
 
                 fetch(URL_GOOGLE_SCRIPT, {
                     method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -321,14 +415,12 @@
                     btn.disabled = false;
                     if(res.status === "sucesso") {
                         fecharModal();
-                        buscarDados(); // Recarrega a tabela
+                        buscarDados(); 
                     } else {
-                        // O SERVIDOR CONSEGUIU LER, MAS ALGO DEU ERRADO (EX: NÃO ACHOU O PACIENTE)
                         alert("Servidor diz: " + (res.detalhe || "Erro desconhecido"));
                     }
                 }).catch((err) => { 
-                    // ERRO CRÍTICO DE REDE OU VERSÃO ANTIGA DO SCRIPT
-                    alert("Falha Crítica ao tentar editar: " + err.message + "\n\n1. Verifique a ligação à internet.\n2. Verifique se clicou em 'Nova Versão' ao atualizar o Google Apps Script."); 
+                    alert("Falha Crítica ao tentar editar: " + err.message); 
                     btn.textContent = "Salvar Alterações";
                     btn.disabled = false;
                 });

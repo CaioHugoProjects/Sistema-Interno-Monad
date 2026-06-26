@@ -11,7 +11,30 @@ document.addEventListener("DOMContentLoaded", function() {
     const cpfInput = document.querySelector('input[name="cpf"]');
     const telefoneInput = document.querySelector('input[name="telefone"]');
     const cpfError = document.getElementById('cpf-error');
+    // ==========================================
+// LÓGICA DE DATA INTELIGENTE (PERSISTENTE)
+// ==========================================
+const inputData = document.querySelector('input[name="data"]');
 
+if (inputData) {
+    const hoje = new Date().toISOString().split('T')[0];
+    const dataSalva = localStorage.getItem('monad_data_recepcao');
+    
+    // 1. Se existir data salva e for de hoje, usa ela. 
+    // Se for de outro dia, ela mantém a salva (para agendamentos futuros).
+    // Se não existir nada, define como hoje.
+    if (dataSalva) {
+        inputData.value = dataSalva;
+    } else {
+        inputData.value = hoje;
+        localStorage.setItem('monad_data_recepcao', hoje);
+    }
+
+    // 2. Sempre que o utilizador mudar a data manualmente, atualizamos o registo
+    inputData.addEventListener('change', function() {
+        localStorage.setItem('monad_data_recepcao', this.value);
+    });
+}
     if (cpfInput) {
         cpfInput.addEventListener('input', function(e) {
             let v = e.target.value.replace(/\D/g, ''); 
@@ -21,13 +44,13 @@ document.addEventListener("DOMContentLoaded", function() {
             else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
             e.target.value = v;
             cpfError.style.display = 'none';
-            cpfInput.style.borderColor = '#ccc';
+            cpfInput.style.borderColor = 'var(--border)';
         });
 
         cpfInput.addEventListener('blur', function() {
             if (this.value && !validarCPF(this.value)) {
                 cpfError.style.display = 'block';
-                this.style.borderColor = 'red';
+                this.style.borderColor = 'var(--danger)';
             }
         });
     }
@@ -96,7 +119,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     
-    // Atualiza a lista quando muda qualquer checkbox existente
     document.body.addEventListener('change', function(e) {
         if (e.target.classList.contains('master-checkbox')) {
             atualizarListaExames();
@@ -119,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (nomeExame !== '') {
             const novoLabel = document.createElement('label');
             novoLabel.style.display = 'block';
-            novoLabel.style.color = '#d9534f'; 
+            novoLabel.style.color = 'var(--danger)'; 
             
             const novoCheckbox = document.createElement('input');
             novoCheckbox.type = 'checkbox';
@@ -140,7 +162,6 @@ document.addEventListener("DOMContentLoaded", function() {
     if (btnAddExameLab) btnAddExameLab.addEventListener('click', () => adicionarExameExtra(inputExameExtraLab, listaExtrasPainelLab, 'lab'));
     if (btnAddExameRaiox) btnAddExameRaiox.addEventListener('click', () => adicionarExameExtra(inputExameExtraRaiox, listaExtrasPainelRaiox, 'raiox'));
 
-
     const checkAudio = document.getElementById('check-audiometria');
     const setorAudio = document.getElementById('setor-audio');
     if (checkAudio && setorAudio) {
@@ -148,28 +169,48 @@ document.addEventListener("DOMContentLoaded", function() {
         setorAudio.style.display = checkAudio.checked ? 'flex' : 'none';
     }
 
+    // ==========================================================
+    // VALIDAÇÃO RIGOROSA E GRAVAÇÃO
+    // ==========================================================
     if (btnSalvarImprimir) {
         btnSalvarImprimir.addEventListener('click', function() {
+            if (btnSalvarImprimir.disabled) return;
+
+            // 1. Validação de CPF
             if (cpfInput.value && !validarCPF(cpfInput.value)) {
-                alert("CPF inválido.");
+                alert("O CPF digitado é inválido. Por favor, corrija antes de gravar.");
                 return cpfInput.focus();
             }
 
+            // 2. Validação de Campos Obrigatórios de Negócio
+            const nome = document.querySelector('[name="nome"]').value.trim();
+            const empresa = document.querySelector('[name="empresa"]').value.trim();
+            const funcao = document.querySelector('[name="funcao"]').value.trim();
+            const dn = document.querySelector('[name="dn"]').value.trim();
+            const dataExame = document.querySelector('[name="data"]').value.trim();
+
+            if (!nome || !empresa || !funcao || !dn || !dataExame) {
+                alert("⚠️ AÇÃO BLOQUEADA:\nPor favor, preencha todos os campos obrigatórios (Empresa, Nome, Função, Nascimento e Data do Exame).");
+                return;
+            }
+
+            // Início do Bloqueio (Anti-Duplo Clique)
             btnSalvarImprimir.disabled = true;
             btnSalvarImprimir.style.opacity = "0.5";
             msgStatus.style.display = "block";
-            msgStatus.style.color = "#004080";
-            msgStatus.textContent = "A guardar registo no sistema...";
+            msgStatus.style.color = "var(--accent-strong)";
+            msgStatus.style.background = "var(--accent-soft)";
+            msgStatus.textContent = "⏳ A gravar registo no sistema e a gerar ficha...";
 
             const dados = {
-                empresa: document.querySelector('[name="empresa"]').value,
-                nome: document.querySelector('[name="nome"]').value,
-                funcao: document.querySelector('[name="funcao"]').value,
-                dn: document.querySelector('[name="dn"]').value,
-                rg: document.querySelector('[name="rg"]').value,
-                cpf: document.querySelector('[name="cpf"]').value,
-                telefone: document.querySelector('[name="telefone"]').value,
-                dataExame: document.querySelector('[name="data"]').value,
+                empresa: empresa,
+                nome: nome,
+                funcao: funcao,
+                dn: dn,
+                rg: document.querySelector('[name="rg"]').value.trim(),
+                cpf: document.querySelector('[name="cpf"]').value.trim(),
+                telefone: document.querySelector('[name="telefone"]').value.trim(),
+                dataExame: dataExame,
                 examesClinicos: Array.from(document.querySelectorAll('.master-checkbox[data-setor="clinico"]:checked')).map(cb=>cb.dataset.nome).join(', ') || 'Nenhum',
                 examesRaioX: Array.from(document.querySelectorAll('.master-checkbox[data-setor="raiox"]:checked')).map(cb=>cb.dataset.nome).join(', ') || 'Nenhum',
                 examesLab: Array.from(document.querySelectorAll('.master-checkbox[data-setor="lab"]:checked')).map(cb=>cb.dataset.nome).join(', ') || 'Nenhum',
@@ -186,14 +227,14 @@ document.addEventListener("DOMContentLoaded", function() {
             .then(data => {
                 if (data.status !== "sucesso") throw new Error();
                 msgStatus.textContent = "✅ Guardado com sucesso! A preparar impressão...";
-                msgStatus.style.color = "green";
+                msgStatus.style.color = "var(--success)";
+                msgStatus.style.background = "var(--success-soft)";
                 setTimeout(() => {
                     msgStatus.style.display = "none";
                     btnSalvarImprimir.disabled = false;
                     btnSalvarImprimir.style.opacity = "1";
                     window.print(); 
                     document.getElementById("masterForm").reset();
-                    // Limpar as divs de exames extras ao salvar
                     if (listaExtrasPainelLab) listaExtrasPainelLab.innerHTML = "";
                     if (listaExtrasPainelRaiox) listaExtrasPainelRaiox.innerHTML = "";
                     atualizarListaExames(); 
@@ -201,10 +242,11 @@ document.addEventListener("DOMContentLoaded", function() {
             })
             .catch(() => {
                 msgStatus.textContent = "❌ Erro ao guardar. Verifique a internet.";
-                msgStatus.style.color = "red";
+                msgStatus.style.color = "var(--danger)";
+                msgStatus.style.background = "var(--danger-soft)";
                 btnSalvarImprimir.disabled = false;
                 btnSalvarImprimir.style.opacity = "1";
             });
         });
     }
-});
+}); 
