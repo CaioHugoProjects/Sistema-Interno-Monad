@@ -1,196 +1,312 @@
 /* =========================================
-   ESTILOS GERAIS DO SISTEMA (TELA)
+   SISTEMA DE DESIGN - CLÍNICA MONAD
+   Fonte: Inter (Acessibilidade e Elegância)
    ========================================= */
-*, *::before, *::after { box-sizing: border-box; }
-body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; color: #333; line-height: 1.5; min-height: 100vh; }
-header { background-color: #004080; color: white; padding: 20px; text-align: center; }
-header h1 { margin: 0; font-size: 24px; }
-header h2 { margin: 5px 0 15px 0; font-size: 16px; font-weight: normal; color: #cce0ff; }
-main h2, .painel-recepcao h2 { color: #004080; margin: 0 0 16px 0; }
-nav ul { list-style: none; padding: 0; margin: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; }
-nav a { color: white; text-decoration: none; font-weight: bold; padding: 8px 12px; border-radius: 4px; }
-nav a:hover { background-color: #003366; }
-main { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-footer { text-align: center; padding: 20px; background-color: #e6e6e6; margin-top: 40px; font-size: 14px; color: #666; margin: 0; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-button, input, select, textarea { font: inherit; }
-label { font-size: 14px; color: #333; }
-input[type="checkbox"], input[type="radio"] { margin-right: 8px; }
+*, *::before, *::after { 
+    box-sizing: border-box; 
+}
 
-/* PAINEL DA RECEPÇÃO */
-.painel-recepcao { background: #ffffff; padding: 25px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 40px; }
-.painel-recepcao h2 { margin-top: 0; color: #004080; }
-fieldset { border: 1px solid #ccc; border-radius: 5px; padding: 15px; margin-bottom: 20px; }
-legend { font-weight: bold; background: #fff; padding: 0 10px; color: #004080; }
-.form-group { margin-bottom: 15px; }
-.form-group label { display: flex; flex-direction: column; gap: 6px; font-weight: bold; font-size: 14px; color: #555; }
-.row { display: flex; gap: 20px; flex-wrap: wrap; }
-.row label { flex: 1; display: flex; flex-direction: column; font-weight: bold; font-size: 14px; color: #555; }
-.master-input { padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; width: 100%; }
-.exames-grid-master { display: flex; flex-wrap: wrap; gap: 30px; justify-content: space-between; }
-.btn-imprimir { background-color: #28a745; color: white; padding: 15px 22px; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; width: auto; min-width: 180px; }
+body { 
+    font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+    margin: 0; 
+    padding: 0; 
+    background-color: #f1f5f9; /* Slate 100 - Fundo suave */
+    color: #334155; /* Slate 700 - Texto legível e não 100% preto */
+    line-height: 1.6; 
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* CABEÇALHO ELEGANTE COM GRADIENTE SUTIL */
+header { 
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    color: white; 
+    padding: 24px 20px; 
+    text-align: center; 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+header h1 { 
+    margin: 0; 
+    font-size: 26px; 
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+header h2 { 
+    margin: 6px 0 20px 0; 
+    font-size: 15px; 
+    font-weight: 500; 
+    color: #bfdbfe; 
+}
+
+/* NAVEGAÇÃO FLUIDA */
+nav ul { 
+    list-style: none; 
+    padding: 0; 
+    margin: 0; 
+    display: flex; 
+    justify-content: center; 
+    flex-wrap: wrap; 
+    gap: 12px; 
+}
+
+nav a { 
+    color: #e2e8f0; 
+    text-decoration: none; 
+    font-weight: 600; 
+    font-size: 14px;
+    padding: 10px 16px; 
+    border-radius: 8px; 
+    transition: all 0.2s ease;
+}
+
+nav a:hover, nav a[style*="background-color: #003366"] { 
+    background-color: rgba(255, 255, 255, 0.15) !important; 
+    color: white;
+}
+
+nav a[style*="background-color: #7f1d1d"] {
+    background-color: rgba(239, 68, 68, 0.8) !important;
+}
+nav a[style*="background-color: #7f1d1d"]:hover {
+    background-color: rgba(220, 38, 38, 1) !important;
+}
+
+main { 
+    max-width: 1200px; 
+    margin: 40px auto; 
+    padding: 0 20px; 
+}
+
+footer { 
+    text-align: center; 
+    padding: 24px; 
+    color: #64748b; 
+    font-size: 13px; 
+    margin-top: 40px; 
+}
+
+/* ELEMENTOS DE FORMULÁRIO (ACESSIBILIDADE E UX) */
+button, input, select, textarea { font-family: inherit; }
+label { font-size: 14px; color: #475569; font-weight: 500; }
+input[type="checkbox"], input[type="radio"] { 
+    margin-right: 10px; 
+    accent-color: #2563eb; 
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+/* CARTÕES E PAINÉIS */
+.painel-recepcao { 
+    background: #ffffff; 
+    padding: 30px; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 12px; 
+    margin-bottom: 40px; 
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.painel-recepcao h2 { 
+    margin-top: 0; 
+    color: #1e293b; 
+    font-size: 22px;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 12px;
+    margin-bottom: 24px;
+}
+
+fieldset { 
+    border: 1px solid #cbd5e1; 
+    border-radius: 8px; 
+    padding: 20px; 
+    margin-bottom: 24px; 
+    background-color: #f8fafc;
+}
+
+legend { 
+    font-weight: 600; 
+    background: #fff; 
+    padding: 4px 12px; 
+    color: #3b82f6; 
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* GRIDS E ALINHAMENTOS DO FORMULÁRIO */
+.form-group { margin-bottom: 18px; }
+.row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+.row label { display: flex; flex-direction: column; gap: 8px; }
+
+/* INPUTS REFINADOS COM ESTADO DE FOCO */
+.master-input { 
+    padding: 12px 14px; 
+    border: 1px solid #cbd5e1; 
+    border-radius: 6px; 
+    width: 100%; 
+    font-size: 14px;
+    color: #1e293b;
+    background-color: white;
+    transition: all 0.2s ease;
+}
+
+.master-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+.master-input::placeholder { color: #94a3b8; }
+
+/* BOTÕES GERAIS */
+.btn-imprimir, .btn-login { 
+    background: linear-gradient(to right, #2563eb, #1d4ed8);
+    color: white; 
+    padding: 14px 28px; 
+    border: none; 
+    border-radius: 8px; 
+    font-size: 15px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    width: auto; 
+    min-width: 200px; 
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
+
+.btn-imprimir:hover, .btn-login:hover { 
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-imprimir:active, .btn-login:active {
+    transform: translateY(0);
+}
 
 /* ==============================================
-   TIPO DE EXAME E CAIXA DE ROLAGEM
+   GRID INTELIGENTE DOS EXAMES
    ============================================== */
 .tipo-exame-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 12px;
     padding: 10px 0;
 }
+
 .tipo-exame-grid label {
     font-size: 13px;
-    font-weight: bold;
-    color: #444;
+    color: #334155;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 10px 12px;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    background-color: #fafafa;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: white;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
-.tipo-exame-grid input {
-    margin: 0;
+
+.tipo-exame-grid label:hover {
+    border-color: #93c5fd;
+    background-color: #eff6ff;
 }
+
+.exames-grid-master { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+    gap: 25px; 
+}
+
+.exames-grid-master h4 {
+    margin-top: 0;
+    color: #0f172a;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 8px;
+    font-size: 15px;
+}
+
 .exames-grid-master label {
-    display: block;
-    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
     cursor: pointer;
+    color: #475569;
+    font-size: 14px;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
 }
+
+.exames-grid-master label:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+/* SCROLLBAR MODERNA E ELEGANTE */
 .scroll-box {
-    max-height: 250px;
+    max-height: 280px;
     overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 12px;
-    background-color: #fafafa;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: white;
 }
-.scroll-box::-webkit-scrollbar { width: 8px; }
-.scroll-box::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-.scroll-box::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
-.scroll-box::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
 
-/* FICHAS SETORIAIS (TELA) */
+.scroll-box::-webkit-scrollbar { width: 6px; }
+.scroll-box::-webkit-scrollbar-track { background: #f8fafc; border-radius: 4px; }
+.scroll-box::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.scroll-box::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* FICHAS SETORIAIS (TELA / ÁREA OCULTA) */
 .area-impressao { display: flex; flex-direction: column; gap: 30px; }
-.ficha-setor { background: #fff; border: 1px solid #999; padding: 20px; border-radius: 5px; display: flex; flex-direction: column; }
-.cabecalho-setor { border-bottom: 2px dashed #ccc; padding-bottom: 15px; margin-bottom: 15px; }
-.cabecalho-setor h2 { text-align: center; background: #eee; padding: 8px; margin: 0 0 15px 0; font-size: 16px; border: 1px solid #ccc; }
-.linha-info { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 14px; }
-.info-maior { flex: 0.7; }
-.info-menor { flex: 0.3; text-align: right; }
-.dados-espelhados span { color: #004080; font-weight: bold; }
+.ficha-setor { background: #fff; border: 1px solid #cbd5e1; padding: 25px; border-radius: 8px; display: flex; flex-direction: column; }
+.cabecalho-setor { border-bottom: 2px dashed #cbd5e1; padding-bottom: 15px; margin-bottom: 15px; }
+.cabecalho-setor h2 { text-align: center; background: #f1f5f9; padding: 10px; margin: 0 0 15px 0; font-size: 16px; border: 1px solid #e2e8f0; border-radius: 6px; color: #1e293b; }
+.linha-info { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+.info-maior { flex: 0.7; color: #475569; }
+.info-menor { flex: 0.3; text-align: right; color: #475569; }
+.dados-espelhados span { color: #0f172a; font-weight: 700; }
 .corpo-setor { flex: 1; }
-.corpo-setor h3 { margin-top: 0; font-size: 15px; text-decoration: underline; margin-bottom: 10px; }
+.corpo-setor h3 { margin-top: 0; font-size: 14px; color: #64748b; text-transform: uppercase; margin-bottom: 12px; }
 .lista-exames-print { margin: 0; padding-left: 20px; column-width: 250px; column-gap: 30px; }
-.lista-exames-print li { font-size: 14px; margin-bottom: 6px; list-style-type: square; font-weight: bold; break-inside: avoid; }
-.lista-exames-print li.vazio { color: #999; list-style-type: none; margin-left: 0; font-style: italic; font-weight: normal; display: block; width: 100%; }
-.tabela-audiometria { width: 100%; border-collapse: collapse; margin-top: 5px; }
-.tabela-audiometria th, .tabela-audiometria td { border: 1px solid #000; padding: 5px; text-align: center; font-size: 13px; }
-.rodape-setor { margin-top: 20px; display: flex; justify-content: flex-end; }
-.area-assinatura { border-top: 1px solid #000; width: 300px; text-align: center; padding-top: 5px; font-size: 13px; }
-
+.lista-exames-print li { font-size: 14px; margin-bottom: 8px; list-style-type: disc; font-weight: 600; color: #1e293b; }
+.lista-exames-print li.vazio { color: #94a3b8; list-style-type: none; margin-left: 0; font-style: italic; font-weight: normal; }
+.tabela-audiometria { width: 100%; border-collapse: collapse; margin-top: 10px; border-radius: 4px; overflow: hidden; }
+.tabela-audiometria th, .tabela-audiometria td { border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-size: 13px; }
+.tabela-audiometria th { background: #f8fafc; color: #475569; }
+.rodape-setor { margin-top: 30px; display: flex; justify-content: flex-end; }
+.area-assinatura { border-top: 1px solid #000; width: 300px; text-align: center; padding-top: 8px; font-size: 13px; font-weight: 500; color: #334155; }
 
 /* =======================================================
-   RESPONSIVIDADE (CELULARES E TABLETS)
+   RESPONSIVIDADE INTELIGENTE (SMARTPHONES E TABLETS)
    ======================================================= */
-
-/* Telas médias (Tablets e celulares deitados) */
-@media (max-width: 850px) {
-    /* Empilha os blocos principais de exames (Clínicos, Raio-X, Lab) */
-    .exames-grid-master {
-        flex-direction: column;
-        gap: 25px;
-    }
-}
-
-/* Telas pequenas (Celulares em pé) */
 @media (max-width: 768px) {
-    /* Menu flexível */
-    nav ul {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    nav a {
-        font-size: 14px;
-    }
-
-    /* Transforma os campos da Recepção de linhas para colunas */
-    .row {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .painel-recepcao {
-        padding: 20px;
-    }
-
-    .btn-imprimir {
-        width: 100%;
-    }
-
-    .exames-grid-master {
-        flex-direction: column;
-        gap: 25px;
-    }
-
-    /* Reduz o grid de Tipo de Exame para 2 colunas */
-    .tipo-exame-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    /* Organiza as informações do cabeçalho da Ficha espelhada na tela */
-    .linha-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-        margin-bottom: 12px;
-    }
-    .info-menor {
-        text-align: left;
-    }
-
-    /* Impede que a tabela de Audiometria quebre para fora do site */
-    .tabela-audiometria {
-        width: 100%;
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-}
-
-/* Telas muito pequenas (Smartphones menores) */
-@media (max-width: 480px) {
-    /* Tipo de exame fica em 1 coluna (lista corrida) */
-    .tipo-exame-grid {
-        grid-template-columns: 1fr;
-    }
+    header h1 { font-size: 22px; }
+    main { margin-top: 20px; padding: 0 15px; }
+    .painel-recepcao { padding: 20px; }
     
-    .painel-recepcao {
-        padding: 15px;
-    }
-    
-    header h1 {
-        font-size: 20px;
-    }
-    header h2 {
-        font-size: 13px;
-    }
-}
+    .linha-info { flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 12px; }
+    .info-menor { text-align: left; }
+    .btn-imprimir { width: 100%; }
 
+    .tabela-audiometria { display: block; overflow-x: auto; white-space: nowrap; }
+}
 
 /* =======================================================
-   REGRAS DE IMPRESSÃO - LAYOUT INTELIGENTE DEFINITIVO
-   (As regras abaixo mantêm as fichas perfeitas no papel A4)
+   REGRAS DE IMPRESSÃO (PERFEIÇÃO A4 MANTIDA)
    ======================================================= */
 @media print {
     *, *::before, *::after { box-sizing: border-box !important; }
     @page { size: A4; margin: 4mm; }
     header, nav, footer, .no-print, .painel-recepcao { display: none !important; }
-    body { background-color: white; margin: 0; padding: 0; }
+    body { background-color: white; margin: 0; padding: 0; color: black; }
     main { margin: 0; padding: 0; max-width: 100%; }
     
     .area-impressao {
@@ -211,35 +327,31 @@ legend { font-weight: bold; background: #fff; padding: 0 10px; color: #004080; }
         box-shadow: none;
         display: flex;
         flex-direction: column;
+        background: white;
     }
 
-    /* LOGICA DE DISTRIBUIÇÃO A4 */
     #setor-audio { flex: 0 0 80mm; }
     #setor-raiox { flex: 0 1 auto; min-height: 45mm; }
     #setor-clinico, #setor-lab { flex: 1 1 auto; min-height: 55mm; }
     
     .cabecalho-setor { border-bottom: 1px solid #000; padding-bottom: 4px; margin-bottom: 6px; }
-    .cabecalho-setor h2 { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 12px; padding: 3px; margin: 0 0 6px 0; border: 1px solid #000; }
-    .linha-info { margin-bottom: 3px; font-size: 11px; flex-direction: row; align-items: center; } /* Força a linha a continuar lado a lado no papel */
+    .cabecalho-setor h2 { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 12px; padding: 3px; margin: 0 0 6px 0; border: 1px solid #000; border-radius: 0; color: black;}
+    .linha-info { margin-bottom: 3px; font-size: 11px; flex-direction: row; align-items: center; color: black;} 
     .dados-espelhados span { color: #000; }
-    .corpo-setor h3 { font-size: 11px; margin: 4px 0; }
+    .corpo-setor h3 { font-size: 11px; margin: 4px 0; color: black;}
     
-    .lista-exames-print {
-        margin: 0; padding-left: 15px;
-        column-width: 130px; column-gap: 15px;
-    }
+    .lista-exames-print { margin: 0; padding-left: 15px; column-width: 130px; column-gap: 15px; }
+    .lista-exames-print li { font-size: 11px; margin-bottom: 2px; break-inside: avoid; page-break-inside: avoid; color: black;}
     
-    .lista-exames-print li { font-size: 11px; margin-bottom: 2px; break-inside: avoid; page-break-inside: avoid; }
-    
-    .tabela-audiometria { margin-top: 4px; display: table; }
-    .tabela-audiometria th { padding: 4px; font-size: 11px; background-color: #e0e0e0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .tabela-audiometria td { padding: 4px; font-size: 11px; height: 35px; } 
+    .tabela-audiometria { margin-top: 4px; display: table; border-collapse: collapse; }
+    .tabela-audiometria th { padding: 4px; font-size: 11px; background-color: #e0e0e0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; color: black; border: 1px solid black;}
+    .tabela-audiometria td { padding: 4px; font-size: 11px; height: 35px; border: 1px solid black; } 
     
     .rodape-setor { margin-top: auto; } 
-    .area-assinatura { font-size: 10px; width: 240px; margin-top: 8px; border-top: 1px solid #000; text-align: center; }
+    .area-assinatura { font-size: 10px; width: 240px; margin-top: 8px; border-top: 1px solid #000; text-align: center; color: black; }
 
-    /* MODO COMPACTO DE EMERGÊNCIA */
-    body.print-compacto .lista-exames-print li { font-size: 9px; margin-bottom: 1px; }
+    /* MODO COMPACTO DE EMERGÊNCIA PARA FICHAS GRANDES */
+    body.print-compacto .lista-exames-print li { font-size: 9.5px; margin-bottom: 1px; }
     body.print-compacto .corpo-setor h3 { font-size: 10px; margin: 2px 0; }
     body.print-compacto .cabecalho-setor h2 { margin-bottom: 4px; padding: 2px; }
 }

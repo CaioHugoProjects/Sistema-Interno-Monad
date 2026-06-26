@@ -94,9 +94,9 @@
                 
                 <div class="edit-full"><hr style="border: 0; border-top: 1px dashed #ccc; margin: 10px 0;"></div>
                 
-                <label class="edit-full">Exames Clínicos Solicitados (Separar por vírgula): <input type="text" id="edit-ex-clinico"></label>
-                <label class="edit-full">Exames Raio-X Solicitados (Separar por vírgula): <input type="text" id="edit-ex-raiox"></label>
-                <label class="edit-full">Exames Lab Solicitados (Separar por vírgula): <input type="text" id="edit-ex-lab"></label>
+                <label class="edit-full">Exames Clínicos (Separar por vírgula): <input type="text" id="edit-ex-clinico"></label>
+                <label class="edit-full">Exames Raio-X (Separar por vírgula): <input type="text" id="edit-ex-raiox"></label>
+                <label class="edit-full">Exames Lab (Separar por vírgula): <input type="text" id="edit-ex-lab"></label>
                 
                 <label style="flex-direction: row; align-items: center; color: #b45309;"><input type="checkbox" id="edit-tem-fono" style="transform: scale(1.3);"> Tem Fonoaudiologia?</label>
                 <label style="flex-direction: row; align-items: center; color: #b45309;"><input type="checkbox" id="edit-tem-consulta" style="transform: scale(1.3);"> Tem Consulta Médica?</label>
@@ -140,7 +140,6 @@
                     }).catch(() => {});
             }
 
-            // Radar Administrativo a cada 15s
             setInterval(buscarDados, 15000);
 
             function renderizarTabela(pacientes) {
@@ -206,7 +205,6 @@
                 document.getElementById('msg-vazio').style.display = visiveis === 0 ? 'block' : 'none';
             }
 
-            // AÇÕES DIRETAS NA TABELA (Checkboxes, Textarea e Apagar/Editar)
             tabela.addEventListener('change', function(e) {
                 const tr = e.target.closest('tr');
                 const cpf = tr.dataset.cpf;
@@ -250,8 +248,8 @@
                             body: JSON.stringify({ acao: "DELETAR_PACIENTE", cpf: tr.dataset.cpf, dataExame: tr.dataset.dataexame })
                         }).then(r => r.json()).then(res => {
                             if(res.status === "sucesso") tr.remove();
-                            else throw new Error();
-                        }).catch(() => { alert("Falha na exclusão."); e.target.textContent = "🗑️ Excluir"; e.target.disabled = false; });
+                            else throw new Error(res.detalhe || "Erro desconhecido");
+                        }).catch((err) => { alert("Falha na exclusão: " + err.message); e.target.textContent = "🗑️ Excluir"; e.target.disabled = false; });
                     }
                 }
 
@@ -291,6 +289,7 @@
                 document.getElementById('modal-editar').style.display = 'none';
             };
 
+            // SISTEMA INTELIGENTE DE CAPTURA DE ERRO NA EDIÇÃO
             document.getElementById('btn-salvar-edicao').addEventListener('click', function(e) {
                 const btn = e.target;
                 btn.textContent = "A gravar...";
@@ -322,10 +321,14 @@
                     btn.disabled = false;
                     if(res.status === "sucesso") {
                         fecharModal();
-                        buscarDados(); // Recarrega a tabela para mostrar as alterações
-                    } else throw new Error();
-                }).catch(() => { 
-                    alert("Erro ao editar paciente. Verifique a ligação."); 
+                        buscarDados(); // Recarrega a tabela
+                    } else {
+                        // O SERVIDOR CONSEGUIU LER, MAS ALGO DEU ERRADO (EX: NÃO ACHOU O PACIENTE)
+                        alert("Servidor diz: " + (res.detalhe || "Erro desconhecido"));
+                    }
+                }).catch((err) => { 
+                    // ERRO CRÍTICO DE REDE OU VERSÃO ANTIGA DO SCRIPT
+                    alert("Falha Crítica ao tentar editar: " + err.message + "\n\n1. Verifique a ligação à internet.\n2. Verifique se clicou em 'Nova Versão' ao atualizar o Google Apps Script."); 
                     btn.textContent = "Salvar Alterações";
                     btn.disabled = false;
                 });
