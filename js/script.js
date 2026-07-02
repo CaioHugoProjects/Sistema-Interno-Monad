@@ -11,30 +11,32 @@ document.addEventListener("DOMContentLoaded", function() {
     const cpfInput = document.querySelector('input[name="cpf"]');
     const telefoneInput = document.querySelector('input[name="telefone"]');
     const cpfError = document.getElementById('cpf-error');
-    // ==========================================
-// LÓGICA DE DATA INTELIGENTE (PERSISTENTE)
-// ==========================================
-const inputData = document.querySelector('input[name="data"]');
-
-if (inputData) {
-    const hoje = new Date().toISOString().split('T')[0];
-    const dataSalva = localStorage.getItem('monad_data_recepcao');
     
-    // 1. Se existir data salva e for de hoje, usa ela. 
-    // Se for de outro dia, ela mantém a salva (para agendamentos futuros).
-    // Se não existir nada, define como hoje.
-    if (dataSalva) {
-        inputData.value = dataSalva;
-    } else {
-        inputData.value = hoje;
-        localStorage.setItem('monad_data_recepcao', hoje);
+    // ==========================================
+    // LÓGICA DE DATA INTELIGENTE (PERSISTENTE)
+    // ==========================================
+    const inputData = document.querySelector('input[name="data"]');
+
+    if (inputData) {
+        const hoje = new Date().toISOString().split('T')[0];
+        const dataSalva = localStorage.getItem('monad_data_recepcao');
+        
+        // 1. Se existir data salva e for de hoje, usa ela. 
+        // Se for de outro dia, ela mantém a salva (para agendamentos futuros).
+        // Se não existir nada, define como hoje.
+        if (dataSalva) {
+            inputData.value = dataSalva;
+        } else {
+            inputData.value = hoje;
+            localStorage.setItem('monad_data_recepcao', hoje);
+        }
+
+        // 2. Sempre que o utilizador mudar a data manualmente, atualizamos o registo
+        inputData.addEventListener('change', function() {
+            localStorage.setItem('monad_data_recepcao', this.value);
+        });
     }
 
-    // 2. Sempre que o utilizador mudar a data manualmente, atualizamos o registo
-    inputData.addEventListener('change', function() {
-        localStorage.setItem('monad_data_recepcao', this.value);
-    });
-}
     if (cpfInput) {
         cpfInput.addEventListener('input', function(e) {
             let v = e.target.value.replace(/\D/g, ''); 
@@ -203,6 +205,7 @@ if (inputData) {
             msgStatus.textContent = "⏳ A gravar registo no sistema e a gerar ficha...";
 
             const dados = {
+                token: localStorage.getItem('monad_token'), // TOKEN INJETADO AQUI
                 empresa: empresa,
                 nome: nome,
                 funcao: funcao,
@@ -225,7 +228,7 @@ if (inputData) {
             })
             .then(r => r.json())
             .then(data => {
-                if (data.status !== "sucesso") throw new Error();
+                if (data.status !== "sucesso") throw new Error(data.detalhe);
                 msgStatus.textContent = "✅ Guardado com sucesso! A preparar impressão...";
                 msgStatus.style.color = "var(--success)";
                 msgStatus.style.background = "var(--success-soft)";
@@ -233,15 +236,17 @@ if (inputData) {
                     msgStatus.style.display = "none";
                     btnSalvarImprimir.disabled = false;
                     btnSalvarImprimir.style.opacity = "1";
+                    
+                    // Dispara a impressão
                     window.print(); 
-                    document.getElementById("masterForm").reset();
-                    if (listaExtrasPainelLab) listaExtrasPainelLab.innerHTML = "";
-                    if (listaExtrasPainelRaiox) listaExtrasPainelRaiox.innerHTML = "";
-                    atualizarListaExames(); 
+                    
+                    // O form.reset() e a limpeza dos exames extra foram removidos daqui.
+                    // A tela irá manter exatamente os mesmos dados da última pessoa inserida.
+                    
                 }, 1500);
             })
-            .catch(() => {
-                msgStatus.textContent = "❌ Erro ao guardar. Verifique a internet.";
+            .catch((err) => {
+                msgStatus.textContent = "❌ Erro ao guardar. " + (err.message || "Verifique a internet.");
                 msgStatus.style.color = "var(--danger)";
                 msgStatus.style.background = "var(--danger-soft)";
                 btnSalvarImprimir.disabled = false;
@@ -249,4 +254,4 @@ if (inputData) {
             });
         });
     }
-}); 
+});

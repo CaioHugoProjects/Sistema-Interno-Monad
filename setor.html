@@ -166,7 +166,8 @@
                     
                     fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ acao: "ATUALIZAR_SETOR", cpf: tr.dataset.cpf, setor: setorLogado, liberado: cb.checked })
+                        // TOKEN INJETADO AQUI
+                        body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_SETOR", cpf: tr.dataset.cpf, setor: setorLogado, liberado: cb.checked })
                     }).then(r => r.json()).then(res => {
                         if(res.status !== "sucesso") throw new Error();
                         cb.style.opacity = "1";
@@ -188,7 +189,8 @@
                     
                     fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ acao: "ATUALIZAR_OBS", cpf: tr.dataset.cpf, obs: obsInput.value })
+                        // TOKEN INJETADO AQUI
+                        body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_OBS", cpf: tr.dataset.cpf, obs: obsInput.value })
                     }).then(r => r.json()).then(res => {
                         if(res.status !== "sucesso") throw new Error();
                         obsInput.style.opacity = "1"; 

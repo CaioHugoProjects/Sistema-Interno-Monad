@@ -282,7 +282,8 @@
 
                     fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ acao: "ATUALIZAR_SETOR", cpf: cpf, setor: setor, liberado: liberado })
+                        // TOKEN INJETADO AQUI
+                        body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_SETOR", cpf: cpf, setor: setor, liberado: liberado })
                     }).then(r => r.json()).then(res => {
                         if(res.status !== "sucesso") throw new Error();
                         cb.style.opacity = "1";
@@ -302,7 +303,8 @@
                     
                     fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ acao: "ATUALIZAR_OBS", cpf: cpf, obs: obsInput.value })
+                        // TOKEN INJETADO AQUI
+                        body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_OBS", cpf: cpf, obs: obsInput.value })
                     }).then(r => r.json()).then(res => {
                         if(res.status !== "sucesso") throw new Error();
                         obsInput.style.opacity = "1"; 
@@ -329,7 +331,8 @@
 
                         fetch(URL_GOOGLE_SCRIPT, {
                             method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({ acao: "DELETAR_PACIENTE", cpf: tr.dataset.cpf, dataExame: tr.dataset.dataexame })
+                            // TOKEN INJETADO AQUI
+                            body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "DELETAR_PACIENTE", cpf: tr.dataset.cpf, dataExame: tr.dataset.dataexame })
                         }).then(r => r.json()).then(res => {
                             if(res.status === "sucesso") tr.remove();
                             else throw new Error(res.detalhe || "Erro desconhecido");
@@ -387,6 +390,7 @@
                 let dataRaw = document.getElementById('edit-data-exame').value;
                 
                 const dadosEdicao = {
+                    token: localStorage.getItem('monad_token'), // TOKEN INJETADO AQUI
                     acao: "EDITAR_PACIENTE",
                     cpfAntigo: document.getElementById('edit-cpf-antigo').value.trim(),
                     dataExame: dataRaw.trim(),
