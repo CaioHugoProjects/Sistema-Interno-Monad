@@ -21,19 +21,27 @@ document.addEventListener("DOMContentLoaded", function() {
         const hoje = new Date().toISOString().split('T')[0];
         const dataSalva = localStorage.getItem('monad_data_recepcao');
         
-        // 1. Se existir data salva e for de hoje, usa ela. 
-        // Se for de outro dia, ela mantém a salva (para agendamentos futuros).
-        // Se não existir nada, define como hoje.
-        if (dataSalva) {
-            inputData.value = dataSalva;
-        } else {
-            inputData.value = hoje;
+        let dataFinal = dataSalva ? dataSalva : hoje;
+        inputData.value = dataFinal;
+        
+        if (!dataSalva) {
             localStorage.setItem('monad_data_recepcao', hoje);
         }
 
-        // 2. Sempre que o utilizador mudar a data manualmente, atualizamos o registo
+        // Força a injeção da data na impressão logo no carregamento
+        const partes = dataFinal.split('-');
+        if (partes.length === 3) {
+            document.querySelectorAll('.out-data').forEach(span => {
+                span.textContent = `${partes[2]}/${partes[1]}/${partes[0]}`;
+            });
+        }
+
         inputData.addEventListener('change', function() {
             localStorage.setItem('monad_data_recepcao', this.value);
+            const p = this.value.split('-');
+            if (p.length === 3) {
+                document.querySelectorAll('.out-data').forEach(span => span.textContent = `${p[2]}/${p[1]}/${p[0]}`);
+            }
         });
     }
 
@@ -127,9 +135,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // ==========================================================
-    // LÓGICA DE INSERÇÃO DE EXAMES EXTRAS
-    // ==========================================================
     const btnAddExameLab = document.getElementById('btn-add-exame');
     const inputExameExtraLab = document.getElementById('input-exame-extra');
     const listaExtrasPainelLab = document.getElementById('lista-extras-painel');
@@ -171,20 +176,15 @@ document.addEventListener("DOMContentLoaded", function() {
         setorAudio.style.display = checkAudio.checked ? 'flex' : 'none';
     }
 
-    // ==========================================================
-    // VALIDAÇÃO RIGOROSA E GRAVAÇÃO
-    // ==========================================================
     if (btnSalvarImprimir) {
         btnSalvarImprimir.addEventListener('click', function() {
             if (btnSalvarImprimir.disabled) return;
 
-            // 1. Validação de CPF
             if (cpfInput.value && !validarCPF(cpfInput.value)) {
                 alert("O CPF digitado é inválido. Por favor, corrija antes de gravar.");
                 return cpfInput.focus();
             }
 
-            // 2. Validação de Campos Obrigatórios de Negócio
             const nome = document.querySelector('[name="nome"]').value.trim();
             const empresa = document.querySelector('[name="empresa"]').value.trim();
             const funcao = document.querySelector('[name="funcao"]').value.trim();
@@ -192,11 +192,14 @@ document.addEventListener("DOMContentLoaded", function() {
             const dataExame = document.querySelector('[name="data"]').value.trim();
 
             if (!nome || !empresa || !funcao || !dn || !dataExame) {
-                alert("⚠️ AÇÃO BLOQUEADA:\nPor favor, preencha todos os campos obrigatórios (Empresa, Nome, Função, Nascimento e Data do Exame).");
+                alert("⚠️ AÇÃO BLOQUEADA:\nPor favor, preencha todos os campos obrigatórios.");
                 return;
             }
 
-            // Início do Bloqueio (Anti-Duplo Clique)
+            // CAPTURA DO TIPO DE EXAME E ENVIA
+            const tiposSelecionados = Array.from(document.querySelectorAll('.master-tipo:checked')).map(cb => cb.value);
+            const tipoExame = tiposSelecionados.length > 0 ? `(${tiposSelecionados.join(' / ')})` : '';
+
             btnSalvarImprimir.disabled = true;
             btnSalvarImprimir.style.opacity = "0.5";
             msgStatus.style.display = "block";
@@ -205,8 +208,9 @@ document.addEventListener("DOMContentLoaded", function() {
             msgStatus.textContent = "⏳ A gravar registo no sistema e a gerar ficha...";
 
             const dados = {
-                token: localStorage.getItem('monad_token'), // TOKEN INJETADO AQUI
+                token: localStorage.getItem('monad_token'), // SEGURANÇA ATIVADA
                 empresa: empresa,
+                tipoExame: tipoExame, // INCLUÍDO AQUI
                 nome: nome,
                 funcao: funcao,
                 dn: dn,
@@ -237,12 +241,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     btnSalvarImprimir.disabled = false;
                     btnSalvarImprimir.style.opacity = "1";
                     
-                    // Dispara a impressão
                     window.print(); 
-                    
-                    // O form.reset() e a limpeza dos exames extra foram removidos daqui.
-                    // A tela irá manter exatamente os mesmos dados da última pessoa inserida.
-                    
+                    // NÃO CHAMA MAIS O RESET() PARA MANTER OS DADOS NA TELA
                 }, 1500);
             })
             .catch((err) => {
@@ -254,4 +254,4 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
     }
-});
+}); 

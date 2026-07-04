@@ -86,7 +86,11 @@
                 
                 <label>Nome: <input type="text" id="edit-nome"></label>
                 <label>Empresa: <input type="text" id="edit-empresa"></label>
+                
+                <!-- CAMPO TIPO DE EXAME ADICIONADO AQUI -->
+                <label>Tipo de Exame: <input type="text" id="edit-tipo" placeholder="Ex: (PERIÓDICO)"></label>
                 <label>Função: <input type="text" id="edit-funcao"></label>
+                
                 <label>Nascimento: <input type="text" id="edit-dn"></label>
                 <label>CPF: <input type="text" id="edit-cpf"></label>
                 <label>RG: <input type="text" id="edit-rg"></label>
@@ -110,9 +114,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ==========================================================
             const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
-            // ==========================================================
 
             const tabela = document.getElementById('lista-liberacao');
             const inputData = document.getElementById('filtro-data');
@@ -123,7 +125,6 @@
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
-            // FUNÇÃO PARA VALIDAR CPF NO BACKSTAGE DO ADMIN
             function validarCPF(cpf) {
                 cpf = cpf.replace(/[^\d]+/g,'');
                 if(cpf == '') return false;
@@ -230,6 +231,8 @@
                     const tdL = pac.temLab ? cellLab(pac.examesLab, pac.liberadoLab, pac.obsLab) : `<span class="text-na">—</span>`;
                     const tdM = pac.temConsulta ? cell("Médico do Trabalho", pac.liberadoConsulta, 'consulta') : `<span class="text-na">—</span>`;
 
+                    const tipoStr = pac.tipoExame ? (pac.tipoExame.includes('(') ? pac.tipoExame : `(${pac.tipoExame})`) : '';
+
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
                     tr.dataset.cpf = pac.cpf;
@@ -238,6 +241,7 @@
                     tr.innerHTML = `
                         <td>
                             <div style="font-weight:bold; color:#1e293b;">${pac.nome}</div>
+                            <div style="font-size:11px; color:#64748b;">Empresa: ${pac.empresa} ${tipoStr}</div>
                             <div style="font-size:11px; color:#64748b;">CPF: ${pac.cpf}</div>
                         </td>
                         <td style="text-align: center; background:#f8fafc;">${tdC}</td>
@@ -282,7 +286,6 @@
 
                     fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        // TOKEN INJETADO AQUI
                         body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_SETOR", cpf: cpf, setor: setor, liberado: liberado })
                     }).then(r => r.json()).then(res => {
                         if(res.status !== "sucesso") throw new Error();
@@ -303,7 +306,6 @@
                     
                     fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        // TOKEN INJETADO AQUI
                         body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_OBS", cpf: cpf, obs: obsInput.value })
                     }).then(r => r.json()).then(res => {
                         if(res.status !== "sucesso") throw new Error();
@@ -331,7 +333,6 @@
 
                         fetch(URL_GOOGLE_SCRIPT, {
                             method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            // TOKEN INJETADO AQUI
                             body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "DELETAR_PACIENTE", cpf: tr.dataset.cpf, dataExame: tr.dataset.dataexame })
                         }).then(r => r.json()).then(res => {
                             if(res.status === "sucesso") tr.remove();
@@ -357,6 +358,10 @@
                 
                 document.getElementById('edit-nome').value = pac.nome;
                 document.getElementById('edit-empresa').value = pac.empresa;
+                
+                // Mapeia para o modal
+                document.getElementById('edit-tipo').value = pac.tipoExame || "";
+                
                 document.getElementById('edit-funcao').value = pac.funcao;
                 document.getElementById('edit-dn').value = pac.dn;
                 document.getElementById('edit-rg').value = pac.rg;
@@ -380,7 +385,6 @@
             document.getElementById('btn-salvar-edicao').addEventListener('click', function(e) {
                 const btn = e.target;
                 
-                // MÁSCARA E VALIDAÇÃO DE CPF PARA O ADMIN
                 const cpfNovo = document.getElementById('edit-cpf').value.trim();
                 if (cpfNovo && !validarCPF(cpfNovo)) {
                     alert("AÇÃO BLOQUEADA: O CPF digitado é inválido. Por favor, corrija antes de salvar as alterações.");
@@ -390,12 +394,13 @@
                 let dataRaw = document.getElementById('edit-data-exame').value;
                 
                 const dadosEdicao = {
-                    token: localStorage.getItem('monad_token'), // TOKEN INJETADO AQUI
+                    token: localStorage.getItem('monad_token'), // TOKEN ENVIADO AQUI
                     acao: "EDITAR_PACIENTE",
                     cpfAntigo: document.getElementById('edit-cpf-antigo').value.trim(),
                     dataExame: dataRaw.trim(),
                     nome: document.getElementById('edit-nome').value,
                     empresa: document.getElementById('edit-empresa').value,
+                    tipoExame: document.getElementById('edit-tipo').value, // TIPO ENVIADO AQUI
                     funcao: document.getElementById('edit-funcao').value,
                     dn: document.getElementById('edit-dn').value,
                     rg: document.getElementById('edit-rg').value,

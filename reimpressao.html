@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
-        // GATEKEEPER DE SEGURANÇA ATUALIZADO
         const sec_setor = localStorage.getItem('monad_setor');
         if (!sec_setor || (sec_setor !== 'recepcao' && sec_setor !== 'todos' && sec_setor !== 'admin')) { 
             window.location.href = "login.html"; 
@@ -30,7 +29,6 @@
             </ul>
         </nav>
         <script>
-            // Revela o botão do Admin apenas se quem estiver logado for o admin
             if (localStorage.getItem('monad_setor') === 'admin') {
                 document.getElementById('menu-admin').style.display = 'block';
             }
@@ -157,9 +155,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ==========================================
             const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
-            // ==========================================
 
             const tabela = document.getElementById('lista-reimpressao');
             const inputPesquisa = document.getElementById('pesquisa-paciente');
@@ -212,10 +208,13 @@
                     
                     const resumoSetores = setores.length > 0 ? setores.join(", ") : "Nenhum exame marcado";
 
+                    // Prepara o Tipo de Exame visualmente na tabela (Garante que se tiver aspas ele formata certo)
+                    const tipoStr = pac.tipoExame ? (pac.tipoExame.includes('(') ? pac.tipoExame : `(${pac.tipoExame})`) : '';
+
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
                     tr.innerHTML = `
-                        <td><span class="tag-empresa" style="background:#e2e8f0; color:#1e293b; padding:6px 10px; border-radius:6px; font-weight:bold;">${pac.empresa}</span></td>
+                        <td><span class="tag-empresa" style="background:#e2e8f0; color:#1e293b; padding:6px 10px; border-radius:6px; font-weight:bold;">${pac.empresa} ${tipoStr}</span></td>
                         <td>
                             <div style="font-weight: bold; font-size: 15px; color:#0f172a;">${pac.nome}</div>
                             <div style="font-size: 12px; color:#64748b;">${pac.funcao} • Nasc: ${pac.dn}</div>
@@ -252,14 +251,26 @@
             window.imprimirFicha = function(index) {
                 const pac = databasePacientes[index];
 
-                document.querySelectorAll('.out-empresa').forEach(el => el.textContent = pac.empresa);
+                // CORREÇÃO DA DATA: Formata AAAA-MM-DD para DD/MM/AAAA na impressão
+                let dataParaImpressao = pac.dataExame;
+                if (dataParaImpressao && dataParaImpressao.includes('-')) {
+                    const p = dataParaImpressao.split('-');
+                    if (p.length === 3) dataParaImpressao = `${p[2]}/${p[1]}/${p[0]}`;
+                }
+
+                // O SEU PEDIDO PRINCIPAL AQUI: Funde a Empresa e o Tipo de Exame num só
+                const tipoFormatado = pac.tipoExame ? (pac.tipoExame.includes('(') ? pac.tipoExame : `(${pac.tipoExame})`) : '';
+                const empresaFormatada = pac.empresa + (tipoFormatado ? ` ${tipoFormatado}` : '');
+
+                document.querySelectorAll('.out-empresa').forEach(el => el.textContent = empresaFormatada);
+                
                 document.querySelectorAll('.out-nome').forEach(el => el.textContent = pac.nome);
                 document.querySelectorAll('.out-funcao').forEach(el => el.textContent = pac.funcao);
                 document.querySelectorAll('.out-dn').forEach(el => el.textContent = pac.dn);
                 document.querySelectorAll('.out-cpf').forEach(el => el.textContent = pac.cpf);
                 document.querySelectorAll('.out-rg').forEach(el => el.textContent = pac.rg);
                 document.querySelectorAll('.out-telefone').forEach(el => el.textContent = pac.telefone);
-                document.querySelectorAll('.out-data').forEach(el => el.textContent = pac.dataExame);
+                document.querySelectorAll('.out-data').forEach(el => el.textContent = dataParaImpressao);
 
                 function renderizarLista(idElemento, stringExames) {
                     const ul = document.getElementById(idElemento);
