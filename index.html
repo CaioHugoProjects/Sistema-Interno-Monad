@@ -6,7 +6,10 @@
     <title>Monad Sistema Interno - Recepção</title>
     <link rel="stylesheet" href="styles/styles.css">
     <script>
-        // GATEKEEPER DE SEGURANÇA ATUALIZADO
+        // GATEKEEPER E LEITURA DO MODO ESCURO
+        if (localStorage.getItem('monad_theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
         const s = localStorage.getItem('monad_setor');
         if (!s || (s !== 'recepcao' && s !== 'todos' && s !== 'admin')) { window.location.href = "login.html"; }
     </script>
@@ -15,7 +18,8 @@
     <header>
         <h1>Sistema Interno</h1>
         <h2>Clínica Monad Ocupacional - Oriximiná</h2>
-        <div style="float: right; margin-top: 10px;" class="no-print">
+        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
+            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
             <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:#dc2626; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
         </div>
         <nav class="no-print">
@@ -27,7 +31,6 @@
             </ul>   
         </nav>
         <script>
-            // Revela o botão do Admin apenas se quem estiver logado for o admin
             if (localStorage.getItem('monad_setor') === 'admin') {
                 document.getElementById('menu-admin').style.display = 'block';
             }
@@ -242,5 +245,25 @@
         </div>
     </main>
     <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnTheme = document.getElementById('btn-theme-toggle');
+            if (btnTheme) {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                btnTheme.textContent = isDark ? '☀️' : '🌙';
+                btnTheme.addEventListener('click', () => {
+                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                        document.documentElement.removeAttribute('data-theme');
+                        localStorage.setItem('monad_theme', 'light');
+                        btnTheme.textContent = '🌙';
+                    } else {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        localStorage.setItem('monad_theme', 'dark');
+                        btnTheme.textContent = '☀️';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
-</html> 
+</html>

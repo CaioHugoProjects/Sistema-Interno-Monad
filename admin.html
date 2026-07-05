@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
+        // GATEKEEPER E LEITURA DO MODO ESCURO
+        if (localStorage.getItem('monad_theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
         const tokenAtivo = localStorage.getItem('monad_token');
         const setorLogado = localStorage.getItem('monad_setor');
         if (!tokenAtivo || setorLogado !== "admin") {
@@ -27,7 +31,8 @@
     <header>
         <h1 style="color: #fca5a5;">Acesso Administrativo</h1>
         <h2>Supervisão, Edição e Exclusão de Registos</h2>
-        <div style="float: right; margin-top: 10px;" class="no-print">
+        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
+            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
             <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:#dc2626; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
         </div>
         <nav>
@@ -86,8 +91,6 @@
                 
                 <label>Nome: <input type="text" id="edit-nome"></label>
                 <label>Empresa: <input type="text" id="edit-empresa"></label>
-                
-                <!-- CAMPO TIPO DE EXAME ADICIONADO AQUI -->
                 <label>Tipo de Exame: <input type="text" id="edit-tipo" placeholder="Ex: (PERIÓDICO)"></label>
                 <label>Função: <input type="text" id="edit-funcao"></label>
                 
@@ -240,7 +243,7 @@
 
                     tr.innerHTML = `
                         <td>
-                            <div style="font-weight:bold; color:#1e293b;">${pac.nome}</div>
+                            <div style="font-weight:bold; color:#1e293b;" class="col-nome">${pac.nome}</div>
                             <div style="font-size:11px; color:#64748b;">Empresa: ${pac.empresa} ${tipoStr}</div>
                             <div style="font-size:11px; color:#64748b;">CPF: ${pac.cpf}</div>
                         </td>
@@ -281,7 +284,7 @@
                     const setor = cb.dataset.setor;
                     const liberado = cb.checked;
                     
-                    cb.disabled = true; // PREVENÇÃO DUPLO CLIQUE ADMIN
+                    cb.disabled = true;
                     cb.style.opacity = "0.4";
 
                     fetch(URL_GOOGLE_SCRIPT, {
@@ -358,10 +361,7 @@
                 
                 document.getElementById('edit-nome').value = pac.nome;
                 document.getElementById('edit-empresa').value = pac.empresa;
-                
-                // Mapeia para o modal
                 document.getElementById('edit-tipo').value = pac.tipoExame || "";
-                
                 document.getElementById('edit-funcao').value = pac.funcao;
                 document.getElementById('edit-dn').value = pac.dn;
                 document.getElementById('edit-rg').value = pac.rg;
@@ -394,13 +394,13 @@
                 let dataRaw = document.getElementById('edit-data-exame').value;
                 
                 const dadosEdicao = {
-                    token: localStorage.getItem('monad_token'), // TOKEN ENVIADO AQUI
+                    token: localStorage.getItem('monad_token'),
                     acao: "EDITAR_PACIENTE",
                     cpfAntigo: document.getElementById('edit-cpf-antigo').value.trim(),
                     dataExame: dataRaw.trim(),
                     nome: document.getElementById('edit-nome').value,
                     empresa: document.getElementById('edit-empresa').value,
-                    tipoExame: document.getElementById('edit-tipo').value, // TIPO ENVIADO AQUI
+                    tipoExame: document.getElementById('edit-tipo').value,
                     funcao: document.getElementById('edit-funcao').value,
                     dn: document.getElementById('edit-dn').value,
                     rg: document.getElementById('edit-rg').value,
@@ -438,6 +438,26 @@
             document.getElementById('btn-buscar-data').addEventListener('click', buscarDados);
             inputPesq.addEventListener('input', aplicarFiltros);
             buscarDados();
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnTheme = document.getElementById('btn-theme-toggle');
+            if (btnTheme) {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                btnTheme.textContent = isDark ? '☀️' : '🌙';
+                btnTheme.addEventListener('click', () => {
+                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                        document.documentElement.removeAttribute('data-theme');
+                        localStorage.setItem('monad_theme', 'light');
+                        btnTheme.textContent = '🌙';
+                    } else {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        localStorage.setItem('monad_theme', 'dark');
+                        btnTheme.textContent = '☀️';
+                    }
+                });
+            }
         });
     </script>
 </body>

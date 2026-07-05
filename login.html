@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Interno - Clínica Monad</title>
     <link rel="stylesheet" href="styles/styles.css">
+    <script>
+        // GATEKEEPER E LEITURA DO MODO ESCURO
+        if (localStorage.getItem('monad_theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
     <style>
         .login-container { max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 4px solid #004080; }
         .form-login { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
@@ -15,12 +21,24 @@
         .btn-login:hover { background-color: #002d62; }
         .btn-login:disabled { background-color: #94a3b8; cursor: not-allowed; }
         .msg-erro { color: #dc2626; font-weight: bold; font-size: 14px; text-align: center; display: none; background: #fee2e2; padding: 8px; border-radius: 4px; border: 1px solid #fca5a5; }
+
+        /* REGRAS DO DARK MODE APENAS PARA O LOGIN */
+        [data-theme="dark"] body { background-color: #0f172a; }
+        [data-theme="dark"] .login-container { background: #1e293b; border-color: #334155; box-shadow: none; border-top: 4px solid #3b82f6;}
+        [data-theme="dark"] .login-container h3 { color: #60a5fa !important; }
+        [data-theme="dark"] .form-login label { color: #cbd5e1; }
+        [data-theme="dark"] .form-login input { background-color: #0f172a; border-color: #334155; color: #f8fafc; }
+        [data-theme="dark"] .btn-login { background-color: #2563eb; }
+        [data-theme="dark"] .btn-login:hover { background-color: #1d4ed8; }
     </style>
 </head>
 <body>
     <header>
         <h1>Sistema de Gestão Interna</h1>
         <h2>Clínica Monad Ocupacional - Oriximiná</h2>
+        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
+            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
+        </div>
     </header>
 
     <main>
@@ -68,19 +86,17 @@
             .then(r => r.json())
             .then(res => {
                 if (res.status === "sucesso") {
-                    // Armazena as credenciais
                     localStorage.setItem('monad_token', res.token);
                     localStorage.setItem('monad_setor', res.setor);
                     
-                    // ROTEAMENTO CORRETO:
                     if (res.setor === "recepcao") {
                         window.location.href = "index.html";
                     } else if (res.setor === "todos") {
-                        window.location.href = "checkin.html"; // Visão Geral
+                        window.location.href = "checkin.html";
                     } else if (res.setor === "admin") {
-                        window.location.href = "admin.html";   // <--- O REDIRECIONAMENTO QUE FALTAVA
+                        window.location.href = "admin.html";
                     } else {
-                        window.location.href = "setor.html";   // Painéis Técnicos
+                        window.location.href = "setor.html";
                     }
                 } else {
                     throw new Error(res.mensagem || "Credenciais incorretas.");
@@ -92,6 +108,26 @@
                 btn.disabled = false;
                 btn.textContent = "Entrar no Painel";
             });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnTheme = document.getElementById('btn-theme-toggle');
+            if (btnTheme) {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                btnTheme.textContent = isDark ? '☀️' : '🌙';
+                btnTheme.addEventListener('click', () => {
+                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                        document.documentElement.removeAttribute('data-theme');
+                        localStorage.setItem('monad_theme', 'light');
+                        btnTheme.textContent = '🌙';
+                    } else {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        localStorage.setItem('monad_theme', 'dark');
+                        btnTheme.textContent = '☀️';
+                    }
+                });
+            }
         });
     </script>
 </body>

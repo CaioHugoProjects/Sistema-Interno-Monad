@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
+        // GATEKEEPER E LEITURA DO MODO ESCURO
+        if (localStorage.getItem('monad_theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
         const tokenAtivo = localStorage.getItem('monad_token');
         const setorLogado = localStorage.getItem('monad_setor');
         if (!tokenAtivo || !setorLogado || setorLogado === "todos" || setorLogado === "recepcao") {
@@ -18,7 +22,8 @@
     <header>
         <h1>Área Técnica Especializada</h1>
         <h2 id="nome-painel-setor">Carregando Especialidade...</h2>
-        <div style="float: right; margin-top: 10px;" class="no-print">
+        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
+            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
             <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:#dc2626; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
         </div>
     </header>
@@ -60,9 +65,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ==========================================================
             const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
-            // ==========================================================
 
             const mapNomes = { "clinico": "Exames Físicos", "raiox": "Radiologia", "fono": "Audiometria", "lab": "Laboratório", "consulta": "Clínico Médico" };
             document.getElementById('nome-painel-setor').textContent = mapNomes[setorLogado] || "Painel Restrito";
@@ -154,28 +157,26 @@
                 msgVazio.style.display = visiveis === 0 ? 'block' : 'none';
             }
 
-            // GESTÃO DE EVENTOS COM BLOQUEIO DE DUPLO CLIQUE (RACE CONDITION)
             tabela.addEventListener('change', function(e) {
                 const tr = e.target.closest('tr');
                 tr.dataset.syncing = "true";
 
                 if (e.target.classList.contains('check-setor')) {
                     const cb = e.target;
-                    cb.disabled = true; // Desativa até o servidor responder
+                    cb.disabled = true; 
                     cb.style.opacity = "0.4";
                     
                     fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        // TOKEN INJETADO AQUI
                         body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_SETOR", cpf: tr.dataset.cpf, setor: setorLogado, liberado: cb.checked })
                     }).then(r => r.json()).then(res => {
                         if(res.status !== "sucesso") throw new Error();
                         cb.style.opacity = "1";
-                        cb.disabled = false; // Restaura a capacidade de clique
+                        cb.disabled = false; 
                         verificarFila(tr);
                         setTimeout(() => tr.dataset.syncing = "false", 1500);
                     }).catch(() => { 
-                        cb.checked = !cb.checked; // Reverte se falhou
+                        cb.checked = !cb.checked; 
                         cb.style.opacity = "1"; 
                         cb.disabled = false;
                         tr.dataset.syncing = "false"; 
@@ -184,12 +185,11 @@
 
                 if (e.target.classList.contains('obs-input')) {
                     const obsInput = e.target;
-                    obsInput.disabled = true; // Desativa durante o salvamento
+                    obsInput.disabled = true; 
                     obsInput.style.opacity = "0.6";
                     
                     fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        // TOKEN INJETADO AQUI
                         body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_OBS", cpf: tr.dataset.cpf, obs: obsInput.value })
                     }).then(r => r.json()).then(res => {
                         if(res.status !== "sucesso") throw new Error();
@@ -219,6 +219,26 @@
                 document.querySelectorAll('.linha-paciente').forEach(l => l.style.display = l.textContent.toLowerCase().includes(termo) ? '' : 'none');
             });
             buscar();
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnTheme = document.getElementById('btn-theme-toggle');
+            if (btnTheme) {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                btnTheme.textContent = isDark ? '☀️' : '🌙';
+                btnTheme.addEventListener('click', () => {
+                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                        document.documentElement.removeAttribute('data-theme');
+                        localStorage.setItem('monad_theme', 'light');
+                        btnTheme.textContent = '🌙';
+                    } else {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        localStorage.setItem('monad_theme', 'dark');
+                        btnTheme.textContent = '☀️';
+                    }
+                });
+            }
         });
     </script>
 </body>

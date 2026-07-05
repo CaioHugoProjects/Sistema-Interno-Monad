@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
+        // GATEKEEPER E LEITURA DO MODO ESCURO
+        if (localStorage.getItem('monad_theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
         const tokenAtivo = localStorage.getItem('monad_token');
         const setorLogado = localStorage.getItem('monad_setor');
         if (!tokenAtivo || !setorLogado || (setorLogado !== "todos" && setorLogado !== "recepcao" && setorLogado !== "admin")) {
@@ -19,7 +23,8 @@
     <header>
         <h1>Sistema Interno</h1>
         <h2>Painel de Gestão (Visão Geral)</h2>
-        <div style="float: right; margin-top: 10px;" class="no-print">
+        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
+            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
             <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:#dc2626; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
         </div>
         <nav>
@@ -129,7 +134,6 @@
             setInterval(atualizacaoSilenciosa, 15000);
 
             function atualizacaoSilenciosa() {
-                // OTIMIZAÇÃO: Ignorar requisições se aba estiver inativa
                 if (document.hidden || !inputData.value) return; 
                 
                 if (fetchController) fetchController.abort();
@@ -145,7 +149,6 @@
                                 return;
                             }
                             
-                            // Soft-Update para não piscar a tabela da Visão Geral
                             data.pacientes.forEach(pac => {
                                 const linha = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
                                 if (linha) {
@@ -251,6 +254,26 @@
             document.getElementById('btn-buscar-data').addEventListener('click', buscarDados);
             inputPesq.addEventListener('input', aplicarFiltros);
             buscarDados();
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnTheme = document.getElementById('btn-theme-toggle');
+            if (btnTheme) {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                btnTheme.textContent = isDark ? '☀️' : '🌙';
+                btnTheme.addEventListener('click', () => {
+                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                        document.documentElement.removeAttribute('data-theme');
+                        localStorage.setItem('monad_theme', 'light');
+                        btnTheme.textContent = '🌙';
+                    } else {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        localStorage.setItem('monad_theme', 'dark');
+                        btnTheme.textContent = '☀️';
+                    }
+                });
+            }
         });
     </script>
 </body>
