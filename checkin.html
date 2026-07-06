@@ -21,11 +21,11 @@
 </head>
 <body>
     <header>
-        <h1>Sistema Interno</h1>
+        <h1 style="color: var(--text-strong);">Sistema Interno</h1>
         <h2>Painel de Gestão (Visão Geral)</h2>
         <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:#dc2626; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
+            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
         </div>
         <nav>
             <ul>
@@ -45,14 +45,14 @@
     <main>
         <div class="painel-recepcao">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="margin: 0; color: #004080;">Acompanhamento Global</h2>
+                <h2 style="margin: 0; color: var(--text-strong);">Acompanhamento Global</h2>
                 
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 5px;">
-                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
-                        <button id="btn-buscar-data" style="background-color: #004080; color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Atualizar</button>
+                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
+                        <button id="btn-buscar-data" style="background-color: var(--accent); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Atualizar</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar..." style="padding: 8px; width: 220px; border: 1px solid #ccc; border-radius: 5px;">
+                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
                 </div>
             </div>
 
@@ -65,7 +65,7 @@
                 <button class="tab-btn" data-aba="consulta">Consulta Médica</button>
             </div>
             
-            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: #004080; display: none;">⏳ A procurar dados...</div>
+            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ A procurar dados...</div>
 
             <div class="table-responsive">
                 <table class="tabela-liberacao">
@@ -85,7 +85,7 @@
                 </table>
             </div>
             
-            <div id="msg-vazio" style="text-align: center; padding: 30px; color: #64748b; display: none; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; margin-top: 10px;">
+            <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-top: 10px;">
                 <strong>Nenhum paciente encontrado.</strong>
             </div>
         </div>
@@ -93,9 +93,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ==========================================================
             const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
-            // ==========================================================
 
             const tabela = document.getElementById('lista-liberacao');
             const inputData = document.getElementById('filtro-data');
@@ -188,7 +186,7 @@
                         <div class="celula-exame">
                             <input type="checkbox" class="c-lab" ${checked ? 'checked' : ''} onclick="return false;" style="cursor:not-allowed;">
                             <div class="detalhe-exame">${exame}</div>
-                            <div class="obs-read" style="font-size:10px; color:#ef4444; background:#fee2e2; padding:3px; border-radius:3px; width:100%; text-align:center; min-height: 18px;">${obs || ''}</div>
+                            <div class="obs-read" style="font-size:10px; color:var(--danger); background:var(--danger-soft); padding:3px; border-radius:3px; width:100%; text-align:center; min-height: 18px;">${obs || ''}</div>
                         </div>
                     `;
 

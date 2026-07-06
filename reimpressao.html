@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
-        // GATEKEEPER E LEITURA DO MODO ESCURO
+        // GATEKEEPER DE SEGURANÇA ATUALIZADO
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
@@ -19,11 +19,11 @@
 </head>
 <body>
     <header>
-        <h1>Sistema Interno</h1>
+        <h1 style="color: var(--text-strong);">Sistema Interno</h1>
         <h2>Painel de Reimpressão e Agendamentos</h2>
         <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:#dc2626; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
+            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
         </div>
         <nav>
             <ul>
@@ -34,6 +34,7 @@
             </ul>
         </nav>
         <script>
+            // Revela o botão do Admin apenas se quem estiver logado for o admin
             if (localStorage.getItem('monad_setor') === 'admin') {
                 document.getElementById('menu-admin').style.display = 'block';
             }
@@ -43,20 +44,20 @@
     <main>
         <div class="painel-recepcao no-print">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="margin: 0; color: #004080;">Arquivo e Reimpressão de Fichas</h2>
+                <h2 style="margin: 0; color: var(--text-strong);">Arquivo e Reimpressão de Fichas</h2>
                 
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 5px;">
-                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
-                        <button id="btn-buscar-data" style="background-color: #004080; color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Buscar</button>
+                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
+                        <button id="btn-buscar-data" style="background-color: var(--accent); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Buscar</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar..." style="padding: 8px; width: 220px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; box-sizing: border-box; background: var(--surface-muted); color: var(--text-strong);">
                 </div>
             </div>
 
-            <p style="font-size: 14px; color: #666; margin-bottom: 20px;">Selecione a data de atendimento (passada ou futura) para visualizar a lista de colaboradores e emitir a segunda via da ficha.</p>
+            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">Selecione a data de atendimento (passada ou futura) para visualizar a lista de colaboradores e emitir a segunda via da ficha.</p>
             
-            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: #004080; display: none;">
+            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">
                 ⏳ A consultar base de dados...
             </div>
 
@@ -76,7 +77,7 @@
                 </table>
             </div>
             
-            <div id="msg-vazio" style="text-align: center; padding: 30px; color: #64748b; display: none; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; margin-top: 10px;">
+            <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-top: 10px;">
                 <strong>Nenhum paciente encontrado para esta data!</strong>
             </div>
         </div>
@@ -218,20 +219,20 @@
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
                     tr.innerHTML = `
-                        <td><span class="tag-empresa" style="background:#e2e8f0; color:#1e293b; padding:6px 10px; border-radius:6px; font-weight:bold;">${pac.empresa} <span style="color:#004080;">${tipoStr}</span></span></td>
+                        <td><span class="tag-empresa">${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></span></td>
                         <td>
-                            <div style="font-weight: bold; font-size: 15px; color:#0f172a;" class="col-nome">${pac.nome}</div>
-                            <div style="font-size: 12px; color:#64748b;">${pac.funcao} • Nasc: ${pac.dn}</div>
+                            <div style="font-weight: bold; font-size: 15px; color:var(--text-strong);">${pac.nome}</div>
+                            <div style="font-size: 12px; color:var(--text-muted);">${pac.funcao} • Nasc: ${pac.dn}</div>
                         </td>
                         <td>
-                            <div style="font-size: 13px; color:#334155;"><strong>CPF:</strong> ${pac.cpf}</div>
-                            <div style="font-size: 12px; color:#64748b;"><strong>RG:</strong> ${pac.rg} • <strong>Tel:</strong> ${pac.telefone}</div>
+                            <div style="font-size: 13px; color:var(--text-main);"><strong>CPF:</strong> ${pac.cpf}</div>
+                            <div style="font-size: 12px; color:var(--text-muted);"><strong>RG:</strong> ${pac.rg} • <strong>Tel:</strong> ${pac.telefone}</div>
                         </td>
-                        <td style="font-size: 12px; color:#475569; max-width: 200px; white-space: normal;">
+                        <td style="font-size: 12px; color:var(--text-secondary); max-width: 200px; white-space: normal;">
                             ${resumoSetores}
                         </td>
                         <td style="text-align: center;">
-                            <button onclick="imprimirFicha(${index})" style="background-color: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto;">
+                            <button onclick="imprimirFicha(${index})" style="background-color: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto;">
                                 🖨️ Imprimir
                             </button>
                         </td>

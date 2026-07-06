@@ -31,6 +31,29 @@
     --danger-soft: #fee2e2;
 }
 
+/* VARIÁVEIS EXCLUSIVAS PARA O MODO ESCURO */
+[data-theme="dark"] {
+    --surface: #1e293b;
+    --surface-muted: #0f172a;
+    --surface-strong: #334155;
+    --border: #334155;
+    --border-hover: #475569;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --accent: #3b82f6;
+    --accent-strong: #60a5fa;
+    --accent-soft: rgba(59, 130, 246, 0.2);
+    --success: #10b981;
+    --success-soft: rgba(16, 185, 129, 0.2);
+    --success-border: rgba(16, 185, 129, 0.4);
+    --warning: #f59e0b;
+    --warning-soft: rgba(245, 158, 11, 0.2);
+    --warning-border: rgba(245, 158, 11, 0.4);
+    --danger: #ef4444;
+    --danger-soft: rgba(239, 68, 68, 0.2);
+}
+
 /* ==============================================
    FILTROS SUPERIORES E BOTÕES
    ============================================== */
@@ -140,7 +163,7 @@
 }
 
 .tabela-liberacao th {
-    background-color: #f8fafc;
+    background-color: var(--surface-muted);
     color: var(--text-secondary);
     font-weight: 600;
     text-transform: uppercase;
@@ -158,18 +181,18 @@
 }
 
 .tabela-liberacao tr:last-child td { border-bottom: none; }
-.tabela-liberacao tr:hover td { background-color: #fcfcfd; }
+.tabela-liberacao tr:hover td { background-color: var(--surface-strong); }
 
 /* COMPONENTES DA TABELA */
 .perfil-paciente { display: flex; align-items: center; gap: 12px; }
 .perfil-paciente .avatar {
     width: 38px; height: 38px;
-    background: linear-gradient(135deg, #e0f2fe, #bfdbfe);
-    color: #1e3a8a;
+    background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+    color: white;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-weight: 700; font-size: 14px;
-    border: 1px solid #93c5fd;
+    border: 1px solid var(--accent-strong);
 }
 .col-nome { font-weight: 600; color: var(--text-primary); font-size: 15px; }
 
@@ -230,6 +253,7 @@
     border-radius: 6px;
     resize: vertical;
     background-color: var(--surface-muted);
+    color: var(--text-primary);
     transition: all 0.2s ease;
 }
 .obs-input:focus, .obs-input-admin:focus {
@@ -238,34 +262,6 @@
     outline: none;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
-
-/* =========================================
-   DARK MODE PARA TABELAS E BADGES
-   ========================================= */
-[data-theme="dark"] #filtro-data, [data-theme="dark"] #pesquisa-paciente { background-color: #1e293b; color: #f8fafc; border-color: #334155; }
-[data-theme="dark"] #filtro-data:focus, [data-theme="dark"] #pesquisa-paciente:focus { border-color: #3b82f6; background-color: #0f172a; }
-
-[data-theme="dark"] .tabs-setores { border-bottom-color: #334155; }
-[data-theme="dark"] .tab-btn { color: #94a3b8; }
-[data-theme="dark"] .tab-btn:hover { background-color: #334155; color: #f8fafc; }
-[data-theme="dark"] .tab-btn.active { background-color: #1e293b; color: #3b82f6; border-color: #334155; }
-
-[data-theme="dark"] .table-responsive { background-color: #1e293b; border-color: #334155; }
-[data-theme="dark"] .tabela-liberacao th { background-color: #0f172a; color: #94a3b8; border-bottom-color: #334155; }
-[data-theme="dark"] .tabela-liberacao td { color: #cbd5e1; border-bottom-color: #334155; }
-[data-theme="dark"] .tabela-liberacao tr:hover td { background-color: #0f172a; }
-
-[data-theme="dark"] .perfil-paciente .avatar { background: #1e3a8a; color: #bfdbfe; border-color: #3b82f6; }
-[data-theme="dark"] .col-nome { color: #f8fafc; }
-[data-theme="dark"] .detalhe-exame { color: #94a3b8; }
-[data-theme="dark"] .text-na { color: #475569; }
-
-[data-theme="dark"] .tag-empresa { background-color: #0f172a; color: #cbd5e1; border-color: #334155; }
-[data-theme="dark"] .badge-status.pendente { background-color: rgba(217, 119, 6, 0.2); color: #fcd34d; border-color: rgba(217, 119, 6, 0.4); }
-[data-theme="dark"] .badge-status.liberado { background-color: rgba(5, 150, 105, 0.2); color: #6ee7b7; border-color: rgba(5, 150, 105, 0.4); }
-
-[data-theme="dark"] .obs-input, [data-theme="dark"] .obs-input-admin { background-color: #0f172a; border-color: #334155; color: #f8fafc; }
-[data-theme="dark"] .obs-input:focus, [data-theme="dark"] .obs-input-admin:focus { border-color: #3b82f6; background-color: #1e293b; }
 
 /* =======================================================
    RESPONSIVIDADE (TRANSFORMAÇÃO EM CARDS)

@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
-        // GATEKEEPER E LEITURA DO MODO ESCURO
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
@@ -20,24 +19,24 @@
 </head>
 <body>
     <header>
-        <h1>Área Técnica Especializada</h1>
+        <h1 style="color: var(--text-strong);">Área Técnica Especializada</h1>
         <h2 id="nome-painel-setor">Carregando Especialidade...</h2>
         <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:#dc2626; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
+            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
         </div>
     </header>
     
     <main>
         <div class="painel-recepcao">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="margin: 0; color: #004080;">Fila de Atendimento do Setor</h2>
+                <h2 style="margin: 0; color: var(--text-strong);">Fila de Atendimento do Setor</h2>
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 5px;">
-                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
                         <button id="btn-buscar-data" style="background-color: var(--accent); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Buscar</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Buscar colaborador..." style="padding: 8px; width: 220px; border: 1px solid #ccc; border-radius: 5px;">
+                    <input type="text" id="pesquisa-paciente" placeholder="Buscar colaborador..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
                 </div>
             </div>
             
@@ -57,7 +56,7 @@
                 </table>
             </div>
             
-            <div id="msg-vazio" style="text-align: center; padding: 30px; color: #64748b; display: none; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; margin-top: 10px;">
+            <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-top: 10px;">
                 <strong>Nenhum paciente pendente para este setor hoje!</strong>
             </div>
         </div>
@@ -65,7 +64,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // ==========================================================
             const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
+            // ==========================================================
 
             const mapNomes = { "clinico": "Exames Físicos", "raiox": "Radiologia", "fono": "Audiometria", "lab": "Laboratório", "consulta": "Clínico Médico" };
             document.getElementById('nome-painel-setor').textContent = mapNomes[setorLogado] || "Painel Restrito";
@@ -144,11 +145,18 @@
                         
                     if (setorLogado === "lab") exames += `<textarea class="obs-input" data-cpf="${pac.cpf}" placeholder="Observação da coleta..." rows="2"></textarea>`;
 
+                    const tipoStr = pac.tipoExame ? (pac.tipoExame.includes('(') ? pac.tipoExame : `(${pac.tipoExame})`) : '';
+
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente'; tr.dataset.cpf = pac.cpf; tr.dataset.syncing = "false";
                     tr.innerHTML = `
-                        <td><span class="tag-empresa">${pac.empresa || '-'}</span></td>
-                        <td><div class="perfil-paciente"><div class="avatar">${pac.nome.charAt(0).toUpperCase()}</div><span class="col-nome">${pac.nome}</span></div></td>
+                        <td><span class="tag-empresa">${pac.empresa || '-'} <span style="font-size:10px; color:var(--accent);">${tipoStr}</span></span></td>
+                        <td>
+                            <div class="perfil-paciente">
+                                <div class="avatar">${pac.nome.charAt(0).toUpperCase()}</div>
+                                <span class="col-nome">${pac.nome}</span>
+                            </div>
+                        </td>
                         <td>${exames}</td>
                         <td style="text-align: center;"><span class="badge-status pendente">AGUARDANDO</span></td>
                     `;
@@ -196,7 +204,7 @@
                         obsInput.style.opacity = "1"; 
                         obsInput.style.borderColor = "var(--success)";
                         obsInput.disabled = false;
-                        setTimeout(() => obsInput.style.borderColor = "var(--border)", 2000);
+                        setTimeout(() => obsInput.style.borderColor = "var(--border-strong)", 2000);
                         setTimeout(() => tr.dataset.syncing = "false", 1500);
                     }).catch(() => { 
                         obsInput.style.opacity = "1"; 

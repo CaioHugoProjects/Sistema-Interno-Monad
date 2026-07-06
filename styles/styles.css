@@ -96,7 +96,7 @@ footer {
 
 /* ELEMENTOS DE FORMULÁRIO (ACESSIBILIDADE E UX) */
 button, input, select, textarea { font-family: inherit; }
-label { font-size: 14px; color: #475569; font-weight: 500; }
+label { font-size: 14px; color: var(--text-main, #475569); font-weight: 500; }
 input[type="checkbox"], input[type="radio"] { 
     margin-right: 10px; 
     accent-color: #2563eb; 

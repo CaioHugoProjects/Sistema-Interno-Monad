@@ -7,33 +7,33 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
-        // GATEKEEPER E LEITURA DO MODO ESCURO
-        if (localStorage.getItem('monad_theme') === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
         const tokenAtivo = localStorage.getItem('monad_token');
         const setorLogado = localStorage.getItem('monad_setor');
         if (!tokenAtivo || setorLogado !== "admin") {
             window.location.href = "login.html";
         }
+        // LEITURA DO MODO ESCURO
+        if (localStorage.getItem('monad_theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
     </script>
     <style>
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .modal-box h3 { color: #7f1d1d; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #fee2e2; padding-bottom: 10px; }
+        .modal-box { background: var(--surface); padding: 25px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-box h3 { color: var(--danger); margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid var(--border-strong); padding-bottom: 10px; }
         .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .edit-grid label { font-size: 13px; font-weight: bold; color: #475569; display: flex; flex-direction: column; gap: 5px; }
-        .edit-grid input[type="text"] { padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
+        .edit-grid label { font-size: 13px; font-weight: bold; color: var(--text-muted); display: flex; flex-direction: column; gap: 5px; }
+        .edit-grid input[type="text"] { padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; font-size: 14px; background: var(--surface-muted); color: var(--text-strong);}
         .edit-full { grid-column: span 2; }
     </style>
 </head>
 <body>
     <header>
-        <h1 style="color: #fca5a5;">Acesso Administrativo</h1>
-        <h2>Supervisão, Edição e Exclusão de Registos</h2>
-        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
+        <h1 style="color: var(--danger);">Acesso Administrativo</h1>
+        <h2 style="color: var(--text-muted);">Supervisão, Edição e Exclusão de Registos</h2>
+        <div style="float: right; margin-top: 10px; display: flex; gap: 10px; align-items: center;" class="no-print">
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:#dc2626; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
+            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
         </div>
         <nav>
             <ul>
@@ -46,19 +46,19 @@
     </header>
     
     <main>
-        <div class="painel-recepcao" style="border: 2px solid #ef4444;">
+        <div class="painel-recepcao" style="border: 2px solid var(--danger);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="margin: 0; color: #7f1d1d;">Gestão de Fila e Exclusão</h2>
+                <h2 style="margin: 0; color: var(--text-strong);">Gestão de Fila e Exclusão</h2>
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 5px;">
-                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
-                        <button id="btn-buscar-data" style="background-color: #7f1d1d; color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Atualizar</button>
+                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
+                        <button id="btn-buscar-data" style="background-color: var(--danger); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Atualizar</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar..." style="padding: 8px; width: 220px; border: 1px solid #ccc; border-radius: 5px;">
+                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
                 </div>
             </div>
 
-            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: #7f1d1d; display: none;">⏳ Carregando permissões administrativas...</div>
+            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ Carregando permissões administrativas...</div>
 
             <div class="table-responsive">
                 <table class="tabela-liberacao">
@@ -76,7 +76,7 @@
                     <tbody id="lista-liberacao"></tbody>
                 </table>
             </div>
-            <div id="msg-vazio" style="text-align: center; padding: 30px; color: #64748b; display: none; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; margin-top: 10px;">
+            <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-top: 10px;">
                 <strong>Nenhum paciente encontrado.</strong>
             </div>
         </div>
@@ -93,24 +93,23 @@
                 <label>Empresa: <input type="text" id="edit-empresa"></label>
                 <label>Tipo de Exame: <input type="text" id="edit-tipo" placeholder="Ex: (PERIÓDICO)"></label>
                 <label>Função: <input type="text" id="edit-funcao"></label>
-                
                 <label>Nascimento: <input type="text" id="edit-dn"></label>
                 <label>CPF: <input type="text" id="edit-cpf"></label>
                 <label>RG: <input type="text" id="edit-rg"></label>
                 <label>Telefone: <input type="text" id="edit-tel"></label>
                 
-                <div class="edit-full"><hr style="border: 0; border-top: 1px dashed #ccc; margin: 10px 0;"></div>
+                <div class="edit-full"><hr style="border: 0; border-top: 1px dashed var(--border-strong); margin: 10px 0;"></div>
                 
-                <label class="edit-full">Exames Clínicos (Separar por vírgula): <input type="text" id="edit-ex-clinico"></label>
-                <label class="edit-full">Exames Raio-X (Separar por vírgula): <input type="text" id="edit-ex-raiox"></label>
-                <label class="edit-full">Exames Lab (Separar por vírgula): <input type="text" id="edit-ex-lab"></label>
+                <label class="edit-full">Exames Clínicos: <input type="text" id="edit-ex-clinico"></label>
+                <label class="edit-full">Exames Raio-X: <input type="text" id="edit-ex-raiox"></label>
+                <label class="edit-full">Exames Lab: <input type="text" id="edit-ex-lab"></label>
                 
-                <label style="flex-direction: row; align-items: center; color: #b45309;"><input type="checkbox" id="edit-tem-fono" style="transform: scale(1.3);"> Tem Fonoaudiologia?</label>
-                <label style="flex-direction: row; align-items: center; color: #b45309;"><input type="checkbox" id="edit-tem-consulta" style="transform: scale(1.3);"> Tem Consulta Médica?</label>
+                <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-fono" style="transform: scale(1.3);"> Tem Fonoaudiologia?</label>
+                <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-consulta" style="transform: scale(1.3);"> Tem Consulta Médica?</label>
             </div>
             <div style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">
-                <button onclick="fecharModal()" style="padding:10px 15px; border-radius:5px; border:1px solid #ccc; background:#f1f5f9; cursor:pointer; font-weight:bold;">Cancelar</button>
-                <button id="btn-salvar-edicao" style="padding:10px 20px; background:#2563eb; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Salvar Alterações</button>
+                <button onclick="fecharModal()" style="padding:10px 15px; border-radius:5px; border:1px solid var(--border-strong); background:var(--surface-muted); color: var(--text-strong); cursor:pointer; font-weight:bold;">Cancelar</button>
+                <button id="btn-salvar-edicao" style="padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Salvar Alterações</button>
             </div>
         </div>
     </div>
@@ -224,7 +223,7 @@
                         <div class="celula-exame">
                             <input type="checkbox" class="check-setor-admin" data-setor="lab" ${checked ? 'checked' : ''} style="cursor:pointer; transform: scale(1.3);">
                             <div class="detalhe-exame" style="margin-top:4px;">${exame}</div>
-                            <textarea class="obs-input-admin" data-cpf="${pac.cpf}" rows="2" style="width:100px; font-size:10px; border:1px solid #ccc;">${obs || ''}</textarea>
+                            <textarea class="obs-input-admin" data-cpf="${pac.cpf}" rows="2">${obs || ''}</textarea>
                         </div>
                     `;
 
@@ -243,19 +242,19 @@
 
                     tr.innerHTML = `
                         <td>
-                            <div style="font-weight:bold; color:#1e293b;" class="col-nome">${pac.nome}</div>
-                            <div style="font-size:11px; color:#64748b;">Empresa: ${pac.empresa} ${tipoStr}</div>
-                            <div style="font-size:11px; color:#64748b;">CPF: ${pac.cpf}</div>
+                            <div style="font-weight:bold; color:var(--text-strong);" class="col-nome">${pac.nome}</div>
+                            <div style="font-size:11px; color:var(--text-muted);">Empresa: ${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></div>
+                            <div style="font-size:11px; color:var(--text-muted);">CPF: ${pac.cpf}</div>
                         </td>
-                        <td style="text-align: center; background:#f8fafc;">${tdC}</td>
+                        <td style="text-align: center; background:var(--surface-muted);">${tdC}</td>
                         <td style="text-align: center;">${tdR}</td>
-                        <td style="text-align: center; background:#f8fafc;">${tdF}</td>
+                        <td style="text-align: center; background:var(--surface-muted);">${tdF}</td>
                         <td style="text-align: center;">${tdL}</td>
-                        <td style="text-align: center; background:#f8fafc;">${tdM}</td>
+                        <td style="text-align: center; background:var(--surface-muted);">${tdM}</td>
                         <td style="text-align: center;">
                             <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <button class="btn-editar" data-index="${index}" style="background:#2563eb; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">✏️ Editar Dados</button>
-                                <button class="btn-apagar" style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">🗑️ Excluir</button>
+                                <button class="btn-editar" data-index="${index}" style="background:var(--accent); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">✏️ Editar Dados</button>
+                                <button class="btn-apagar" style="background:var(--danger); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">🗑️ Excluir</button>
                             </div>
                         </td>
                     `;
@@ -315,7 +314,7 @@
                         obsInput.style.opacity = "1"; 
                         obsInput.style.borderColor = "var(--success)";
                         obsInput.disabled = false;
-                        setTimeout(() => obsInput.style.borderColor = "#ccc", 2000);
+                        setTimeout(() => obsInput.style.borderColor = "var(--border-strong)", 2000);
                     }).catch(() => { 
                         alert("Erro ao guardar observação."); 
                         obsInput.style.opacity = "1"; 
@@ -328,7 +327,7 @@
                 if (e.target.classList.contains('btn-apagar')) {
                     const btn = e.target;
                     const tr = btn.closest('tr');
-                    const nome = tr.querySelector('div').textContent;
+                    const nome = tr.querySelector('.col-nome').textContent;
                     
                     if (confirm(`TEM A CERTEZA ABSOLUTA?\n\nDeseja excluir permanentemente o registo de:\n${nome}\n\nEsta ação não pode ser desfeita.`)) {
                         btn.textContent = "Apagando...";
