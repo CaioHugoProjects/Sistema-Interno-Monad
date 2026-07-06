@@ -22,9 +22,13 @@
         <h1 style="color: var(--text-strong);">Área Técnica Especializada</h1>
         <h2 id="nome-painel-setor">Carregando Especialidade...</h2>
         <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
+            <!-- NOVO BOTÃO AQUI (Começa invisível) -->
+            <button id="btn-relacao-lab" style="display: none; background:var(--accent); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer; box-shadow: var(--shadow-btn);" onclick="window.location.href='relacao_lab.html'">📋 Relação de Envio</button>
+            
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
             <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
         </div>
+    </header>
     </header>
     
     <main>
@@ -70,7 +74,9 @@
 
             const mapNomes = { "clinico": "Exames Físicos", "raiox": "Radiologia", "fono": "Audiometria", "lab": "Laboratório", "consulta": "Clínico Médico" };
             document.getElementById('nome-painel-setor').textContent = mapNomes[setorLogado] || "Painel Restrito";
-
+            if (setorLogado === 'lab' || setorLogado === 'admin') {
+                document.getElementById('btn-relacao-lab').style.display = 'block';
+            }
             const tabela = document.getElementById('lista-liberacao');
             const inputData = document.getElementById('filtro-data');
             const msgVazio = document.getElementById('msg-vazio');
