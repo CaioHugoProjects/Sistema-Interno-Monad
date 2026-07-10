@@ -20,7 +20,7 @@
         <h2>Clínica Monad Ocupacional - Oriximiná</h2>
         <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
+            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
         </div>
         <nav class="no-print">
             <ul>
@@ -115,11 +115,11 @@
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombar"> Raio-x coluna lombar</label><br>
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombo-Sacra"> Raio-x Coluna Lombo-Sacra</label>
                                 
-                                <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
+                            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
                                     <label style="font-size: 12px; color: var(--text-muted);">Adicionar Raio-X Extra:</label>
                                     <div style="display: flex; gap: 5px; margin-top: 5px;">
                                         <input type="text" id="input-exame-extra-raiox" placeholder="Nome do Raio-X..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
-                                        <button type="button" id="btn-add-exame-raiox" style="background: var(--accent); color: white; border: none; border-radius: 4px; padding: 0 10px; cursor: pointer; font-weight: bold;">Inserir</button>
+                                        <button type="button" id="btn-add-exame-raiox" class="btn-inserir-seguro">Inserir</button>
                                     </div>
                                     <div id="lista-extras-painel-raiox" style="margin-top: 10px;"></div>
                                 </div>
@@ -148,13 +148,13 @@
                                     <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TRICLOROCOMPOSTOS-TOTAIS"> TRICOLOROCOMPOSTOS TOTAIS</label>
                                     
                                     <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
-                                        <label style="font-size: 12px; color: var(--text-muted);">Adicionar Exame Extra:</label>
-                                        <div style="display: flex; gap: 5px; margin-top: 5px;">
-                                            <input type="text" id="input-exame-extra" placeholder="Nome do exame..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
-                                            <button type="button" id="btn-add-exame" style="background: var(--accent); color: white; border: none; border-radius: 4px; padding: 0 10px; cursor: pointer; font-weight: bold;">Inserir</button>
-                                        </div>
-                                        <div id="lista-extras-painel" style="margin-top: 10px;"></div>
-                                    </div>
+        <label style="font-size: 12px; color: var(--text-muted);">Adicionar Exame Extra:</label>
+        <div style="display: flex; gap: 5px; margin-top: 5px;">
+            <input type="text" id="input-exame-extra" placeholder="Nome do exame..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
+            <button type="button" id="btn-add-exame" class="btn-inserir-seguro">Inserir</button>
+        </div>
+        <div id="lista-extras-painel" style="margin-top: 10px;"></div>
+    </div>
                                 </div>
                             </div>
                         </div>

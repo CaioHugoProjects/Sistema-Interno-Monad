@@ -93,13 +93,15 @@
     </style>
 </head>
 <body>
-    <header class="no-print">
+    <<header class="no-print">
         <h1 style="color: var(--text-strong);">Relação de Envio - Laboratório</h1>
         <h2>Cadeia de Custódia de Amostras</h2>
         <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;">
-            <button onclick="window.location.href='setor.html'" style="background:var(--surface-muted); color:var(--text-strong); border:1px solid var(--border-strong); padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Voltar ao Painel</button>
+            <!-- Aplicada a nova classe btn-header-outline -->
+            <button onclick="window.location.href='setor.html'" class="btn-header-outline">Voltar ao Painel</button>
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
+            <!-- Aplicada a nova classe btn-header-danger -->
+            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
         </div>
     </header>
     
