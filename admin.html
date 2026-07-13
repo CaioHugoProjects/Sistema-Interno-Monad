@@ -12,7 +12,6 @@
         if (!tokenAtivo || setorLogado !== "admin") {
             window.location.href = "login.html";
         }
-        // LEITURA DO MODO ESCURO
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
@@ -33,14 +32,14 @@
         <h2 style="color: var(--text-muted);">Supervisão, Edição e Exclusão de Registos</h2>
         <div style="float: right; margin-top: 10px; display: flex; gap: 10px; align-items: center;" class="no-print">
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
+            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
         </div>
         <nav>
             <ul>
                 <li><a href="index.html">Recepção</a></li>
                 <li><a href="checkin.html">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
-                <li><a href="admin.html" style="background-color: #7f1d1d;">Painel Admin</a></li>
+                <li><a href="admin.html" style="background-color: #7f1d1d; color: white;">Painel Admin</a></li>
             </ul>
         </nav>
     </header>
@@ -49,16 +48,19 @@
         <div class="painel-recepcao" style="border: 2px solid var(--danger);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
                 <h2 style="margin: 0; color: var(--text-strong);">Gestão de Fila e Exclusão</h2>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 5px;">
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; flex: 1; justify-content: flex-end;">
+                    <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
                         <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
-                        <button id="btn-buscar-data" style="background-color: var(--danger); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Atualizar</button>
+                        <!-- Botão de Busca Diária -->
+                        <button id="btn-buscar-data" style="background-color: var(--danger); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn);">Atualizar Dia</button>
+                        <!-- NOVO BOTÃO: Busca Global -->
+                        <button id="btn-busca-global" style="background-color: var(--warning); color: #0f172a; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); transition: transform 0.2s;">🌍 Busca Global</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
+                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar nome ou CPF..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
                 </div>
             </div>
 
-            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ Carregando permissões administrativas...</div>
+            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ Carregando base de dados...</div>
 
             <div class="table-responsive">
                 <table class="tabela-liberacao">
@@ -123,6 +125,9 @@
             const inputPesq = document.getElementById('pesquisa-paciente');
             let databaseAdmin = [];
             let fetchController = null; 
+            
+            // Variável de controlo para saber se estamos no modo de Busca Global
+            let modoBuscaGlobal = false;
 
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
@@ -144,14 +149,25 @@
                 return true;
             }
 
-            function buscarDados() {
-                if(!inputData.value) return;
+            // Função mestre de busca (Aceita parâmetro para saber se é global ou diária)
+            function buscarDados(isGlobal = false) {
+                modoBuscaGlobal = isGlobal; // Atualiza o estado
+                
+                if(!isGlobal && !inputData.value) return;
+                
                 document.getElementById('msg-carregando').style.display = "block";
+                tabela.innerHTML = "";
+                document.getElementById('msg-vazio').style.display = "none";
                 
                 if (fetchController) fetchController.abort();
                 fetchController = new AbortController();
 
-                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
+                // Constrói o Link: Se for global, passa buscaGlobal=true. Se for diária, passa a data.
+                const urlFetch = isGlobal 
+                    ? `${URL_GOOGLE_SCRIPT}?buscaGlobal=true` 
+                    : `${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`;
+
+                fetch(urlFetch, { signal: fetchController.signal })
                     .then(r => r.json())
                     .then(data => {
                         document.getElementById('msg-carregando').style.display = "none";
@@ -165,8 +181,9 @@
                     }).catch((err) => { if (err.name !== 'AbortError') console.error(err); });
             }
 
+            // Polling de 15 segundos (Pausa automaticamente se estiver em Busca Global)
             setInterval(() => {
-                if (document.hidden || !inputData.value) return; 
+                if (document.hidden || modoBuscaGlobal || !inputData.value) return; 
                 
                 if (fetchController) fetchController.abort();
                 fetchController = new AbortController();
@@ -240,9 +257,11 @@
                     tr.dataset.cpf = pac.cpf;
                     tr.dataset.dataexame = pac.dataExame;
 
+                    // Adicionada a DATA na Interface para a Busca Global fazer sentido
                     tr.innerHTML = `
                         <td>
                             <div style="font-weight:bold; color:var(--text-strong);" class="col-nome">${pac.nome}</div>
+                            <div style="font-size:12px; color:var(--accent); font-weight: 600;">📅 Data: ${pac.dataExame || '-'}</div>
                             <div style="font-size:11px; color:var(--text-muted);">Empresa: ${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></div>
                             <div style="font-size:11px; color:var(--text-muted);">CPF: ${pac.cpf}</div>
                         </td>
@@ -423,7 +442,7 @@
                     btn.disabled = false;
                     if(res.status === "sucesso") {
                         fecharModal();
-                        buscarDados(); 
+                        buscarDados(modoBuscaGlobal); // Atualiza consoante o modo onde estávamos
                     } else {
                         alert("Servidor diz: " + (res.detalhe || "Erro desconhecido"));
                     }
@@ -434,12 +453,17 @@
                 });
             });
 
-            document.getElementById('btn-buscar-data').addEventListener('click', buscarDados);
+            // Atribuição de Eventos aos Botões
+            document.getElementById('btn-buscar-data').addEventListener('click', () => buscarDados(false)); // Busca por data
+            document.getElementById('btn-busca-global').addEventListener('click', () => buscarDados(true)); // Busca em toda a base
+
             inputPesq.addEventListener('input', aplicarFiltros);
-            buscarDados();
+            
+            // Busca inicial (apenas a data de hoje)
+            buscarDados(false);
         });
-    </script>
-    <script>
+
+        // Theme Toggle Logic
         document.addEventListener('DOMContentLoaded', () => {
             const btnTheme = document.getElementById('btn-theme-toggle');
             if (btnTheme) {
