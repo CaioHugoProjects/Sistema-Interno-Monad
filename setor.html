@@ -102,11 +102,13 @@
             const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
             const setor = localStorage.getItem('monad_setor');
             
+            // Dicionário corrigido com o setor "clinico" incluído
             const configSetores = {
+                'clinico': { titulo: 'Avaliação Clínica / Neurológica', flag: 'temClinico', exames: 'examesClinicos', lib: 'liberadoClinico' },
                 'raiox': { titulo: 'Radiologia (Raio-X)', flag: 'temRaiox', exames: 'examesRaioX', lib: 'liberadoRaiox' },
                 'lab': { titulo: 'Laboratório de Coletas', flag: 'temLab', exames: 'examesLab', lib: 'liberadoLab' },
                 'fono': { titulo: 'Fonoaudiologia', flag: 'temFono', exames: null, texto: 'Audiometria Ocupacional', lib: 'liberadoFono' },
-                'consulta': { titulo: 'Consultório Médico', flag: 'temConsulta', exames: null, texto: 'Avaliação Clínica Ocupacional', lib: 'liberadoConsulta' }
+                'consulta': { titulo: 'Consultório Médico', flag: 'temConsulta', exames: null, texto: 'Avaliação Médica Ocupacional', lib: 'liberadoConsulta' }
             };
 
             const myConfig = configSetores[setor] || { titulo: 'Setor Desconhecido', flag: null };
@@ -203,9 +205,9 @@
                     const concluido = pac[myConfig.lib];
                     const tipoStr = pac.tipoExame ? `<span style="color:var(--accent); font-weight:600;">(${pac.tipoExame})</span>` : '';
                     
-                    // LÓGICA DO BOTÃO CHAMAR (Apenas Consultório)
+                    // LÓGICA DO BOTÃO CHAMAR (Habilitado para Consulta Médica ou Avaliação Clínica)
                     let btnChamar = "";
-                    if (setor === 'consulta') {
+                    if (setor === 'consulta' || setor === 'clinico') {
                         btnChamar = `
                             <button class="btn-chamar no-print" onclick="chamarPaciente('${pac.nome}', '${pac.cpf}')" title="Toca o aviso na Receção">
                                 📢 Chamar Paciente
