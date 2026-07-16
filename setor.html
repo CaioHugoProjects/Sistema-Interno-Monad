@@ -54,6 +54,11 @@
                             <th>Colaborador</th>
                             <th style="text-align: center;" id="th-dinamico">Procedimentos</th>
                             <th style="text-align: center;">Ação</th>
+                             <td>
+            <div style="font-weight:bold;">${pac.nome}</div>
+            <div style="font-size:11px;">CPF: ${pac.cpf}</div>
+            ${botaoChamar}
+        </td>
                         </tr>
                     </thead>
                     <tbody id="lista-liberacao"></tbody>
@@ -255,5 +260,38 @@
             }
         });
     </script>
+    <!-- DENTRO DO SEU SCRIPT DE RENDERIZAÇÃO DA TABELA EM setor.html -->
+
+<script>
+    // 1. Crie a função de chamar no final do seu script:
+    window.chamarPaciente = function(nome, cpf) {
+        // Alerta imediato para o médico
+        alert(`A chamar ${nome} na receção...`); 
+        
+        fetch(URL_GOOGLE_SCRIPT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ 
+                token: localStorage.getItem('monad_token'), 
+                acao: "CHAMAR_PACIENTE", 
+                nome: nome, 
+                cpf: cpf 
+            })
+        });
+    };
+
+    // 2. Quando estiver a criar a linha da tabela (tr.innerHTML = ...):
+    // Verifique se o setor é o médico (consulta) e crie o botão
+    let botaoChamar = "";
+    if (setorLogado === "consulta" || setorLogado === "medico") {
+        botaoChamar = `<button onclick="chamarPaciente('${pac.nome}', '${pac.cpf}')" style="background-color: var(--warning); color: #0f172a; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">📢 Chamar Consultório</button>`;
+    }
+
+    // Cole a variável ${botaoChamar} debaixo do nome do paciente na tabela
+    // Exemplo:
+    /*
+       
+    */
+</script>
 </body>
 </html>
