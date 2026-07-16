@@ -3,244 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Setor - Clínica Monad</title>
+    <title>Painel de Setor - Clínica Monad</title>
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
+        // GATEKEEPER E TEMA
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
         const tokenAtivo = localStorage.getItem('monad_token');
         const setorLogado = localStorage.getItem('monad_setor');
-        if (!tokenAtivo || !setorLogado || setorLogado === "todos" || setorLogado === "recepcao") {
+        
+        // Se não houver token, ou se for admin/recepcao (que têm painéis próprios), expulsa
+        if (!tokenAtivo || setorLogado === "admin" || setorLogado === "recepcao") {
             window.location.href = "login.html";
         }
     </script>
+    <style>
+        .card-paciente {
+            background: var(--surface);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow-float);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+        .card-paciente.concluido {
+            opacity: 0.6;
+            border-left: 4px solid var(--success);
+            background: var(--surface-muted);
+        }
+        .info-paciente { flex: 1; min-width: 250px; }
+        .acao-setor { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 200px; }
+        
+        .obs-box { width: 100%; margin-top: 10px; }
+        .obs-box textarea {
+            width: 100%; padding: 10px; border: 1px solid var(--border-strong);
+            border-radius: 6px; background: var(--surface-muted); color: var(--text-strong);
+            font-size: 13px; resize: vertical; transition: all 0.2s;
+        }
+        .obs-box textarea:focus { border-color: var(--accent); outline: none; }
+        
+        .btn-chamar {
+            background-color: var(--warning); color: #0f172a; border: none; padding: 8px 15px;
+            border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s, background 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;
+        }
+        .btn-chamar:hover { transform: translateY(-2px); background-color: #f59e0b; }
+        .btn-chamar:active { transform: translateY(0); }
+    </style>
 </head>
 <body>
-    <header>
-        <h1 style="color: var(--text-strong);">Área Técnica Especializada</h1>
-        <h2 id="nome-painel-setor">Carregando Especialidade...</h2>
-        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
-            <!-- NOVO BOTÃO AQUI (Começa invisível) -->
-            <button id="btn-relacao-lab" style="display: none; background:var(--accent); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer; box-shadow: var(--shadow-btn);" onclick="window.location.href='relacao_lab.html'">📋 Relação de Envio</button>
-            
+    <header class="no-print">
+        <h1 style="color: var(--text-strong);" id="titulo-setor">Painel Técnico</h1>
+        <h2>Atendimentos do Dia</h2>
+        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;">
+            <button onclick="window.location.href='relacao_lab.html'" id="btn-relacao-lab" class="btn-header-outline" style="display: none; background: #10b981 !important; color: white !important; border: none !important;">🧪 Relação de Envio</button>
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
+            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
         </div>
-    </header>
     </header>
     
     <main>
-        <div class="painel-recepcao">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="margin: 0; color: var(--text-strong);">Fila de Atendimento do Setor</h2>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
-                        <button id="btn-buscar-data" style="background-color: var(--accent); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Buscar</button>
-                    </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Buscar colaborador..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
+        <div class="painel-recepcao no-print">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="font-weight: bold; color: var(--text-strong);">Data:</label>
+                    <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
+                    <button id="btn-buscar-data" style="background-color: var(--accent); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn);">Atualizar</button>
                 </div>
+                <input type="text" id="pesquisa-paciente" placeholder="Pesquisar paciente..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
             </div>
-            
-            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ Carregando Fila...</div>
 
-            <div class="table-responsive">
-                <table class="tabela-liberacao">
-                    <thead>
-                        <tr>
-                            <th>Empresa</th>
-                            <th>Colaborador</th>
-                            <th style="text-align: center;" id="th-dinamico">Procedimentos</th>
-                            <th style="text-align: center;">Ação</th>
-                             <td>
-            <div style="font-weight:bold;">${pac.nome}</div>
-            <div style="font-size:11px;">CPF: ${pac.cpf}</div>
-            ${botaoChamar}
-        </td>
-                        </tr>
-                    </thead>
-                    <tbody id="lista-liberacao"></tbody>
-                </table>
+            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ Sincronizando com a base de dados...</div>
+            
+            <div id="lista-atendimentos">
+                <!-- Cards injetados via JS -->
             </div>
             
-            <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-top: 10px;">
-                <strong>Nenhum paciente pendente para este setor hoje!</strong>
+            <div id="msg-vazio" style="text-align: center; padding: 40px; color: var(--text-muted); display: none; background: var(--surface-muted); border-radius: 8px; border: 1px dashed var(--border-strong);">
+                <strong>Nenhum paciente aguardando neste setor para a data selecionada.</strong>
             </div>
         </div>
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ==========================================================
+            // ==========================================
+            // 1. CONFIGURAÇÃO DE SETOR
+            // ==========================================
             const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
-            // ==========================================================
+            const setor = localStorage.getItem('monad_setor');
+            
+            const configSetores = {
+                'raiox': { titulo: 'Radiologia (Raio-X)', flag: 'temRaiox', exames: 'examesRaioX', lib: 'liberadoRaiox' },
+                'lab': { titulo: 'Laboratório de Coletas', flag: 'temLab', exames: 'examesLab', lib: 'liberadoLab' },
+                'fono': { titulo: 'Fonoaudiologia', flag: 'temFono', exames: null, texto: 'Audiometria Ocupacional', lib: 'liberadoFono' },
+                'consulta': { titulo: 'Consultório Médico', flag: 'temConsulta', exames: null, texto: 'Avaliação Clínica Ocupacional', lib: 'liberadoConsulta' }
+            };
 
-            const mapNomes = { "clinico": "Exames Físicos", "raiox": "Radiologia", "fono": "Audiometria", "lab": "Laboratório", "consulta": "Clínico Médico" };
-            document.getElementById('nome-painel-setor').textContent = mapNomes[setorLogado] || "Painel Restrito";
-            if (setorLogado === 'lab' || setorLogado === 'admin') {
-                document.getElementById('btn-relacao-lab').style.display = 'block';
+            const myConfig = configSetores[setor] || { titulo: 'Setor Desconhecido', flag: null };
+            document.getElementById('titulo-setor').textContent = myConfig.titulo;
+
+            // Se for laboratório, mostra o botão para imprimir a relação de envio
+            if (setor === 'lab') {
+                document.getElementById('btn-relacao-lab').style.display = 'inline-flex';
             }
-            const tabela = document.getElementById('lista-liberacao');
-            const inputData = document.getElementById('filtro-data');
-            const msgVazio = document.getElementById('msg-vazio');
+
+            // ==========================================
+            // 2. LÓGICA DE DADOS E RENDERIZAÇÃO
+            // ==========================================
+            let databaseSetor = [];
             let fetchController = null;
 
+            const inputData = document.getElementById('filtro-data');
+            const inputPesq = document.getElementById('pesquisa-paciente');
+            const listaDiv = document.getElementById('lista-atendimentos');
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
-            function buscar() {
-                if(!inputData.value) return;
+            function buscarDados() {
+                if(!inputData.value || !myConfig.flag) return;
+                document.getElementById('msg-carregando').style.display = "block";
                 
-                if(fetchController) fetchController.abort();
+                if (fetchController) fetchController.abort();
                 fetchController = new AbortController();
-                
+
                 fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
                     .then(r => r.json())
                     .then(data => {
-                        if (data.status === "sucesso") renderizar(data.pacientes);
-                    }).catch((err) => { if (err.name !== 'AbortError') console.error(err); });
+                        document.getElementById('msg-carregando').style.display = "none";
+                        if (data.status === "sucesso" && data.pacientes.length > 0) {
+                            // Filtra apenas os que têm exame marcado para ESTE setor
+                            databaseSetor = data.pacientes.filter(p => p[myConfig.flag] === true);
+                            renderizarLista(databaseSetor);
+                        } else {
+                            databaseSetor = [];
+                            renderizarLista([]);
+                        }
+                    }).catch(err => { if (err.name !== 'AbortError') console.error(err); });
             }
 
+            // Polling silencioso a cada 15s para manter a tela viva
             setInterval(() => {
-                if(document.hidden || !inputData.value) return;
-                
-                if(fetchController) fetchController.abort();
-                fetchController = new AbortController();
-                
-                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
+                if (document.hidden || !inputData.value) return;
+                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`)
                     .then(r => r.json())
                     .then(data => {
                         if (data.status === "sucesso") {
-                            const filtrados = data.pacientes.filter(p => p[`tem${setorLogado.charAt(0).toUpperCase() + setorLogado.slice(1)}`]);
-                            if (filtrados.length !== document.querySelectorAll('.linha-paciente').length) return renderizar(data.pacientes);
-
+                            const filtrados = data.pacientes.filter(p => p[myConfig.flag] === true);
+                            // Se a quantidade de pessoas mudou, re-renderiza tudo
+                            if (filtrados.length !== document.querySelectorAll('.card-paciente').length) {
+                                databaseSetor = filtrados;
+                                renderizarLista(databaseSetor);
+                                return;
+                            }
+                            // Se a quantidade é a mesma, só atualiza os vistos/checkboxes silenciosamente
                             filtrados.forEach(pac => {
-                                const l = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
-                                if (l && l.dataset.syncing !== "true") {
-                                    const cb = l.querySelector('.check-setor'); 
-                                    const newValue = pac[`liberado${setorLogado.charAt(0).toUpperCase() + setorLogado.slice(1)}`];
-                                    if(cb && cb.checked !== newValue && !cb.disabled) cb.checked = newValue;
+                                const card = document.querySelector(`.card-paciente[data-cpf="${pac.cpf}"]`);
+                                if (card) {
+                                    const cb = card.querySelector('.cb-liberar-setor');
+                                    if (cb && !cb.disabled && cb.checked !== pac[myConfig.lib]) {
+                                        cb.checked = pac[myConfig.lib];
+                                        if (pac[myConfig.lib]) card.classList.add('concluido');
+                                        else card.classList.remove('concluido');
+                                    }
                                     
-                                    const obs = l.querySelector('.obs-input'); 
-                                    if(obs && document.activeElement !== obs && obs.value !== (pac.obsLab || '') && !obs.disabled) obs.value = pac.obsLab || '';
-                                    
-                                    verificarFila(l);
+                                    // Sincroniza campo de observação se for lab e se o técnico não estiver a escrever nele
+                                    if (setor === 'lab') {
+                                        const obs = card.querySelector('.obs-setor');
+                                        if (obs && document.activeElement !== obs && !obs.disabled && obs.value !== (pac.obsLab || '')) {
+                                            obs.value = pac.obsLab || '';
+                                        }
+                                    }
                                 }
                             });
+                            databaseSetor = filtrados;
                         }
-                    }).catch((err) => { if (err.name !== 'AbortError') console.error(err); });
+                    }).catch(e => console.error(e));
             }, 15000);
 
-            function renderizar(pacientes) {
-                tabela.innerHTML = ""; let visiveis = 0;
-                pacientes.forEach(pac => {
-                    const mapa = {
-                        clinico: { tem: pac.temClinico, txt: pac.examesClinicos, lib: pac.liberadoClinico },
-                        raiox: { tem: pac.temRaiox, txt: pac.examesRaioX, lib: pac.liberadoRaiox },
-                        fono: { tem: pac.temFono, txt: "Audiometria", lib: pac.liberadoFono },
-                        lab: { tem: pac.temLab, txt: pac.examesLab, lib: pac.liberadoLab },
-                        consulta: { tem: pac.temConsulta, txt: "Consulta Médica", lib: pac.liberadoConsulta }
-                    };
+            function renderizarLista(pacientes) {
+                listaDiv.innerHTML = "";
+                if (pacientes.length === 0) {
+                    document.getElementById('msg-vazio').style.display = "block";
+                    return;
+                }
+                document.getElementById('msg-vazio').style.display = "none";
 
-                    const atual = mapa[setorLogado];
-                    if(!atual || !atual.tem) return;
-                    visiveis++;
+                pacientes.forEach((pac) => {
+                    const examesListados = myConfig.exames ? pac[myConfig.exames] : myConfig.texto;
+                    const concluido = pac[myConfig.lib];
+                    const tipoStr = pac.tipoExame ? `<span style="color:var(--accent); font-weight:600;">(${pac.tipoExame})</span>` : '';
+                    
+                    // LÓGICA DO BOTÃO CHAMAR (Apenas Consultório)
+                    let btnChamar = "";
+                    if (setor === 'consulta') {
+                        btnChamar = `
+                            <button class="btn-chamar no-print" onclick="chamarPaciente('${pac.nome}', '${pac.cpf}')" title="Toca o aviso na Receção">
+                                📢 Chamar Paciente
+                            </button>
+                        `;
+                    }
 
-                    let exames = `
-                        <div class="celula-exame">
-                            <input type="checkbox" class="check-setor" ${atual.lib ? 'checked' : ''}>
-                            <div class="detalhe-exame">${atual.txt}</div>
-                        </div>`;
-                        
-                    if (setorLogado === "lab") exames += `<textarea class="obs-input" data-cpf="${pac.cpf}" placeholder="Observação da coleta..." rows="2"></textarea>`;
-
-                    const tipoStr = pac.tipoExame ? (pac.tipoExame.includes('(') ? pac.tipoExame : `(${pac.tipoExame})`) : '';
-
-                    const tr = document.createElement('tr');
-                    tr.className = 'linha-paciente'; tr.dataset.cpf = pac.cpf; tr.dataset.syncing = "false";
-                    tr.innerHTML = `
-                        <td><span class="tag-empresa">${pac.empresa || '-'} <span style="font-size:10px; color:var(--accent);">${tipoStr}</span></span></td>
-                        <td>
-                            <div class="perfil-paciente">
-                                <div class="avatar">${pac.nome.charAt(0).toUpperCase()}</div>
-                                <span class="col-nome">${pac.nome}</span>
+                    // LÓGICA DA OBSERVAÇÃO (Apenas Laboratório)
+                    let boxObs = "";
+                    if (setor === 'lab') {
+                        boxObs = `
+                            <div class="obs-box">
+                                <textarea class="obs-setor" data-cpf="${pac.cpf}" rows="2" placeholder="Observações de coleta (Ex: Veia difícil, Recusou-se...)" title="Salva automaticamente ao sair do campo">${pac.obsLab || ''}</textarea>
                             </div>
-                        </td>
-                        <td>${exames}</td>
-                        <td style="text-align: center;"><span class="badge-status pendente">AGUARDANDO</span></td>
+                        `;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = `card-paciente ${concluido ? 'concluido' : ''}`;
+                    card.dataset.cpf = pac.cpf;
+                    
+                    card.innerHTML = `
+                        <div class="info-paciente">
+                            <div style="font-size: 18px; font-weight: bold; color: var(--text-strong);">${pac.nome}</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">CPF: ${pac.cpf} • Nasc: ${pac.dn}</div>
+                            <div style="font-size: 13px; color: var(--text-main);"><strong>Empresa:</strong> ${pac.empresa} ${tipoStr}</div>
+                            <div style="font-size: 13px; color: var(--text-main); margin-top: 5px;">
+                                <strong>Procedimento(s):</strong> <span style="color: var(--accent); font-weight: 500;">${examesListados}</span>
+                            </div>
+                            ${boxObs}
+                        </div>
+                        <div class="acao-setor">
+                            ${btnChamar}
+                            <label style="display: flex; align-items: center; gap: 8px; background: var(--surface-strong); padding: 10px 15px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer; user-select: none; width: 100%; justify-content: center;">
+                                <input type="checkbox" class="cb-liberar-setor" data-cpf="${pac.cpf}" ${concluido ? 'checked' : ''} style="transform: scale(1.4); margin: 0;">
+                                <span style="font-weight: bold; color: var(--text-strong);">MARCAR COMO CONCLUÍDO</span>
+                            </label>
+                        </div>
                     `;
-                    tabela.appendChild(tr); verificarFila(tr);
+                    listaDiv.appendChild(card);
                 });
-                msgVazio.style.display = visiveis === 0 ? 'block' : 'none';
+                aplicarFiltros();
             }
 
-            tabela.addEventListener('change', function(e) {
-                const tr = e.target.closest('tr');
-                tr.dataset.syncing = "true";
+            // ==========================================
+            // 3. AÇÕES (CHAMAR, CHECKBOX, OBS)
+            // ==========================================
 
-                if (e.target.classList.contains('check-setor')) {
+            // FUNÇÃO GLOBAL: O Médico clica e o sistema envia o comando
+            window.chamarPaciente = function(nome, cpf) {
+                // Feedback visual temporário no botão
+                const btns = document.querySelectorAll('.btn-chamar');
+                btns.forEach(b => { 
+                    if(b.getAttribute('onclick').includes(cpf)) {
+                        const textoOriginal = b.innerHTML;
+                        b.innerHTML = "Avisando Receção... ⏳";
+                        b.style.backgroundColor = "#10b981"; // Fica verde
+                        b.style.color = "white";
+                        
+                        // Envia para o backend
+                        fetch(URL_GOOGLE_SCRIPT, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "CHAMAR_PACIENTE", nome: nome, cpf: cpf })
+                        }).then(r => r.json()).then(res => {
+                            setTimeout(() => { 
+                                b.innerHTML = "✅ Paciente Chamado"; 
+                                setTimeout(() => { b.innerHTML = textoOriginal; b.style.backgroundColor = ""; b.style.color = ""; }, 3000);
+                            }, 500);
+                        }).catch(err => { alert("Erro ao chamar. Verifique a internet."); b.innerHTML = textoOriginal; b.style.backgroundColor = ""; b.style.color = ""; });
+                    }
+                });
+            };
+
+            // Evento de Checkbox de Conclusão
+            listaDiv.addEventListener('change', function(e) {
+                if (e.target.classList.contains('cb-liberar-setor')) {
                     const cb = e.target;
-                    cb.disabled = true; 
-                    cb.style.opacity = "0.4";
+                    const cpf = cb.dataset.cpf;
+                    const liberado = cb.checked;
+                    const card = cb.closest('.card-paciente');
                     
+                    cb.disabled = true;
+                    card.style.opacity = "0.4";
+
                     fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_SETOR", cpf: tr.dataset.cpf, setor: setorLogado, liberado: cb.checked })
+                        body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_SETOR", cpf: cpf, setor: setor, liberado: liberado })
                     }).then(r => r.json()).then(res => {
                         if(res.status !== "sucesso") throw new Error();
-                        cb.style.opacity = "1";
-                        cb.disabled = false; 
-                        verificarFila(tr);
-                        setTimeout(() => tr.dataset.syncing = "false", 1500);
-                    }).catch(() => { 
-                        cb.checked = !cb.checked; 
-                        cb.style.opacity = "1"; 
+                        card.style.opacity = "1";
                         cb.disabled = false;
-                        tr.dataset.syncing = "false"; 
+                        if(liberado) card.classList.add('concluido');
+                        else card.classList.remove('concluido');
+                    }).catch(() => { 
+                        alert("Erro ao salvar status. Tente novamente."); 
+                        cb.checked = !liberado; 
+                        card.style.opacity = "1"; 
+                        cb.disabled = false; 
                     });
                 }
 
-                if (e.target.classList.contains('obs-input')) {
+                // Evento de Gravação de Observação (Laboratório)
+                if (e.target.classList.contains('obs-setor')) {
                     const obsInput = e.target;
-                    obsInput.disabled = true; 
-                    obsInput.style.opacity = "0.6";
+                    const cpf = obsInput.dataset.cpf;
+                    obsInput.disabled = true;
+                    obsInput.style.opacity = "0.5";
                     
                     fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_OBS", cpf: tr.dataset.cpf, obs: obsInput.value })
+                        body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_OBS", cpf: cpf, obs: obsInput.value })
                     }).then(r => r.json()).then(res => {
-                        if(res.status !== "sucesso") throw new Error();
                         obsInput.style.opacity = "1"; 
-                        obsInput.style.borderColor = "var(--success)";
                         obsInput.disabled = false;
+                        obsInput.style.borderColor = "var(--success)"; // Pisca verde
                         setTimeout(() => obsInput.style.borderColor = "var(--border-strong)", 2000);
-                        setTimeout(() => tr.dataset.syncing = "false", 1500);
                     }).catch(() => { 
+                        alert("Erro ao guardar observação."); 
                         obsInput.style.opacity = "1"; 
-                        obsInput.style.borderColor = "var(--danger)"; 
                         obsInput.disabled = false;
-                        tr.dataset.syncing = "false"; 
                     });
                 }
             });
 
-            function verificarFila(l) {
-                const cb = l.querySelector('.check-setor'); const b = l.querySelector('.badge-status');
-                if(cb && cb.checked) { b.textContent = 'CONCLUÍDO'; b.className = 'badge-status liberado'; l.style.opacity="0.5"; }
-                else { b.textContent = 'AGUARDANDO'; b.className = 'badge-status pendente'; l.style.opacity="1"; }
+            // Filtro de Pesquisa Local
+            function aplicarFiltros() {
+                const termo = inputPesq.value.toLowerCase();
+                let visiveis = 0;
+                document.querySelectorAll('.card-paciente').forEach(card => {
+                    const texto = card.textContent.toLowerCase();
+                    const mostra = texto.includes(termo);
+                    card.style.display = mostra ? 'flex' : 'none';
+                    if(mostra) visiveis++;
+                });
+                document.getElementById('msg-vazio').style.display = (visiveis === 0 && databaseSetor.length > 0) ? 'block' : 'none';
             }
 
-            document.getElementById('btn-buscar-data').addEventListener('click', buscar);
-            document.getElementById('pesquisa-paciente').addEventListener('input', (e) => {
-                const termo = e.target.value.toLowerCase();
-                document.querySelectorAll('.linha-paciente').forEach(l => l.style.display = l.textContent.toLowerCase().includes(termo) ? '' : 'none');
-            });
-            buscar();
+            inputPesq.addEventListener('input', aplicarFiltros);
+            document.getElementById('btn-buscar-data').addEventListener('click', buscarDados);
+            
+            buscarDados(); // Inicia a busca ao carregar
         });
-    </script>
-    <script>
+
+        // Toggle Dark Mode
         document.addEventListener('DOMContentLoaded', () => {
             const btnTheme = document.getElementById('btn-theme-toggle');
             if (btnTheme) {
@@ -260,38 +370,5 @@
             }
         });
     </script>
-    <!-- DENTRO DO SEU SCRIPT DE RENDERIZAÇÃO DA TABELA EM setor.html -->
-
-<script>
-    // 1. Crie a função de chamar no final do seu script:
-    window.chamarPaciente = function(nome, cpf) {
-        // Alerta imediato para o médico
-        alert(`A chamar ${nome} na receção...`); 
-        
-        fetch(URL_GOOGLE_SCRIPT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ 
-                token: localStorage.getItem('monad_token'), 
-                acao: "CHAMAR_PACIENTE", 
-                nome: nome, 
-                cpf: cpf 
-            })
-        });
-    };
-
-    // 2. Quando estiver a criar a linha da tabela (tr.innerHTML = ...):
-    // Verifique se o setor é o médico (consulta) e crie o botão
-    let botaoChamar = "";
-    if (setorLogado === "consulta" || setorLogado === "medico") {
-        botaoChamar = `<button onclick="chamarPaciente('${pac.nome}', '${pac.cpf}')" style="background-color: var(--warning); color: #0f172a; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">📢 Chamar Consultório</button>`;
-    }
-
-    // Cole a variável ${botaoChamar} debaixo do nome do paciente na tabela
-    // Exemplo:
-    /*
-       
-    */
-</script>
 </body>
 </html>
