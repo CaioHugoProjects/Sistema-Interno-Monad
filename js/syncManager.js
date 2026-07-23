@@ -22,9 +22,7 @@ const guardarNaFilaOffline = async (dadosDaRequisicao) => {
     console.warn("⚠️ Rede indisponível. Ação enfileirada localmente.");
 };
 
-// Interceptor global que substitui o 'fetch' padrão
 window.monadFetch = async (url, options) => {
-    // Retorno emulativo para não quebrar o .then(r => r.json()) do código antigo
     const mockResponse = (data) => ({ json: async () => data });
 
     if (!navigator.onLine) {
@@ -36,6 +34,7 @@ window.monadFetch = async (url, options) => {
     }
 
     try {
+        // COMANDO NATIVO ISOLADO - NÃO ALTERE ESTA LINHA
         const response = await fetch(url, options);
         const data = await response.json();
         return mockResponse(data);
@@ -64,7 +63,7 @@ const sincronizarFila = async () => {
         console.log(`♻️ Sincronizando ${fila.length} transações pendentes...`);
         for (let i = 0; i < fila.length; i++) {
             try {
-                // Tenta enviar diretamente
+                // COMANDO NATIVO ISOLADO - NÃO ALTERE ESTA LINHA
                 await fetch("https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec", {
                     method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(fila[i])
