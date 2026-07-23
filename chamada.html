@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Chamada - Monad</title>
     <link rel="stylesheet" href="styles/styles.css">
+    <!-- INTERCEPTOR OFFLINE ADICIONADO -->
+    <script src="js/syncManager.js"></script>
     <script>
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
@@ -50,7 +52,7 @@
         }, { once: true });
 
         function verificarChamada() {
-            fetch(`${URL_GOOGLE_SCRIPT}?obterChamada=true`)
+            window.monadFetch(`${URL_GOOGLE_SCRIPT}?obterChamada=true`)
                 .then(r => r.json())
                 .then(data => {
                     if (data && data.timestamp) {
@@ -79,6 +81,25 @@
 
         // Verifica a cada 3 segundos
         setInterval(verificarChamada, 3000);
+    </script>
+    <script>
+        // AUTO-SLEEP e DEFESA ZUMBI
+        (function() {
+            setInterval(function() {
+                var agora = new Date();
+                // Desliga a aplicação sumariamente a partir das 14h
+                if (agora.getHours() >= 14) {
+                    var maiorId = window.setTimeout(function(){}, 0);
+                    for (var i = 0; i <= maiorId; i++) {
+                        window.clearTimeout(i);
+                        window.clearInterval(i);
+                    }
+                    localStorage.clear();
+                    alert("🔒 EXPEDIENTE ENCERRADO.\n\nPor segurança e integridade do banco de dados, o sistema encerrou os processos de sincronização e desconectou o seu usuário.\n\nO acesso será liberado amanhã a partir das 06h30.");
+                    window.location.replace("login.html");
+                }
+            }, 60000); 
+        })();
     </script>
 </body>
 </html>

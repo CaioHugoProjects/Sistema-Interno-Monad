@@ -6,6 +6,8 @@
     <title>Visão Geral - Clínica Monad</title>
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
+    <!-- INTERCEPTOR OFFLINE ADICIONADO -->
+    <script src="js/syncManager.js"></script>
     <script>
         // GATEKEEPER E LEITURA DO MODO ESCURO
         if (localStorage.getItem('monad_theme') === 'dark') {
@@ -120,7 +122,7 @@
                 if (fetchController) fetchController.abort();
                 fetchController = new AbortController();
 
-                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
+                window.monadFetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
                     .then(r => r.json())
                     .then(data => {
                         document.getElementById('msg-carregando').style.display = "none";
@@ -137,7 +139,7 @@
                 if (fetchController) fetchController.abort();
                 fetchController = new AbortController();
 
-                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
+                window.monadFetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
                     .then(r => r.json())
                     .then(data => {
                         if (data.status === "sucesso" && data.pacientes.length > 0) {
@@ -273,6 +275,25 @@
                 });
             }
         });
+    </script>
+    <script>
+        // AUTO-SLEEP e DEFESA ZUMBI
+        (function() {
+            setInterval(function() {
+                var agora = new Date();
+                // Desliga a aplicação sumariamente a partir das 14h
+                if (agora.getHours() >= 14) {
+                    var maiorId = window.setTimeout(function(){}, 0);
+                    for (var i = 0; i <= maiorId; i++) {
+                        window.clearTimeout(i);
+                        window.clearInterval(i);
+                    }
+                    localStorage.clear();
+                    alert("🔒 EXPEDIENTE ENCERRADO.\n\nPor segurança e integridade do banco de dados, o sistema encerrou os processos de sincronização e desconectou o seu usuário.\n\nO acesso será liberado amanhã a partir das 06h30.");
+                    window.location.replace("login.html");
+                }
+            }, 60000); 
+        })();
     </script>
 </body>
 </html>

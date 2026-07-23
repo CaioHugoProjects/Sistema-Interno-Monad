@@ -1,47 +1,38 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // ==========================================
     const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
-    // ==========================================
+
+    // BLOQUEIO ESTRUTURAL: Impede a perda de dados por submissão acidental
+    const masterForm = document.getElementById('masterForm');
+    if (masterForm) {
+        masterForm.addEventListener('submit', function(e) {
+            e.preventDefault(); 
+        });
+    }
 
     const masterInputs = document.querySelectorAll('.master-input');
     const masterCheckboxes = document.querySelectorAll('.master-checkbox');
     const btnSalvarImprimir = document.getElementById('btn-salvar-imprimir');
     const msgStatus = document.getElementById('msg-status');
-
     const cpfInput = document.querySelector('input[name="cpf"]');
     const telefoneInput = document.querySelector('input[name="telefone"]');
     const cpfError = document.getElementById('cpf-error');
-    
-    // ==========================================
-    // LÓGICA DE DATA INTELIGENTE (PERSISTENTE)
-    // ==========================================
     const inputData = document.querySelector('input[name="data"]');
 
     if (inputData) {
         const hoje = new Date().toISOString().split('T')[0];
         const dataSalva = localStorage.getItem('monad_data_recepcao');
-        
         let dataFinal = dataSalva ? dataSalva : hoje;
         inputData.value = dataFinal;
         
-        if (!dataSalva) {
-            localStorage.setItem('monad_data_recepcao', hoje);
-        }
+        if (!dataSalva) localStorage.setItem('monad_data_recepcao', hoje);
 
-        // Força a injeção da data na impressão logo no carregamento
         const partes = dataFinal.split('-');
-        if (partes.length === 3) {
-            document.querySelectorAll('.out-data').forEach(span => {
-                span.textContent = `${partes[2]}/${partes[1]}/${partes[0]}`;
-            });
-        }
+        if (partes.length === 3) document.querySelectorAll('.out-data').forEach(span => span.textContent = `${partes[2]}/${partes[1]}/${partes[0]}`);
 
         inputData.addEventListener('change', function() {
             localStorage.setItem('monad_data_recepcao', this.value);
             const p = this.value.split('-');
-            if (p.length === 3) {
-                document.querySelectorAll('.out-data').forEach(span => span.textContent = `${p[2]}/${p[1]}/${p[0]}`);
-            }
+            if (p.length === 3) document.querySelectorAll('.out-data').forEach(span => span.textContent = `${p[2]}/${p[1]}/${p[0]}`);
         });
     }
 
@@ -101,9 +92,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 const partes = valorDigitado.split('-');
                 if (partes.length === 3) valorDigitado = `${partes[2]}/${partes[1]}/${partes[0]}`;
             }
-            document.querySelectorAll(`.out-${e.target.name}`).forEach(span => {
-                span.textContent = valorDigitado;
-            });
+            document.querySelectorAll(`.out-${e.target.name}`).forEach(span => span.textContent = valorDigitado);
         });
     });
 
@@ -118,9 +107,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function atualizarListaExames() {
         const exames = { clinico: [], raiox: [], lab: [] };
         document.querySelectorAll('.master-checkbox:checked').forEach(cb => {
-            if (exames[cb.dataset.setor]) {
-                exames[cb.dataset.setor].push(cb.dataset.nome);
-            }
+            if (exames[cb.dataset.setor]) exames[cb.dataset.setor].push(cb.dataset.nome);
         });
 
         Object.keys(exames).forEach(setor => {
@@ -130,15 +117,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     document.body.addEventListener('change', function(e) {
-        if (e.target.classList.contains('master-checkbox')) {
-            atualizarListaExames();
-        }
+        if (e.target.classList.contains('master-checkbox')) atualizarListaExames();
     });
 
     const btnAddExameLab = document.getElementById('btn-add-exame');
     const inputExameExtraLab = document.getElementById('input-exame-extra');
     const listaExtrasPainelLab = document.getElementById('lista-extras-painel');
-    
     const btnAddExameRaiox = document.getElementById('btn-add-exame-raiox');
     const inputExameExtraRaiox = document.getElementById('input-exame-extra-raiox');
     const listaExtrasPainelRaiox = document.getElementById('lista-extras-painel-raiox');
@@ -179,7 +163,6 @@ document.addEventListener("DOMContentLoaded", function() {
     if (btnSalvarImprimir) {
         btnSalvarImprimir.addEventListener('click', function() {
             if (btnSalvarImprimir.disabled) return;
-
             if (cpfInput.value && !validarCPF(cpfInput.value)) {
                 alert("O CPF digitado é inválido. Por favor, corrija antes de gravar.");
                 return cpfInput.focus();
@@ -196,7 +179,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 return;
             }
 
-            // CAPTURA DO TIPO DE EXAME E ENVIA
             const tiposSelecionados = Array.from(document.querySelectorAll('.master-tipo:checked')).map(cb => cb.value);
             const tipoExame = tiposSelecionados.length > 0 ? `(${tiposSelecionados.join(' / ')})` : '';
 
@@ -208,9 +190,9 @@ document.addEventListener("DOMContentLoaded", function() {
             msgStatus.textContent = "⏳ A gravar registo no sistema e a gerar ficha...";
 
             const dados = {
-                token: localStorage.getItem('monad_token'), // SEGURANÇA ATIVADA
+                token: localStorage.getItem('monad_token'),
                 empresa: empresa,
-                tipoExame: tipoExame, // INCLUÍDO AQUI
+                tipoExame: tipoExame,
                 nome: nome,
                 funcao: funcao,
                 dn: dn,
@@ -225,7 +207,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 consultaClinica: document.getElementById('check-consulta') ? document.getElementById('check-consulta').checked : false
             };
 
-            fetch(URL_GOOGLE_SCRIPT, {
+            // USA O NOVO FUNIL DE REDE (monadFetch)
+            window.monadFetch(URL_GOOGLE_SCRIPT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(dados)
@@ -240,9 +223,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     msgStatus.style.display = "none";
                     btnSalvarImprimir.disabled = false;
                     btnSalvarImprimir.style.opacity = "1";
-                    
                     window.print(); 
-                    // NÃO CHAMA MAIS O RESET() PARA MANTER OS DADOS NA TELA
                 }, 1500);
             })
             .catch((err) => {
@@ -254,4 +235,4 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
     }
-}); 
+});

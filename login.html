@@ -99,8 +99,7 @@
                         window.location.href = "setor.html";
                     }
                 } else {
-                    throw new Error(res.mensagem || "Credenciais incorretas.");
-                }
+                    throw new Error(res.detalhe || "Credenciais incorretas.");                }
             })
             .catch(err => {
                 erroBox.textContent = err.message || "Erro ao conectar com o servidor.";

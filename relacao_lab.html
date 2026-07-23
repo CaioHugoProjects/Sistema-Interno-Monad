@@ -6,6 +6,8 @@
     <title>Relação de Laboratório - Clínica Monad</title>
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
+    <!-- INTERCEPTOR OFFLINE ADICIONADO -->
+    <script src="js/syncManager.js"></script>
     <script>
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
@@ -93,7 +95,7 @@
     </style>
 </head>
 <body>
-    <<header class="no-print">
+    <header class="no-print">
         <h1 style="color: var(--text-strong);">Relação de Envio - Laboratório</h1>
         <h2>Cadeia de Custódia de Amostras</h2>
         <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;">
@@ -223,7 +225,7 @@
             const dataAtual = new Date();
             document.getElementById('out-data-geracao').textContent = `${String(dataAtual.getDate()).padStart(2, '0')}/${String(dataAtual.getMonth() + 1).padStart(2, '0')}/${dataAtual.getFullYear()} às ${String(dataAtual.getHours()).padStart(2, '0')}:${String(dataAtual.getMinutes()).padStart(2, '0')}`;
 
-            fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`)
+            window.monadFetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`)
                 .then(r => r.json())
                 .then(data => {
                     msgCarregando.style.display = "none";
@@ -415,6 +417,25 @@
                 });
             }
         });
+    </script>
+    <script>
+        // AUTO-SLEEP e DEFESA ZUMBI
+        (function() {
+            setInterval(function() {
+                var agora = new Date();
+                // Desliga a aplicação sumariamente a partir das 14h
+                if (agora.getHours() >= 14) {
+                    var maiorId = window.setTimeout(function(){}, 0);
+                    for (var i = 0; i <= maiorId; i++) {
+                        window.clearTimeout(i);
+                        window.clearInterval(i);
+                    }
+                    localStorage.clear();
+                    alert("🔒 EXPEDIENTE ENCERRADO.\n\nPor segurança e integridade do banco de dados, o sistema encerrou os processos de sincronização e desconectou o seu usuário.\n\nO acesso será liberado amanhã a partir das 06h30.");
+                    window.location.replace("login.html");
+                }
+            }, 60000); 
+        })();
     </script>
 </body>
 </html>
