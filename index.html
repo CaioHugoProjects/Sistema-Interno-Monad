@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monad Sistema Interno - Recepção</title>
     <link rel="stylesheet" href="styles/styles.css">
+    <script src="js/syncManager.js"></script>
     <script>
         // GATEKEEPER E LEITURA DO MODO ESCURO
         if (localStorage.getItem('monad_theme') === 'dark') {
@@ -271,7 +272,7 @@
         setInterval(function() {
             var agora = new Date();
             // Desliga a aplicação sumariamente a partir das 13h
-            if (agora.getHours() >= 13) {
+            if (agora.getHours() >= 22.3) {
                 // Interrompe bruscamente todas as chamadas de setInterval e setTimeout ativas
                 var maiorId = window.setTimeout(function(){}, 0);
                 for (var i = 0; i <= maiorId; i++) {
