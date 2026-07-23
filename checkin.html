@@ -3,118 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Administrador - Clínica Monad</title>
+    <title>Visão Geral - Clínica Monad</title>
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
-        const tokenAtivo = localStorage.getItem('monad_token');
-        const setorLogado = localStorage.getItem('monad_setor');
-        if (!tokenAtivo || setorLogado !== "admin") {
-            window.location.href = "login.html";
-        }
+        // GATEKEEPER E LEITURA DO MODO ESCURO
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
+        const tokenAtivo = localStorage.getItem('monad_token');
+        const setorLogado = localStorage.getItem('monad_setor');
+        if (!tokenAtivo || !setorLogado || (setorLogado !== "todos" && setorLogado !== "recepcao" && setorLogado !== "admin")) {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
     </script>
-    <style>
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .modal-box { background: var(--surface); padding: 25px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .modal-box h3 { color: var(--danger); margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid var(--border-strong); padding-bottom: 10px; }
-        .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .edit-grid label { font-size: 13px; font-weight: bold; color: var(--text-muted); display: flex; flex-direction: column; gap: 5px; }
-        .edit-grid input[type="text"] { padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; font-size: 14px; background: var(--surface-muted); color: var(--text-strong);}
-        .edit-full { grid-column: span 2; }
-    </style>
 </head>
 <body>
     <header>
-        <h1 style="color: var(--danger);">Acesso Administrativo</h1>
-        <h2 style="color: var(--text-muted);">Supervisão, Edição e Exclusão de Registos</h2>
-        <div style="float: right; margin-top: 10px; display: flex; gap: 10px; align-items: center;" class="no-print">
+        <h1 style="color: var(--text-strong);">Sistema Interno</h1>
+        <h2>Painel de Gestão (Visão Geral)</h2>
+        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
+            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
         </div>
         <nav>
             <ul>
                 <li><a href="index.html">Recepção</a></li>
-                <li><a href="checkin.html">Visão Geral</a></li>
+                <li><a href="checkin.html" style="background-color: #003366;">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
-                <li><a href="admin.html" style="background-color: #7f1d1d; color: white;">Painel Admin</a></li>
+                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: #7f1d1d;">Painel Admin</a></li>
             </ul>
         </nav>
+        <script>
+            if (localStorage.getItem('monad_setor') === 'admin') {
+                document.getElementById('menu-admin').style.display = 'block';
+            }
+        </script>
     </header>
     
     <main>
-        <div class="painel-recepcao" style="border: 2px solid var(--danger);">
+        <div class="painel-recepcao">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="margin: 0; color: var(--text-strong);">Gestão de Fila e Exclusão</h2>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap; flex: 1; justify-content: flex-end;">
-                    <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
+                <h2 style="margin: 0; color: var(--text-strong);">Acompanhamento Global</h2>
+                
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
                         <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
-                        <!-- Botão de Busca Diária -->
-                        <button id="btn-buscar-data" style="background-color: var(--danger); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn);">Atualizar Dia</button>
-                        <!-- NOVO BOTÃO: Busca Global -->
-                        <button id="btn-busca-global" style="background-color: var(--warning); color: #0f172a; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); transition: transform 0.2s;">🌍 Busca Global</button>
+                        <button id="btn-buscar-data" style="background-color: var(--accent); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Atualizar</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar nome ou CPF..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
+                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
                 </div>
             </div>
 
-            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ Carregando base de dados...</div>
+            <div class="tabs-setores">
+                <button class="tab-btn active" data-aba="todos">Todos os Setores</button>
+                <button class="tab-btn" data-aba="clinico">Clínico</button>
+                <button class="tab-btn" data-aba="raiox">Raio-X</button>
+                <button class="tab-btn" data-aba="fono">Fonoaudiologia</button>
+                <button class="tab-btn" data-aba="lab">Laboratório</button>
+                <button class="tab-btn" data-aba="consulta">Consulta Médica</button>
+            </div>
+            
+            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ A procurar dados...</div>
 
             <div class="table-responsive">
                 <table class="tabela-liberacao">
                     <thead>
                         <tr>
+                            <th>Empresa</th>
                             <th>Colaborador</th>
-                            <th style="text-align: center;">Clínico</th>
-                            <th style="text-align: center;">Raio-X</th>
-                            <th style="text-align: center;">Fono</th>
-                            <th style="text-align: center;">Laboratório</th>
-                            <th style="text-align: center;">Consulta</th>
-                            <th style="text-align: center; min-width:140px;">Ações Admin</th>
+                            <th class="col-clinico" style="text-align: center;">Clínico</th>
+                            <th class="col-raiox" style="text-align: center;">Raio-X</th>
+                            <th class="col-fono" style="text-align: center;">Fono</th>
+                            <th class="col-lab" style="text-align: center;">Laboratório</th>
+                            <th class="col-consulta" style="text-align: center;">Consulta</th>
+                            <th style="text-align: center;">Status Global</th>
                         </tr>
                     </thead>
                     <tbody id="lista-liberacao"></tbody>
                 </table>
             </div>
+            
             <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-top: 10px;">
                 <strong>Nenhum paciente encontrado.</strong>
             </div>
         </div>
     </main>
-
-    <div id="modal-editar" class="modal-overlay" style="display:none;">
-        <div class="modal-box">
-            <h3>✏️ Editar Dados do Paciente</h3>
-            <div class="edit-grid">
-                <input type="hidden" id="edit-cpf-antigo">
-                <input type="hidden" id="edit-data-exame">
-                
-                <label>Nome: <input type="text" id="edit-nome"></label>
-                <label>Empresa: <input type="text" id="edit-empresa"></label>
-                <label>Tipo de Exame: <input type="text" id="edit-tipo" placeholder="Ex: (PERIÓDICO)"></label>
-                <label>Função: <input type="text" id="edit-funcao"></label>
-                <label>Nascimento: <input type="text" id="edit-dn"></label>
-                <label>CPF: <input type="text" id="edit-cpf"></label>
-                <label>RG: <input type="text" id="edit-rg"></label>
-                <label>Telefone: <input type="text" id="edit-tel"></label>
-                
-                <div class="edit-full"><hr style="border: 0; border-top: 1px dashed var(--border-strong); margin: 10px 0;"></div>
-                
-                <label class="edit-full">Exames Clínicos: <input type="text" id="edit-ex-clinico"></label>
-                <label class="edit-full">Exames Raio-X: <input type="text" id="edit-ex-raiox"></label>
-                <label class="edit-full">Exames Lab: <input type="text" id="edit-ex-lab"></label>
-                
-                <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-fono" style="transform: scale(1.3);"> Tem Fonoaudiologia?</label>
-                <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-consulta" style="transform: scale(1.3);"> Tem Consulta Médica?</label>
-            </div>
-            <div style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">
-                <button onclick="fecharModal()" style="padding:10px 15px; border-radius:5px; border:1px solid var(--border-strong); background:var(--surface-muted); color: var(--text-strong); cursor:pointer; font-weight:bold;">Cancelar</button>
-                <button id="btn-salvar-edicao" style="padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Salvar Alterações</button>
-            </div>
-        </div>
-    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -123,161 +98,127 @@
             const tabela = document.getElementById('lista-liberacao');
             const inputData = document.getElementById('filtro-data');
             const inputPesq = document.getElementById('pesquisa-paciente');
-            let databaseAdmin = [];
-            let fetchController = null; 
-            
-            // Variável de controlo para saber se estamos no modo de Busca Global
-            let modoBuscaGlobal = false;
+            let abaAtiva = 'todos'; 
+            let fetchController = null;
 
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
-            function validarCPF(cpf) {
-                cpf = cpf.replace(/[^\d]+/g,'');
-                if(cpf == '') return false;
-                if (/^(\d)\1{10}$/.test(cpf)) return false;
-                let add = 0;
-                for (let i=0; i < 9; i ++) add += parseInt(cpf.charAt(i)) * (10 - i);
-                let rev = 11 - (add % 11);
-                if (rev == 10 || rev == 11) rev = 0;
-                if (rev != parseInt(cpf.charAt(9))) return false;
-                add = 0;
-                for (let i = 0; i < 10; i ++) add += parseInt(cpf.charAt(i)) * (11 - i);
-                rev = 11 - (add % 11);
-                if (rev == 10 || rev == 11) rev = 0;
-                if (rev != parseInt(cpf.charAt(10))) return false;
-                return true;
-            }
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    abaAtiva = this.getAttribute('data-aba');
+                    aplicarFiltros();
+                });
+            });
 
-            // Função mestre de busca (Aceita parâmetro para saber se é global ou diária)
-            function buscarDados(isGlobal = false) {
-                modoBuscaGlobal = isGlobal; // Atualiza o estado
-                
-                if(!isGlobal && !inputData.value) return;
-                
+            function buscarDados() {
+                if(!inputData.value) return;
                 document.getElementById('msg-carregando').style.display = "block";
-                tabela.innerHTML = "";
-                document.getElementById('msg-vazio').style.display = "none";
                 
                 if (fetchController) fetchController.abort();
                 fetchController = new AbortController();
 
-                // Constrói o Link: Se for global, passa buscaGlobal=true. Se for diária, passa a data.
-                const urlFetch = isGlobal 
-                    ? `${URL_GOOGLE_SCRIPT}?buscaGlobal=true` 
-                    : `${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`;
-
-                fetch(urlFetch, { signal: fetchController.signal })
+                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
                     .then(r => r.json())
                     .then(data => {
                         document.getElementById('msg-carregando').style.display = "none";
-                        if (data.status === "sucesso" && data.pacientes.length > 0) {
-                            databaseAdmin = data.pacientes;
-                            renderizarTabela(databaseAdmin);
-                        } else { 
-                            tabela.innerHTML = ""; 
-                            document.getElementById('msg-vazio').style.display = "block"; 
-                        }
+                        if (data.status === "sucesso" && data.pacientes.length > 0) renderizarTabela(data.pacientes);
+                        else { tabela.innerHTML = ""; document.getElementById('msg-vazio').style.display = "block"; }
                     }).catch((err) => { if (err.name !== 'AbortError') console.error(err); });
             }
 
-            // Polling de 15 segundos (Pausa automaticamente se estiver em Busca Global)
-            setInterval(() => {
-                if (document.hidden || modoBuscaGlobal || !inputData.value) return; 
+            setInterval(atualizacaoSilenciosa, 15000);
+
+            function atualizacaoSilenciosa() {
+                if (document.hidden || !inputData.value) return; 
                 
                 if (fetchController) fetchController.abort();
                 fetchController = new AbortController();
-                
+
                 fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
                     .then(r => r.json())
                     .then(data => {
                         if (data.status === "sucesso" && data.pacientes.length > 0) {
                             const pacValidos = data.pacientes.filter(p => p.temClinico || p.temRaiox || p.temLab || p.temFono || p.temConsulta);
-                            
                             if (pacValidos.length !== document.querySelectorAll('.linha-paciente').length) {
-                                databaseAdmin = data.pacientes;
-                                renderizarTabela(databaseAdmin);
+                                renderizarTabela(data.pacientes);
                                 return;
                             }
                             
                             data.pacientes.forEach(pac => {
-                                const l = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
-                                if (l && document.getElementById('modal-editar').style.display === 'none') {
-                                    const updateCheck = (setor, valor) => {
-                                        const cb = l.querySelector(`.check-setor-admin[data-setor="${setor}"]`);
-                                        if(cb && cb.checked !== valor && !cb.disabled) cb.checked = valor;
+                                const linha = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
+                                if (linha) {
+                                    const updateCheck = (cls, val) => {
+                                        const cb = linha.querySelector(cls);
+                                        if (cb && cb.checked !== val) cb.checked = val;
                                     };
                                     
-                                    updateCheck('clinico', pac.liberadoClinico);
-                                    updateCheck('raiox', pac.liberadoRaiox);
-                                    updateCheck('fono', pac.liberadoFono);
-                                    updateCheck('lab', pac.liberadoLab);
-                                    updateCheck('consulta', pac.liberadoConsulta);
+                                    updateCheck('.c-clinico', pac.liberadoClinico);
+                                    updateCheck('.c-raiox', pac.liberadoRaiox);
+                                    updateCheck('.c-fono', pac.liberadoFono);
+                                    updateCheck('.c-lab', pac.liberadoLab);
+                                    updateCheck('.c-consulta', pac.liberadoConsulta);
                                     
-                                    const obs = l.querySelector('.obs-input-admin'); 
-                                    if(obs && document.activeElement !== obs && obs.value !== (pac.obsLab || '') && !obs.disabled) {
-                                        obs.value = pac.obsLab || '';
-                                    }
+                                    const obs = linha.querySelector('.obs-read'); 
+                                    if(obs && obs.textContent !== (pac.obsLab || '')) obs.textContent = pac.obsLab;
+                                    
+                                    verificarStatusFilaLocal(linha);
                                 }
                             });
-                            databaseAdmin = data.pacientes; 
                         }
                     }).catch((err) => { if (err.name !== 'AbortError') console.error(err); });
-            }, 15000);
+            }
 
             function renderizarTabela(pacientes) {
                 tabela.innerHTML = "";
-                pacientes.forEach((pac, index) => {
+                pacientes.forEach(pac => {
                     if (!pac.temClinico && !pac.temRaiox && !pac.temLab && !pac.temFono && !pac.temConsulta) return;
 
-                    const cell = (exame, checked, setor) => `
+                    const cell = (exame, checked, classe) => `
                         <div class="celula-exame">
-                            <input type="checkbox" class="check-setor-admin" data-setor="${setor}" ${checked ? 'checked' : ''} style="cursor:pointer; transform: scale(1.3);">
-                            <div class="detalhe-exame" style="margin-top:4px;">${exame}</div>
+                            <input type="checkbox" class="${classe}" ${checked ? 'checked' : ''} onclick="return false;" style="cursor:not-allowed;">
+                            <div class="detalhe-exame">${exame}</div>
                         </div>
                     `;
                     const cellLab = (exame, checked, obs) => `
                         <div class="celula-exame">
-                            <input type="checkbox" class="check-setor-admin" data-setor="lab" ${checked ? 'checked' : ''} style="cursor:pointer; transform: scale(1.3);">
-                            <div class="detalhe-exame" style="margin-top:4px;">${exame}</div>
-                            <textarea class="obs-input-admin" data-cpf="${pac.cpf}" rows="2">${obs || ''}</textarea>
+                            <input type="checkbox" class="c-lab" ${checked ? 'checked' : ''} onclick="return false;" style="cursor:not-allowed;">
+                            <div class="detalhe-exame">${exame}</div>
+                            <div class="obs-read" style="font-size:10px; color:var(--danger); background:var(--danger-soft); padding:3px; border-radius:3px; width:100%; text-align:center; min-height: 18px;">${obs || ''}</div>
                         </div>
                     `;
 
-                    const tdC = pac.temClinico ? cell(pac.examesClinicos, pac.liberadoClinico, 'clinico') : `<span class="text-na">—</span>`;
-                    const tdR = pac.temRaiox ? cell(pac.examesRaioX, pac.liberadoRaiox, 'raiox') : `<span class="text-na">—</span>`;
-                    const tdF = pac.temFono ? cell("Audiometria", pac.liberadoFono, 'fono') : `<span class="text-na">—</span>`;
+                    const tdC = pac.temClinico ? cell(pac.examesClinicos, pac.liberadoClinico, 'c-clinico') : `<span class="text-na">—</span>`;
+                    const tdR = pac.temRaiox ? cell(pac.examesRaioX, pac.liberadoRaiox, 'c-raiox') : `<span class="text-na">—</span>`;
+                    const tdF = pac.temFono ? cell("Audiometria", pac.liberadoFono, 'c-fono') : `<span class="text-na">—</span>`;
                     const tdL = pac.temLab ? cellLab(pac.examesLab, pac.liberadoLab, pac.obsLab) : `<span class="text-na">—</span>`;
-                    const tdM = pac.temConsulta ? cell("Médico do Trabalho", pac.liberadoConsulta, 'consulta') : `<span class="text-na">—</span>`;
+                    const tdM = pac.temConsulta ? cell("Médico do Trabalho", pac.liberadoConsulta, 'c-consulta') : `<span class="text-na">—</span>`;
 
-                    const tipoStr = pac.tipoExame ? (pac.tipoExame.includes('(') ? pac.tipoExame : `(${pac.tipoExame})`) : '';
+                    const iniciais = (pac.nome || '-').split(" ").map((n, i, a) => i === 0 || i === a.length - 1 ? n[0] : "").join("").toUpperCase();
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
                     tr.dataset.cpf = pac.cpf;
-                    tr.dataset.dataexame = pac.dataExame;
+                    tr.dataset.clinico = pac.temClinico;
+                    tr.dataset.raiox = pac.temRaiox;
+                    tr.dataset.fono = pac.temFono;
+                    tr.dataset.lab = pac.temLab;
+                    tr.dataset.consulta = pac.temConsulta;
 
-                    // Adicionada a DATA na Interface para a Busca Global fazer sentido
                     tr.innerHTML = `
-                        <td>
-                            <div style="font-weight:bold; color:var(--text-strong);" class="col-nome">${pac.nome}</div>
-                            <div style="font-size:12px; color:var(--accent); font-weight: 600;">📅 Data: ${pac.dataExame || '-'}</div>
-                            <div style="font-size:11px; color:var(--text-muted);">Empresa: ${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></div>
-                            <div style="font-size:11px; color:var(--text-muted);">CPF: ${pac.cpf}</div>
-                        </td>
-                        <td style="text-align: center; background:var(--surface-muted);">${tdC}</td>
-                        <td style="text-align: center;">${tdR}</td>
-                        <td style="text-align: center; background:var(--surface-muted);">${tdF}</td>
-                        <td style="text-align: center;">${tdL}</td>
-                        <td style="text-align: center; background:var(--surface-muted);">${tdM}</td>
-                        <td style="text-align: center;">
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <button class="btn-editar" data-index="${index}" style="background:var(--accent); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">✏️ Editar Dados</button>
-                                <button class="btn-apagar" style="background:var(--danger); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">🗑️ Excluir</button>
-                            </div>
-                        </td>
+                        <td><span class="tag-empresa">${pac.empresa || '-'}</span></td>
+                        <td><div class="perfil-paciente"><div class="avatar">${iniciais}</div><span class="col-nome">${pac.nome}</span></div></td>
+                        <td class="col-clinico" style="text-align: center;">${tdC}</td>
+                        <td class="col-raiox" style="text-align: center;">${tdR}</td>
+                        <td class="col-fono" style="text-align: center;">${tdF}</td>
+                        <td class="col-lab" style="text-align: center;">${tdL}</td>
+                        <td class="col-consulta" style="text-align: center;">${tdM}</td>
+                        <td style="text-align: center;"><span class="badge-status pendente">AGUARDANDO</span></td>
                     `;
                     tabela.appendChild(tr);
+                    verificarStatusFilaLocal(tr);
                 });
                 aplicarFiltros();
             }
@@ -285,185 +226,35 @@
             function aplicarFiltros() {
                 const termo = inputPesq.value.toLowerCase();
                 let visiveis = 0;
+                ['clinico', 'raiox', 'fono', 'lab', 'consulta'].forEach(s => {
+                    document.querySelectorAll(`.col-${s}`).forEach(el => el.style.display = (abaAtiva === 'todos' || abaAtiva === s) ? '' : 'none');
+                });
                 document.querySelectorAll('.linha-paciente').forEach(linha => {
                     const passaPesq = linha.textContent.toLowerCase().includes(termo);
-                    linha.style.display = passaPesq ? '' : 'none';
-                    if (passaPesq) visiveis++;
+                    const passaAba = abaAtiva === 'todos' || linha.dataset[abaAtiva] === 'true';
+                    linha.style.display = (passaPesq && passaAba) ? '' : 'none';
+                    if (passaPesq && passaAba) visiveis++;
                 });
                 document.getElementById('msg-vazio').style.display = visiveis === 0 ? 'block' : 'none';
             }
 
-            tabela.addEventListener('change', function(e) {
-                const tr = e.target.closest('tr');
-                const cpf = tr.dataset.cpf;
-
-                if (e.target.classList.contains('check-setor-admin')) {
-                    const cb = e.target;
-                    const setor = cb.dataset.setor;
-                    const liberado = cb.checked;
-                    
-                    cb.disabled = true;
-                    cb.style.opacity = "0.4";
-
-                    fetch(URL_GOOGLE_SCRIPT, {
-                        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_SETOR", cpf: cpf, setor: setor, liberado: liberado })
-                    }).then(r => r.json()).then(res => {
-                        if(res.status !== "sucesso") throw new Error();
-                        cb.style.opacity = "1";
-                        cb.disabled = false;
-                    }).catch(() => { 
-                        alert("Erro ao forçar atualização."); 
-                        cb.checked = !liberado; 
-                        cb.style.opacity = "1"; 
-                        cb.disabled = false;
-                    });
+            function verificarStatusFilaLocal(linha) {
+                const checkboxes = linha.querySelectorAll('input[type="checkbox"]');
+                const marcados = linha.querySelectorAll('input[type="checkbox"]:checked');
+                const badge = linha.querySelector('.badge-status');
+                if (checkboxes.length > 0 && checkboxes.length === marcados.length) {
+                    badge.textContent = 'CONCLUÍDO'; badge.className = 'badge-status liberado'; linha.classList.add('paciente-liberado-fade');
+                } else {
+                    badge.textContent = 'EM ATENDIMENTO'; badge.className = 'badge-status pendente'; linha.classList.remove('paciente-liberado-fade');
                 }
+            }
 
-                if (e.target.classList.contains('obs-input-admin')) {
-                    const obsInput = e.target;
-                    obsInput.disabled = true;
-                    obsInput.style.opacity = "0.4";
-                    
-                    fetch(URL_GOOGLE_SCRIPT, {
-                        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_OBS", cpf: cpf, obs: obsInput.value })
-                    }).then(r => r.json()).then(res => {
-                        if(res.status !== "sucesso") throw new Error();
-                        obsInput.style.opacity = "1"; 
-                        obsInput.style.borderColor = "var(--success)";
-                        obsInput.disabled = false;
-                        setTimeout(() => obsInput.style.borderColor = "var(--border-strong)", 2000);
-                    }).catch(() => { 
-                        alert("Erro ao guardar observação."); 
-                        obsInput.style.opacity = "1"; 
-                        obsInput.disabled = false;
-                    });
-                }
-            });
-
-            tabela.addEventListener('click', function(e) {
-                if (e.target.classList.contains('btn-apagar')) {
-                    const btn = e.target;
-                    const tr = btn.closest('tr');
-                    const nome = tr.querySelector('.col-nome').textContent;
-                    
-                    if (confirm(`TEM A CERTEZA ABSOLUTA?\n\nDeseja excluir permanentemente o registo de:\n${nome}\n\nEsta ação não pode ser desfeita.`)) {
-                        btn.textContent = "Apagando...";
-                        btn.disabled = true;
-
-                        fetch(URL_GOOGLE_SCRIPT, {
-                            method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "DELETAR_PACIENTE", cpf: tr.dataset.cpf, dataExame: tr.dataset.dataexame })
-                        }).then(r => r.json()).then(res => {
-                            if(res.status === "sucesso") tr.remove();
-                            else throw new Error(res.detalhe || "Erro desconhecido");
-                        }).catch((err) => { 
-                            alert("Falha na exclusão: " + err.message); 
-                            btn.textContent = "🗑️ Excluir"; 
-                            btn.disabled = false; 
-                        });
-                    }
-                }
-
-                if (e.target.classList.contains('btn-editar')) {
-                    const index = e.target.dataset.index;
-                    const pac = databaseAdmin[index];
-                    abrirModalEdicao(pac);
-                }
-            });
-
-            window.abrirModalEdicao = function(pac) {
-                document.getElementById('edit-cpf-antigo').value = pac.cpf;
-                document.getElementById('edit-data-exame').value = pac.dataExame;
-                
-                document.getElementById('edit-nome').value = pac.nome;
-                document.getElementById('edit-empresa').value = pac.empresa;
-                document.getElementById('edit-tipo').value = pac.tipoExame || "";
-                document.getElementById('edit-funcao').value = pac.funcao;
-                document.getElementById('edit-dn').value = pac.dn;
-                document.getElementById('edit-rg').value = pac.rg;
-                document.getElementById('edit-cpf').value = pac.cpf;
-                document.getElementById('edit-tel').value = pac.telefone;
-                
-                document.getElementById('edit-ex-clinico').value = pac.examesClinicos === "Nenhum" ? "" : pac.examesClinicos;
-                document.getElementById('edit-ex-raiox').value = pac.examesRaioX === "Nenhum" ? "" : pac.examesRaioX;
-                document.getElementById('edit-ex-lab').value = pac.examesLab === "Nenhum" ? "" : pac.examesLab;
-                
-                document.getElementById('edit-tem-fono').checked = pac.temFono;
-                document.getElementById('edit-tem-consulta').checked = pac.temConsulta;
-
-                document.getElementById('modal-editar').style.display = 'flex';
-            };
-
-            window.fecharModal = function() {
-                document.getElementById('modal-editar').style.display = 'none';
-            };
-
-            document.getElementById('btn-salvar-edicao').addEventListener('click', function(e) {
-                const btn = e.target;
-                
-                const cpfNovo = document.getElementById('edit-cpf').value.trim();
-                if (cpfNovo && !validarCPF(cpfNovo)) {
-                    alert("AÇÃO BLOQUEADA: O CPF digitado é inválido. Por favor, corrija antes de salvar as alterações.");
-                    return;
-                }
-
-                let dataRaw = document.getElementById('edit-data-exame').value;
-                
-                const dadosEdicao = {
-                    token: localStorage.getItem('monad_token'),
-                    acao: "EDITAR_PACIENTE",
-                    cpfAntigo: document.getElementById('edit-cpf-antigo').value.trim(),
-                    dataExame: dataRaw.trim(),
-                    nome: document.getElementById('edit-nome').value,
-                    empresa: document.getElementById('edit-empresa').value,
-                    tipoExame: document.getElementById('edit-tipo').value,
-                    funcao: document.getElementById('edit-funcao').value,
-                    dn: document.getElementById('edit-dn').value,
-                    rg: document.getElementById('edit-rg').value,
-                    cpfNovo: cpfNovo,
-                    telefone: document.getElementById('edit-tel').value,
-                    examesClinicos: document.getElementById('edit-ex-clinico').value || "Nenhum",
-                    examesRaioX: document.getElementById('edit-ex-raiox').value || "Nenhum",
-                    examesLab: document.getElementById('edit-ex-lab').value || "Nenhum",
-                    audiometria: document.getElementById('edit-tem-fono').checked,
-                    consultaClinica: document.getElementById('edit-tem-consulta').checked
-                };
-
-                btn.textContent = "A gravar...";
-                btn.disabled = true;
-
-                fetch(URL_GOOGLE_SCRIPT, {
-                    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(dadosEdicao)
-                }).then(r => r.json()).then(res => {
-                    btn.textContent = "Salvar Alterações";
-                    btn.disabled = false;
-                    if(res.status === "sucesso") {
-                        fecharModal();
-                        buscarDados(modoBuscaGlobal); // Atualiza consoante o modo onde estávamos
-                    } else {
-                        alert("Servidor diz: " + (res.detalhe || "Erro desconhecido"));
-                    }
-                }).catch((err) => { 
-                    alert("Falha Crítica ao tentar editar: " + err.message); 
-                    btn.textContent = "Salvar Alterações";
-                    btn.disabled = false;
-                });
-            });
-
-            // Atribuição de Eventos aos Botões
-            document.getElementById('btn-buscar-data').addEventListener('click', () => buscarDados(false)); // Busca por data
-            document.getElementById('btn-busca-global').addEventListener('click', () => buscarDados(true)); // Busca em toda a base
-
+            document.getElementById('btn-buscar-data').addEventListener('click', buscarDados);
             inputPesq.addEventListener('input', aplicarFiltros);
-            
-            // Busca inicial (apenas a data de hoje)
-            buscarDados(false);
+            buscarDados();
         });
-
-        // Theme Toggle Logic
+    </script>
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
             const btnTheme = document.getElementById('btn-theme-toggle');
             if (btnTheme) {
