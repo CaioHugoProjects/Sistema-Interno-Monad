@@ -6,8 +6,6 @@
     <title>Painel de Setor - Clínica Monad</title>
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
-    <!-- INTERCEPTOR OFFLINE ADICIONADO -->
-    <script src="js/syncManager.js"></script>
     <script>
         // GATEKEEPER E TEMA
         if (localStorage.getItem('monad_theme') === 'dark') {
@@ -139,7 +137,7 @@
                 if (fetchController) fetchController.abort();
                 fetchController = new AbortController();
 
-                window.monadFetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
+                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
                     .then(r => r.json())
                     .then(data => {
                         document.getElementById('msg-carregando').style.display = "none";
@@ -157,7 +155,7 @@
             // Polling silencioso a cada 15s para manter a tela viva
             setInterval(() => {
                 if (document.hidden || !inputData.value) return;
-                window.monadFetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`)
+                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`)
                     .then(r => r.json())
                     .then(data => {
                         if (data.status === "sucesso") {
@@ -269,7 +267,7 @@
                         b.style.color = "white";
                         
                         // Envia para o backend
-                        window.monadFetch(URL_GOOGLE_SCRIPT, {
+                        fetch(URL_GOOGLE_SCRIPT, {
                             method: 'POST',
                             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                             body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "CHAMAR_PACIENTE", nome: nome, cpf: cpf })
@@ -294,7 +292,7 @@
                     cb.disabled = true;
                     card.style.opacity = "0.4";
 
-                    window.monadFetch(URL_GOOGLE_SCRIPT, {
+                    fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_SETOR", cpf: cpf, setor: setor, liberado: liberado })
                     }).then(r => r.json()).then(res => {
@@ -318,7 +316,7 @@
                     obsInput.disabled = true;
                     obsInput.style.opacity = "0.5";
                     
-                    window.monadFetch(URL_GOOGLE_SCRIPT, {
+                    fetch(URL_GOOGLE_SCRIPT, {
                         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_OBS", cpf: cpf, obs: obsInput.value })
                     }).then(r => r.json()).then(res => {
@@ -372,25 +370,6 @@
                 });
             }
         });
-    </script>
-    <script>
-        // AUTO-SLEEP e DEFESA ZUMBI
-        (function() {
-            setInterval(function() {
-                var agora = new Date();
-                // Desliga a aplicação sumariamente a partir das 14h
-                if (agora.getHours() >= 14) {
-                    var maiorId = window.setTimeout(function(){}, 0);
-                    for (var i = 0; i <= maiorId; i++) {
-                        window.clearTimeout(i);
-                        window.clearInterval(i);
-                    }
-                    localStorage.clear();
-                    alert("🔒 EXPEDIENTE ENCERRADO.\n\nPor segurança e integridade do banco de dados, o sistema encerrou os processos de sincronização e desconectou o seu usuário.\n\nO acesso será liberado amanhã a partir das 06h30.");
-                    window.location.replace("login.html");
-                }
-            }, 60000); 
-        })();
     </script>
 </body>
 </html>

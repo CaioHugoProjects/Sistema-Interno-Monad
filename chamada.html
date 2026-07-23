@@ -1,105 +1,324 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Chamada - Monad</title>
-    <link rel="stylesheet" href="styles/styles.css">
-    <!-- INTERCEPTOR OFFLINE ADICIONADO -->
-    <script src="js/syncManager.js"></script>
-    <script>
-        if (localStorage.getItem('monad_theme') === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
-    </script>
-    <style>
-        body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; justify-content: center; align-items: center; background-color: var(--bg-slate); transition: background-color 0.5s ease;}
-        .painel-aviso { background: var(--surface); padding: 50px; border-radius: var(--radius-lg); box-shadow: var(--shadow-float); text-align: center; border: 4px solid var(--border-strong); width: 80%; max-width: 800px; transform: scale(0.95); opacity: 0.5; transition: all 0.4s ease; }
-        
-        /* Classe ativada quando o médico clica no botão */
-        .chamando { transform: scale(1); opacity: 1; border-color: var(--accent); box-shadow: 0 0 40px var(--accent-ring); }
-        .chamando h1 { color: var(--accent) !important; }
-        
-        h1 { font-size: 45px; margin: 0; color: var(--text-muted); line-height: 1.2; text-transform: uppercase;}
-        h2 { font-size: 24px; color: var(--text-secondary); margin-top: 15px; font-weight: 500; }
-        .rodape-info { position: absolute; bottom: 20px; font-size: 12px; color: var(--text-muted); font-weight: bold;}
-    </style>
-</head>
-<body>
-    <!-- Áudio do "Ding-Dong" (Link público seguro) -->
-    <audio id="som-chamada" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b8175b5f.mp3?filename=airport-ding-dong-89025.mp3" preload="auto"></audio>
+/* =========================================
+   SISTEMA DE DESIGN - CLÍNICA MONAD
+   Fonte: Inter (Acessibilidade e Elegância)
+   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    <div class="painel-aviso" id="caixa-aviso">
-        <h1 id="nome-paciente">AGUARDANDO CHAMADA...</h1>
-        <h2 id="sala-paciente">O Médico avisará por aqui.</h2>
-    </div>
+:root {
+    /* Paleta Tech Corporate - MODO CLARO UNIFICADO */
+    --bg-slate: #f1f5f9; 
+    --surface: #ffffff; 
+    --surface-muted: #f8fafc;
+    --surface-strong: #f1f5f9;
+    
+    --primary-dark: #0f172a; 
+    --primary-main: #1e293b;
+    
+    --accent: #2563eb; 
+    --accent-strong: #1d4ed8;
+    --accent-hover: #1d4ed8;
+    --accent-soft: #eff6ff;
+    --accent-ring: rgba(37, 99, 235, 0.25); 
+    
+    --text-strong: #0f172a;
+    --text-primary: #0f172a;
+    --text-main: #334155;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    
+    --border: #e2e8f0;
+    --border-light: rgba(226, 232, 240, 0.6); 
+    --border-strong: #cbd5e1;
+    --border-hover: #cbd5e1;
 
-    <div class="rodape-info">Sistema de Chamada Clínica Monad • Sincronização Ativa 🟢</div>
+    --success: #059669;
+    --success-soft: #d1fae5;
+    --success-border: #a7f3d0;
+    
+    --warning: #d97706;
+    --warning-soft: #fef3c7;
+    --warning-border: #fde68a;
 
-    <script>
-        // COLOQUE O SEU URL DO GOOGLE SCRIPT AQUI
-        const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
-        
-        let ultimaChamadaRegistada = 0;
-        const nomePaciente = document.getElementById('nome-paciente');
-        const salaPaciente = document.getElementById('sala-paciente');
-        const caixaAviso = document.getElementById('caixa-aviso');
-        const somChamada = document.getElementById('som-chamada');
+    --danger: #dc2626;
+    --danger-soft: #fee2e2;
+    
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    
+    --shadow-float: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.01);
+    --shadow-btn: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
 
-        // Para permitir o áudio automático no navegador, o utilizador precisa clicar na tela 1 vez.
-        document.body.addEventListener('click', () => {
-            somChamada.play().then(() => { somChamada.pause(); somChamada.currentTime = 0; }).catch(e => console.log(e));
-        }, { once: true });
+[data-theme="dark"] {
+    /* Paleta Tech Corporate - MODO ESCURO UNIFICADO */
+    --bg-slate: #0f172a; 
+    --surface: #1e293b; 
+    --surface-muted: #0f172a;
+    --surface-strong: #334155;
+    
+    --primary-dark: #f8fafc; 
+    --primary-main: #cbd5e1;
+    
+    --accent: #3b82f6; 
+    --accent-strong: #60a5fa;
+    --accent-hover: #60a5fa;
+    --accent-soft: rgba(59, 130, 246, 0.2);
+    --accent-ring: rgba(59, 130, 246, 0.4); 
+    
+    --text-strong: #f8fafc; 
+    --text-primary: #f8fafc;
+    --text-main: #cbd5e1; 
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8; 
+    
+    --border: #334155;
+    --border-light: rgba(51, 65, 85, 0.6); 
+    --border-strong: #334155; 
+    --border-hover: #475569;
 
-        function verificarChamada() {
-            window.monadFetch(`${URL_GOOGLE_SCRIPT}?obterChamada=true`)
-                .then(r => r.json())
-                .then(data => {
-                    if (data && data.timestamp) {
-                        // Se o timestamp for MAIOR que o que temos guardado, é uma chamada NOVA!
-                        if (data.timestamp > ultimaChamadaRegistada) {
-                            ultimaChamadaRegistada = data.timestamp;
-                            
-                            // Atualiza a tela
-                            nomePaciente.textContent = data.nome;
-                            salaPaciente.innerHTML = "Dirija-se ao <strong>Consultório Médico</strong>";
-                            
-                            // Efeito visual e sonoro
-                            caixaAviso.classList.add('chamando');
-                            somChamada.play().catch(e => console.log("Clique na tela uma vez para ativar o som."));
-                            
-                            // Remove o destaque visual após 10 segundos
-                            setTimeout(() => {
-                                caixaAviso.classList.remove('chamando');
-                                nomePaciente.textContent = "AGUARDANDO CHAMADA...";
-                                salaPaciente.textContent = "O Médico avisará por aqui.";
-                            }, 15000);
-                        }
-                    }
-                }).catch(err => console.error(err));
-        }
+    --success: #10b981;
+    --success-soft: rgba(16, 185, 129, 0.2);
+    --success-border: rgba(16, 185, 129, 0.4);
+    
+    --warning: #f59e0b;
+    --warning-soft: rgba(245, 158, 11, 0.2);
+    --warning-border: rgba(245, 158, 11, 0.4);
+    
+    --danger: #ef4444;
+    --danger-soft: rgba(239, 68, 68, 0.2);
+    
+    --shadow-float: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    --shadow-btn: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
 
-        // Verifica a cada 3 segundos
-        setInterval(verificarChamada, 3000);
-    </script>
-    <script>
-        // AUTO-SLEEP e DEFESA ZUMBI
-        (function() {
-            setInterval(function() {
-                var agora = new Date();
-                // Desliga a aplicação sumariamente a partir das 14h
-                if (agora.getHours() >= 14) {
-                    var maiorId = window.setTimeout(function(){}, 0);
-                    for (var i = 0; i <= maiorId; i++) {
-                        window.clearTimeout(i);
-                        window.clearInterval(i);
-                    }
-                    localStorage.clear();
-                    alert("🔒 EXPEDIENTE ENCERRADO.\n\nPor segurança e integridade do banco de dados, o sistema encerrou os processos de sincronização e desconectou o seu usuário.\n\nO acesso será liberado amanhã a partir das 06h30.");
-                    window.location.replace("login.html");
-                }
-            }, 60000); 
-        })();
-    </script>
-</body>
-</html>
+*, *::before, *::after { box-sizing: border-box; }
+
+body { 
+    font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+    margin: 0; 
+    padding: 0; 
+    background-color: var(--bg-slate); 
+    color: var(--text-main); 
+    line-height: 1.6; 
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+header { 
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    color: white; 
+    padding: 24px 20px; 
+    text-align: center;
+    justify-content: center; 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] header { 
+    background: linear-gradient(135deg, #020617 0%, #0f172a 100%); 
+    border-bottom: 1px solid #1e293b; box-shadow: none; 
+}
+
+header h1 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; text-align: center;}
+header h2 { margin: 6px 0 20px 0; font-size: 15px; font-weight: 500; color: #bfdbfe; text-align: center;}
+
+nav ul { list-style: none; padding: 0; margin: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+nav a { color: #e2e8f0; text-decoration: none; font-weight: 600; font-size: 14px; padding: 10px 16px; border-radius: 8px; transition: all 0.2s ease;}
+nav a:hover, nav a[style*="background-color: #003366"] { background-color: rgba(255, 255, 255, 0.15) !important; color: white;}
+nav a[style*="background-color: #7f1d1d"] { background-color: rgba(239, 68, 68, 0.8) !important;}
+nav a[style*="background-color: #7f1d1d"]:hover { background-color: rgba(220, 38, 38, 1) !important;}
+
+main { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+
+/* ELEMENTOS DE FORMULÁRIO */
+button, input, select, textarea { font-family: inherit; }
+label { font-size: 14px; color: var(--text-main); font-weight: 500; }
+input[type="checkbox"], input[type="radio"] { margin-right: 10px; accent-color: var(--accent); cursor: pointer; width: 16px; height: 16px;}
+
+.painel-recepcao { 
+    background: var(--surface); padding: 30px; border: 1px solid var(--border); 
+    border-radius: var(--radius-md); margin-bottom: 40px; box-shadow: var(--shadow-float);
+}
+.painel-recepcao h2 { margin-top: 0; color: var(--text-strong); font-size: 22px; border-bottom: 2px solid var(--surface-strong); padding-bottom: 12px; margin-bottom: 24px;}
+
+fieldset { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px; margin-bottom: 24px; background-color: var(--surface-muted);}
+legend { font-weight: 600; background: var(--surface); padding: 4px 12px; color: var(--accent); border-radius: 6px; border: 1px solid var(--border); font-size: 13px; text-transform: uppercase;}
+
+.form-group { margin-bottom: 18px; }
+.row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+.row label { display: flex; flex-direction: column; gap: 8px; }
+
+.master-input { padding: 12px 14px; border: 1px solid var(--border); border-radius: 6px; width: 100%; font-size: 14px; color: var(--text-strong); background-color: var(--surface); transition: all 0.2s ease;}
+.master-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-ring); }
+.master-input::placeholder { color: var(--text-muted); }
+
+.btn-imprimir, .btn-login { background: linear-gradient(to right, var(--accent), var(--accent-strong)); color: white; padding: 14px 28px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: auto; min-width: 200px; transition: all 0.2s ease; box-shadow: var(--shadow-btn);}
+.btn-imprimir:hover, .btn-login:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);}
+
+/* GRID INTELIGENTE DOS EXAMES */
+.tipo-exame-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 10px 0; }
+.tipo-exame-grid label { font-size: 13px; color: var(--text-main); display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; background-color: var(--surface); cursor: pointer; transition: all 0.2s ease;}
+.tipo-exame-grid label:hover { border-color: var(--accent); background-color: var(--accent-soft); }
+
+.exames-grid-master { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+.exames-grid-master h4 { margin-top: 0; color: var(--text-strong); border-bottom: 2px solid var(--border); padding-bottom: 8px; font-size: 15px;}
+.exames-grid-master label { display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; color: var(--text-main); font-size: 14px; padding: 4px; border-radius: 4px; transition: background 0.2s;}
+.exames-grid-master label:hover { background: var(--surface-strong); color: var(--text-strong);}
+
+.scroll-box { max-height: 280px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 15px; background-color: var(--surface);}
+.scroll-box::-webkit-scrollbar { width: 6px; }
+.scroll-box::-webkit-scrollbar-track { background: var(--surface-muted); }
+.scroll-box::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+/* FICHAS SETORIAIS */
+.area-impressao { display: flex; flex-direction: column; gap: 30px; }
+.ficha-setor { background: #fff; border: 1px solid var(--border-strong); padding: 25px; border-radius: 8px; display: flex; flex-direction: column; }
+.cabecalho-setor { border-bottom: 2px dashed var(--border-strong); padding-bottom: 15px; margin-bottom: 15px; }
+.cabecalho-setor h2 { text-align: center; background: #f1f5f9; padding: 10px; margin: 0 0 15px 0; font-size: 16px; border: 1px solid #e2e8f0; border-radius: 6px; color: #1e293b; }
+.linha-info { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+.info-maior { flex: 0.7; color: #475569; }
+.info-menor { flex: 0.3; text-align: right; color: #475569; }
+.dados-espelhados span { color: #0f172a; font-weight: 700; }
+.corpo-setor { flex: 1; }
+.corpo-setor h3 { margin-top: 0; font-size: 14px; color: #64748b; text-transform: uppercase; margin-bottom: 12px; }
+.lista-exames-print { margin: 0; padding-left: 20px; column-width: 250px; column-gap: 30px; }
+.lista-exames-print li { font-size: 14px; margin-bottom: 8px; list-style-type: disc; font-weight: 600; color: #1e293b; }
+.lista-exames-print li.vazio { color: #94a3b8; list-style-type: none; margin-left: 0; font-style: italic; font-weight: normal; }
+.tabela-audiometria { width: 100%; border-collapse: collapse; margin-top: 10px; border-radius: 4px; overflow: hidden; }
+.tabela-audiometria th, .tabela-audiometria td { border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-size: 13px; }
+.tabela-audiometria th { background: #f8fafc; color: #475569; }
+.rodape-setor { margin-top: 30px; display: flex; justify-content: flex-end; }
+.area-assinatura { border-top: 1px solid #000; width: 300px; text-align: center; padding-top: 8px; font-size: 13px; font-weight: 500; color: #334155; }
+
+
+/* =========================================
+   BOTÕES À PROVA DE FALHAS (CORREÇÃO DE CORES)
+   Garante 100% de visibilidade contra fundos brancos ou escuros
+   ========================================= */
+
+.btn-header-outline {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-header-outline:hover { background-color: rgba(255, 255, 255, 0.25) !important; }
+
+.btn-header-danger {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.btn-header-danger:hover { background-color: #b91c1c !important; }
+
+.btn-inserir-seguro {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+.btn-inserir-seguro:hover { background-color: #1d4ed8 !important; }
+[data-theme="dark"] .btn-inserir-seguro { background-color: #3b82f6 !important; color: #ffffff !important; }
+[data-theme="dark"] .btn-inserir-seguro:hover { background-color: #60a5fa !important; color: #0f172a !important; }
+
+.btn-theme-toggle {
+    background: none; border: none; font-size: 22px; cursor: pointer; padding: 5px; transition: transform 0.2s; color: #fff;
+}
+.btn-theme-toggle:hover { transform: scale(1.1); }
+
+
+/* =========================================
+   🛡️ ESCUDO DE DARK MODE (OVERRIDE DE CORES INLINE DO JAVASCRIPT)
+   Deteta cores "fixas" injetadas pelo JS nas tabelas e converte-as
+   ========================================= */
+
+/* 1. Converte fundos brancos/cinzas injetados para fundos escuros */
+[data-theme="dark"] [style*="background:#f8fafc"],
+[data-theme="dark"] [style*="background: #f8fafc"],
+[data-theme="dark"] [style*="background-color:#f8fafc"],
+[data-theme="dark"] [style*="background-color: #f8fafc"] {
+    background-color: var(--surface-muted) !important;
+}
+
+[data-theme="dark"] [style*="background:#e2e8f0"],
+[data-theme="dark"] [style*="background: #e2e8f0"],
+[data-theme="dark"] [style*="background:#f1f5f9"],
+[data-theme="dark"] [style*="background: #f1f5f9"] {
+    background-color: var(--surface-strong) !important;
+}
+
+/* 2. Converte textos pretos/azul-escuros injetados para branco/gelo */
+[data-theme="dark"] [style*="color:#0f172a"],
+[data-theme="dark"] [style*="color: #0f172a"],
+[data-theme="dark"] [style*="color:#1e293b"],
+[data-theme="dark"] [style*="color: #1e293b"],
+[data-theme="dark"] [style*="color:#334155"],
+[data-theme="dark"] [style*="color: #334155"] {
+    color: var(--text-strong) !important;
+}
+
+/* 3. Converte textos cinzentos médios injetados para cinza claro legível */
+[data-theme="dark"] [style*="color:#475569"],
+[data-theme="dark"] [style*="color: #475569"],
+[data-theme="dark"] [style*="color:#64748b"],
+[data-theme="dark"] [style*="color: #64748b"] {
+    color: var(--text-muted) !important;
+}
+
+/* 4. Força as células das tabelas a respeitarem o modo escuro integralmente */
+[data-theme="dark"] .tabela-liberacao td {
+    border-color: var(--border-strong) !important;
+    color: var(--text-main) !important;
+}
+
+
+/* =======================================================
+   REGRAS DE IMPRESSÃO (PERFEIÇÃO A4 MANTIDA)
+   ======================================================= */
+@media print {
+    *, *::before, *::after { box-sizing: border-box !important; }
+    @page { size: A4; margin: 4mm; }
+    header, nav, footer, .no-print, .painel-recepcao { display: none !important; }
+    body, [data-theme="dark"] body { background-color: white !important; margin: 0; padding: 0; color: black !important; }
+    main { margin: 0; padding: 0; max-width: 100%; }
+    
+    .area-impressao { display: flex; flex-direction: column; justify-content: flex-start; height: 282mm; gap: 3mm; margin: 0; padding: 0; overflow: hidden; }
+    .ficha-setor, [data-theme="dark"] .ficha-setor { border: 1px dashed #666 !important; padding: 3mm 5mm !important; margin: 0 !important; border-radius: 0; box-shadow: none; display: flex; flex-direction: column; background: white !important; }
+    #setor-audio { flex: 0 0 80mm; } #setor-raiox { flex: 0 1 auto; min-height: 45mm; } #setor-clinico, #setor-lab { flex: 1 1 auto; min-height: 55mm; }
+    
+    .cabecalho-setor, [data-theme="dark"] .cabecalho-setor { border-bottom: 1px solid #000 !important; padding-bottom: 4px; margin-bottom: 6px; }
+    .cabecalho-setor h2, [data-theme="dark"] .cabecalho-setor h2 { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 12px; padding: 3px; margin: 0 0 6px 0; border: 1px solid #000 !important; border-radius: 0; color: black !important;}
+    .linha-info, [data-theme="dark"] .linha-info { margin-bottom: 3px; font-size: 11px; flex-direction: row; align-items: center; color: black !important;} 
+    .dados-espelhados span, [data-theme="dark"] .dados-espelhados span { color: #000 !important; }
+    .corpo-setor h3, [data-theme="dark"] .corpo-setor h3 { font-size: 11px; margin: 4px 0; color: black !important;}
+    
+    .lista-exames-print { margin: 0; padding-left: 15px; column-width: 130px; column-gap: 15px; }
+    .lista-exames-print li, [data-theme="dark"] .lista-exames-print li { font-size: 11px; margin-bottom: 2px; break-inside: avoid; page-break-inside: avoid; color: black !important;}
+    
+    .tabela-audiometria { margin-top: 4px; display: table; border-collapse: collapse; }
+    .tabela-audiometria th, [data-theme="dark"] .tabela-audiometria th { padding: 4px; font-size: 11px; background-color: #e0e0e0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; color: black !important; border: 1px solid black !important;}
+    .tabela-audiometria td, [data-theme="dark"] .tabela-audiometria td { padding: 4px; font-size: 11px; height: 35px; border: 1px solid black !important; } 
+    
+    .rodape-setor { margin-top: auto; } 
+    .area-assinatura, [data-theme="dark"] .area-assinatura { font-size: 10px; width: 240px; margin-top: 8px; border-top: 1px solid #000 !important; text-align: center; color: black !important; }
+
+    body.print-compacto .lista-exames-print li { font-size: 9.5px; margin-bottom: 1px; }
+    body.print-compacto .corpo-setor h3 { font-size: 10px; margin: 2px 0; }
+    body.print-compacto .cabecalho-setor h2 { margin-bottom: 4px; padding: 2px; }
+}
