@@ -28,7 +28,6 @@ document.addEventListener("DOMContentLoaded", function() {
             localStorage.setItem('monad_data_recepcao', hoje);
         }
 
-        // Força a injeção da data na impressão logo no carregamento
         const partes = dataFinal.split('-');
         if (partes.length === 3) {
             document.querySelectorAll('.out-data').forEach(span => {
@@ -196,7 +195,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 return;
             }
 
-            // CAPTURA DO TIPO DE EXAME E ENVIA
             const tiposSelecionados = Array.from(document.querySelectorAll('.master-tipo:checked')).map(cb => cb.value);
             const tipoExame = tiposSelecionados.length > 0 ? `(${tiposSelecionados.join(' / ')})` : '';
 
@@ -208,9 +206,9 @@ document.addEventListener("DOMContentLoaded", function() {
             msgStatus.textContent = "⏳ A gravar registo no sistema e a gerar ficha...";
 
             const dados = {
-                token: localStorage.getItem('monad_token'), // SEGURANÇA ATIVADA
+                token: localStorage.getItem('monad_token'), 
                 empresa: empresa,
-                tipoExame: tipoExame, // INCLUÍDO AQUI
+                tipoExame: tipoExame,
                 nome: nome,
                 funcao: funcao,
                 dn: dn,
@@ -233,7 +231,17 @@ document.addEventListener("DOMContentLoaded", function() {
             .then(r => r.json())
             .then(data => {
                 if (data.status !== "sucesso") throw new Error(data.detalhe);
-                msgStatus.textContent = "✅ Guardado com sucesso! A preparar impressão...";
+                
+                // =======================================================
+                // FEEDBACK DE RASTREABILIDADE (TABOCAS)
+                // =======================================================
+                if (data.protocolo_gerado && data.protocolo_gerado !== "") {
+                    msgStatus.textContent = "✅ Guardado! PROTOCOLO GERADO: " + data.protocolo_gerado;
+                    alert("Atenção, Receção!\n\nColaborador da TABOCAS registado com Gota Espessa.\nAnote o Protocolo Gerado: " + data.protocolo_gerado);
+                } else {
+                    msgStatus.textContent = "✅ Guardado com sucesso! A preparar impressão...";
+                }
+
                 msgStatus.style.color = "var(--success)";
                 msgStatus.style.background = "var(--success-soft)";
                 setTimeout(() => {
@@ -242,7 +250,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     btnSalvarImprimir.style.opacity = "1";
                     
                     window.print(); 
-                    // NÃO CHAMA MAIS O RESET() PARA MANTER OS DADOS NA TELA
                 }, 1500);
             })
             .catch((err) => {
@@ -254,4 +261,4 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
     }
-}); 
+});
