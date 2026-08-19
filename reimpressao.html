@@ -159,10 +159,12 @@
         </div>
     </main>
 
+    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
-
             const tabela = document.getElementById('lista-reimpressao');
             const inputPesquisa = document.getElementById('pesquisa-paciente');
             const inputData = document.getElementById('filtro-data');
@@ -175,7 +177,7 @@
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
-            function buscarPacientesDaPlanilha() {
+            async function buscarPacientesDoBanco() {
                 tabela.innerHTML = ""; 
                 msgVazio.style.display = "none";
                 msgCarregando.style.display = "block";
@@ -183,38 +185,53 @@
                 const dataFormatada = inputData.value;
                 if(!dataFormatada) return;
 
-                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${dataFormatada}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        msgCarregando.style.display = "none";
-                        if (data.status === "sucesso" && data.pacientes.length > 0) {
-                            databasePacientes = data.pacientes; 
-                            renderizarTabela(databasePacientes);
-                        } else {
-                            databasePacientes = [];
-                            msgVazio.style.display = "block";
-                        }
-                    })
-                    .catch(error => {
-                        msgCarregando.style.display = "none";
-                        msgVazio.innerHTML = "❌ Erro ao ligar ao servidor.";
+                try {
+                    // Busca os dados diretamente do Supabase
+                    const { data, error } = await supabase
+                        .from('atendimentos')
+                        .select('*')
+                        .eq('data_exame', dataFormatada)
+                        .order('created_at', { ascending: false });
+
+                    msgCarregando.style.display = "none";
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        databasePacientes = data; 
+                        renderizarTabela(databasePacientes);
+                    } else {
+                        databasePacientes = [];
                         msgVazio.style.display = "block";
-                    });
+                    }
+                } catch (error) {
+                    msgCarregando.style.display = "none";
+                    msgVazio.innerHTML = "❌ Erro ao ligar ao banco de dados.";
+                    msgVazio.style.display = "block";
+                    console.error("Erro na busca: ", error.message);
+                }
             }
 
             function renderizarTabela(pacientes) {
                 tabela.innerHTML = "";
                 pacientes.forEach((pac, index) => {
+                    // Mapeia as lógicas verificando as colunas do banco
+                    const temClinico = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
+                    const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
+                    const temFono = pac.audiometria === true;
+                    const temLab = pac.exames_lab && pac.exames_lab !== 'Nenhum';
+                    const temConsulta = pac.consulta_clinica === true;
+
                     const setores = [];
-                    if(pac.temClinico) setores.push("Clínicos");
-                    if(pac.temRaiox) setores.push("Raio-X");
-                    if(pac.temFono) setores.push("Audiometria");
-                    if(pac.temLab) setores.push("Laboratório");
-                    if(pac.temConsulta) setores.push("Consulta Médica");
+                    if(temClinico) setores.push("Clínicos");
+                    if(temRaiox) setores.push("Raio-X");
+                    if(temFono) setores.push("Audiometria");
+                    if(temLab) setores.push("Laboratório");
+                    if(temConsulta) setores.push("Consulta Médica");
                     
                     const resumoSetores = setores.length > 0 ? setores.join(", ") : "Nenhum exame marcado";
 
-                    const tipoStr = pac.tipoExame ? (pac.tipoExame.includes('(') ? pac.tipoExame : `(${pac.tipoExame})`) : '';
+                    const tipoStr = pac.tipo_exame ? (pac.tipo_exame.includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
+                    const dataNascimento = pac.data_nascimento || '-';
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
@@ -222,11 +239,11 @@
                         <td><span class="tag-empresa">${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></span></td>
                         <td>
                             <div style="font-weight: bold; font-size: 15px; color:var(--text-strong);">${pac.nome}</div>
-                            <div style="font-size: 12px; color:var(--text-muted);">${pac.funcao} • Nasc: ${pac.dn}</div>
+                            <div style="font-size: 12px; color:var(--text-muted);">${pac.funcao || '-'} • Nasc: ${dataNascimento}</div>
                         </td>
                         <td>
                             <div style="font-size: 13px; color:var(--text-main);"><strong>CPF:</strong> ${pac.cpf}</div>
-                            <div style="font-size: 12px; color:var(--text-muted);"><strong>RG:</strong> ${pac.rg} • <strong>Tel:</strong> ${pac.telefone}</div>
+                            <div style="font-size: 12px; color:var(--text-muted);"><strong>RG:</strong> ${pac.rg || '-'} • <strong>Tel:</strong> ${pac.telefone || '-'}</div>
                         </td>
                         <td style="font-size: 12px; color:var(--text-secondary); max-width: 200px; white-space: normal;">
                             ${resumoSetores}
@@ -250,29 +267,29 @@
                 renderizarTabela(filtrados);
             });
 
-            document.getElementById('btn-buscar-data').addEventListener('click', buscarPacientesDaPlanilha);
-            buscarPacientesDaPlanilha();
+            document.getElementById('btn-buscar-data').addEventListener('click', buscarPacientesDoBanco);
+            buscarPacientesDoBanco();
 
             window.imprimirFicha = function(index) {
                 const pac = databasePacientes[index];
 
-                let dataParaImpressao = pac.dataExame;
+                let dataParaImpressao = pac.data_exame;
                 if (dataParaImpressao && dataParaImpressao.includes('-')) {
                     const p = dataParaImpressao.split('-');
                     if (p.length === 3) dataParaImpressao = `${p[2]}/${p[1]}/${p[0]}`;
                 }
 
-                const tipoFormatado = pac.tipoExame ? (pac.tipoExame.includes('(') ? pac.tipoExame : `(${pac.tipoExame})`) : '';
+                const tipoFormatado = pac.tipo_exame ? (pac.tipo_exame.includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
                 const empresaFormatada = pac.empresa + (tipoFormatado ? ` ${tipoFormatado}` : '');
 
                 document.querySelectorAll('.out-empresa').forEach(el => el.textContent = empresaFormatada);
                 document.querySelectorAll('.out-nome').forEach(el => el.textContent = pac.nome);
-                document.querySelectorAll('.out-funcao').forEach(el => el.textContent = pac.funcao);
-                document.querySelectorAll('.out-dn').forEach(el => el.textContent = pac.dn);
+                document.querySelectorAll('.out-funcao').forEach(el => el.textContent = pac.funcao || '');
+                document.querySelectorAll('.out-dn').forEach(el => el.textContent = pac.data_nascimento || '-');
                 document.querySelectorAll('.out-cpf').forEach(el => el.textContent = pac.cpf);
-                document.querySelectorAll('.out-rg').forEach(el => el.textContent = pac.rg);
-                document.querySelectorAll('.out-telefone').forEach(el => el.textContent = pac.telefone);
-                document.querySelectorAll('.out-data').forEach(el => el.textContent = dataParaImpressao);
+                document.querySelectorAll('.out-rg').forEach(el => el.textContent = pac.rg || '');
+                document.querySelectorAll('.out-telefone').forEach(el => el.textContent = pac.telefone || '');
+                document.querySelectorAll('.out-data').forEach(el => el.textContent = dataParaImpressao || '-');
 
                 function renderizarLista(idElemento, stringExames) {
                     const ul = document.getElementById(idElemento);
@@ -284,13 +301,16 @@
                     }
                 }
 
-                renderizarLista('lista-clinico', pac.examesClinicos);
-                renderizarLista('lista-raiox', pac.examesRaioX);
-                renderizarLista('lista-lab', pac.examesLab);
+                renderizarLista('lista-clinico', pac.exames_clinicos);
+                renderizarLista('lista-raiox', pac.exames_raiox);
+                renderizarLista('lista-lab', pac.exames_lab);
 
-                document.getElementById('setor-audio').style.display = pac.temFono ? 'flex' : 'none';
+                document.getElementById('setor-audio').style.display = pac.audiometria ? 'flex' : 'none';
 
-                let totalExames = (pac.examesClinicos.match(/,/g) || []).length + (pac.examesLab.match(/,/g) || []).length;
+                let examesClinicosStr = pac.exames_clinicos || "";
+                let examesLabStr = pac.exames_lab || "";
+                let totalExames = (examesClinicosStr.match(/,/g) || []).length + (examesLabStr.match(/,/g) || []).length;
+                
                 if(totalExames > 10) document.body.classList.add('print-compacto');
                 else document.body.classList.remove('print-compacto');
 

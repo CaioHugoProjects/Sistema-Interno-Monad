@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     // ==========================================
-    const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
+    // NOTA: O 'supabase' precisa ser inicializado no HTML antes deste arquivo!
     // ==========================================
 
     const masterInputs = document.querySelectorAll('.master-input');
@@ -176,7 +176,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     if (btnSalvarImprimir) {
-        btnSalvarImprimir.addEventListener('click', function() {
+        // Transformado para async para permitir o 'await' do Supabase
+        btnSalvarImprimir.addEventListener('click', async function() {
             if (btnSalvarImprimir.disabled) return;
 
             if (cpfInput.value && !validarCPF(cpfInput.value)) {
@@ -205,60 +206,65 @@ document.addEventListener("DOMContentLoaded", function() {
             msgStatus.style.background = "var(--accent-soft)";
             msgStatus.textContent = "⏳ A gravar registo no sistema e a gerar ficha...";
 
-            const dados = {
-                token: localStorage.getItem('monad_token'), 
+            // Mapeia os dados exatamente para os nomes das colunas criadas no PostgreSQL
+            const dadosBanco = {
                 empresa: empresa,
-                tipoExame: tipoExame,
                 nome: nome,
                 funcao: funcao,
-                dn: dn,
+                data_nascimento: dn,
                 rg: document.querySelector('[name="rg"]').value.trim(),
                 cpf: document.querySelector('[name="cpf"]').value.trim(),
                 telefone: document.querySelector('[name="telefone"]').value.trim(),
-                dataExame: dataExame,
-                examesClinicos: Array.from(document.querySelectorAll('.master-checkbox[data-setor="clinico"]:checked')).map(cb=>cb.dataset.nome).join(', ') || 'Nenhum',
-                examesRaioX: Array.from(document.querySelectorAll('.master-checkbox[data-setor="raiox"]:checked')).map(cb=>cb.dataset.nome).join(', ') || 'Nenhum',
-                examesLab: Array.from(document.querySelectorAll('.master-checkbox[data-setor="lab"]:checked')).map(cb=>cb.dataset.nome).join(', ') || 'Nenhum',
+                tipo_exame: tipoExame,
+                data_exame: dataExame,
+                exames_clinicos: Array.from(document.querySelectorAll('.master-checkbox[data-setor="clinico"]:checked')).map(cb=>cb.dataset.nome).join(', ') || 'Nenhum',
+                exames_raiox: Array.from(document.querySelectorAll('.master-checkbox[data-setor="raiox"]:checked')).map(cb=>cb.dataset.nome).join(', ') || 'Nenhum',
+                exames_lab: Array.from(document.querySelectorAll('.master-checkbox[data-setor="lab"]:checked')).map(cb=>cb.dataset.nome).join(', ') || 'Nenhum',
                 audiometria: checkAudio ? checkAudio.checked : false,
-                consultaClinica: document.getElementById('check-consulta') ? document.getElementById('check-consulta').checked : false
+                consulta_clinica: document.getElementById('check-consulta') ? document.getElementById('check-consulta').checked : false
             };
 
-            fetch(URL_GOOGLE_SCRIPT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(dados)
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.status !== "sucesso") throw new Error(data.detalhe);
+            try {
+                // =======================================================
+                // CONEXÃO DIRETA COM SUPABASE (Substitui o fetch do GAS)
+                // =======================================================
+                const { data, error } = await supabase
+                    .from('atendimentos')
+                    .insert([dadosBanco])
+                    .select('protocolo'); // Pede para o banco retornar o protocolo (se gerado)
+
+                if (error) throw new Error(error.message);
                 
                 // =======================================================
-                // FEEDBACK DE RASTREABILIDADE (TABOCAS)
+                // FEEDBACK DE RASTREABILIDADE (TABOCAS) E SUCESSO
                 // =======================================================
-                if (data.protocolo_gerado && data.protocolo_gerado !== "") {
-                    msgStatus.textContent = "✅ Guardado! PROTOCOLO GERADO: " + data.protocolo_gerado;
-                    alert("Atenção, Receção!\n\nColaborador da TABOCAS registado com Gota Espessa.\nAnote o Protocolo Gerado: " + data.protocolo_gerado);
+                const protocolo_gerado = data[0].protocolo;
+
+                if (protocolo_gerado && protocolo_gerado !== "") {
+                    msgStatus.textContent = "✅ Guardado! PROTOCOLO GERADO: " + protocolo_gerado;
+                    alert("Atenção, Receção!\n\nColaborador da TABOCAS registado com Gota Espessa.\nAnote o Protocolo Gerado: " + protocolo_gerado);
                 } else {
                     msgStatus.textContent = "✅ Guardado com sucesso! A preparar impressão...";
                 }
 
                 msgStatus.style.color = "var(--success)";
                 msgStatus.style.background = "var(--success-soft)";
+                
                 setTimeout(() => {
                     msgStatus.style.display = "none";
                     btnSalvarImprimir.disabled = false;
                     btnSalvarImprimir.style.opacity = "1";
                     
-                    window.print(); 
+                    window.print(); // Mantém a impressão automática da ficha
                 }, 1500);
-            })
-            .catch((err) => {
-                msgStatus.textContent = "❌ Erro ao guardar. " + (err.message || "Verifique a internet.");
+
+            } catch (err) {
+                msgStatus.textContent = "❌ Erro ao guardar. " + (err.message || "Verifique a conexão.");
                 msgStatus.style.color = "var(--danger)";
                 msgStatus.style.background = "var(--danger-soft)";
                 btnSalvarImprimir.disabled = false;
                 btnSalvarImprimir.style.opacity = "1";
-            });
+            }
         });
     }
 });

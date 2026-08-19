@@ -115,7 +115,7 @@
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombar"> Raio-x coluna lombar</label><br>
                                 <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombo-Sacra"> Raio-x Coluna Lombo-Sacra</label>
                                 
-                            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
+                                <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
                                     <label style="font-size: 12px; color: var(--text-muted);">Adicionar Raio-X Extra:</label>
                                     <div style="display: flex; gap: 5px; margin-top: 5px;">
                                         <input type="text" id="input-exame-extra-raiox" placeholder="Nome do Raio-X..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
@@ -148,13 +148,13 @@
                                     <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TRICLOROCOMPOSTOS-TOTAIS"> TRICOLOROCOMPOSTOS TOTAIS</label>
                                     
                                     <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
-        <label style="font-size: 12px; color: var(--text-muted);">Adicionar Exame Extra:</label>
-        <div style="display: flex; gap: 5px; margin-top: 5px;">
-            <input type="text" id="input-exame-extra" placeholder="Nome do exame..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
-            <button type="button" id="btn-add-exame" class="btn-inserir-seguro">Inserir</button>
-        </div>
-        <div id="lista-extras-painel" style="margin-top: 10px;"></div>
-    </div>
+                                        <label style="font-size: 12px; color: var(--text-muted);">Adicionar Exame Extra:</label>
+                                        <div style="display: flex; gap: 5px; margin-top: 5px;">
+                                            <input type="text" id="input-exame-extra" placeholder="Nome do exame..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
+                                            <button type="button" id="btn-add-exame" class="btn-inserir-seguro">Inserir</button>
+                                        </div>
+                                        <div id="lista-extras-painel" style="margin-top: 10px;"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -244,7 +244,18 @@
             </div>
         </div>
     </main>
+
+    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
+    <!-- 1. Biblioteca oficial do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 2. Arquivo com as chaves de conexão do banco de dados -->
+    <script src="js/supabase.js"></script>
+    
+    <!-- 3. Seu script principal que agora fará a inserção direta -->
     <script src="js/script.js"></script>
+    <!-- FIM DA ADAPTAÇÃO -->
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const btnTheme = document.getElementById('btn-theme-toggle');

@@ -93,14 +93,12 @@
     </style>
 </head>
 <body>
-    <<header class="no-print">
+    <header class="no-print">
         <h1 style="color: var(--text-strong);">Relação de Envio - Laboratório</h1>
         <h2>Cadeia de Custódia de Amostras</h2>
         <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;">
-            <!-- Aplicada a nova classe btn-header-outline -->
             <button onclick="window.location.href='setor.html'" class="btn-header-outline">Voltar ao Painel</button>
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <!-- Aplicada a nova classe btn-header-danger -->
             <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
         </div>
     </header>
@@ -181,12 +179,14 @@
         </div>
     </main>
 
-    <script>
-        const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
+    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
 
+    <script>
         let pacientesLaboratorioOriginais = []; 
         
-        // Memória de Modificações Manuais Locais
+        // Memória de Modificações Manuais Locais (Não afetam o Supabase)
         let cpfsRemovidosDaRelacao = []; 
         let adicoesManuais = {}; // Ex: { "123": ["EXAME NOVO"] }
         let remocoesManuais = {}; // Ex: { "123": ["GLICEMIA"] }
@@ -203,7 +203,7 @@
         const hoje = new Date();
         inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
-        function buscar() {
+        async function buscar() {
             if(!inputData.value) return;
             
             // Limpa as edições manuais ao buscar nova data
@@ -223,27 +223,35 @@
             const dataAtual = new Date();
             document.getElementById('out-data-geracao').textContent = `${String(dataAtual.getDate()).padStart(2, '0')}/${String(dataAtual.getMonth() + 1).padStart(2, '0')}/${dataAtual.getFullYear()} às ${String(dataAtual.getHours()).padStart(2, '0')}:${String(dataAtual.getMinutes()).padStart(2, '0')}`;
 
-            fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`)
-                .then(r => r.json())
-                .then(data => {
-                    msgCarregando.style.display = "none";
-                    if (data.status === "sucesso" && data.pacientes.length > 0) {
-                        pacientesLaboratorioOriginais = data.pacientes.filter(p => p.temLab === true && p.examesLab && p.examesLab.trim() !== "Nenhum" && p.examesLab.trim() !== "");
-                        
-                        if(pacientesLaboratorioOriginais.length > 0) {
-                            gerarCheckboxesGlobais();
-                            renderizarTabela();
-                            painelFiltrosExames.style.display = "block";
-                        } else {
-                            msgVazio.style.display = "block";
-                        }
+            try {
+                // Requisição direta ao Supabase
+                const { data, error } = await supabase
+                    .from('atendimentos')
+                    .select('*')
+                    .eq('data_exame', inputData.value);
+
+                msgCarregando.style.display = "none";
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    // Filtra apenas pacientes que possuem exames de laboratório
+                    pacientesLaboratorioOriginais = data.filter(p => p.exames_lab && p.exames_lab.trim() !== "Nenhum" && p.exames_lab.trim() !== "");
+                    
+                    if(pacientesLaboratorioOriginais.length > 0) {
+                        gerarCheckboxesGlobais();
+                        renderizarTabela();
+                        painelFiltrosExames.style.display = "block";
                     } else {
                         msgVazio.style.display = "block";
                     }
-                }).catch((err) => { 
-                    msgCarregando.style.display = "none";
-                    alert("Erro ao buscar dados. Tente novamente."); 
-                });
+                } else {
+                    msgVazio.style.display = "block";
+                }
+            } catch (err) {
+                msgCarregando.style.display = "none";
+                alert("Erro ao buscar dados. Tente novamente."); 
+                console.error("Erro na busca: ", err.message);
+            }
         }
 
         // Gera a lista global de exames no topo
@@ -252,7 +260,7 @@
             let conjuntoExames = new Set(); 
 
             pacientesLaboratorioOriginais.forEach(pac => {
-                let examesSeparados = pac.examesLab.split(',').map(e => e.trim()).filter(e => e !== "");
+                let examesSeparados = pac.exames_lab.split(',').map(e => e.trim()).filter(e => e !== "");
                 examesSeparados.forEach(exame => conjuntoExames.add(exame));
             });
 
@@ -329,8 +337,8 @@
             pacientesCopia.forEach(pac => {
                 if (cpfsRemovidosDaRelacao.includes(pac.cpf)) return; // Ignora pacientes deletados no botão vermelho
 
-                // 1. Pega os exames base da nuvem
-                let examesDoPaciente = pac.examesLab.split(',').map(e => e.trim()).filter(e => e !== "");
+                // 1. Pega os exames base vindos do Supabase
+                let examesDoPaciente = pac.exames_lab.split(',').map(e => e.trim()).filter(e => e !== "");
                 
                 // 2. Filtra pelas caixas globais marcadas no topo
                 let examesAtivos = examesDoPaciente.filter(exame => examesGlobaisSelecionados.includes(exame));
@@ -369,8 +377,8 @@
                             </div>
                             <div class="cpf-label" style="font-size:11px; color:var(--text-muted);">CPF: ${pac.cpf}</div>
                         </td>
-                        <td style="font-size: 13px; color: var(--text-main);">${pac.dn || '-'}</td>
-                        <td>${pac.empresa}</td>
+                        <td style="font-size: 13px; color: var(--text-main);">${pac.data_nascimento || '-'}</td>
+                        <td>${pac.empresa || '-'}</td>
                         <td style="line-height: 1.6;">
                             <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
                                 ${tagsHTML}

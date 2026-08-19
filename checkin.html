@@ -91,15 +91,16 @@
         </div>
     </main>
 
+    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
-
             const tabela = document.getElementById('lista-liberacao');
             const inputData = document.getElementById('filtro-data');
             const inputPesq = document.getElementById('pesquisa-paciente');
             let abaAtiva = 'todos'; 
-            let fetchController = null;
 
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
@@ -113,99 +114,125 @@
                 });
             });
 
-            function buscarDados() {
+            async function buscarDados() {
                 if(!inputData.value) return;
                 document.getElementById('msg-carregando').style.display = "block";
                 
-                if (fetchController) fetchController.abort();
-                fetchController = new AbortController();
+                try {
+                    const { data, error } = await supabase
+                        .from('atendimentos')
+                        .select('*')
+                        .eq('data_exame', inputData.value)
+                        .order('created_at', { ascending: false });
 
-                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
-                    .then(r => r.json())
-                    .then(data => {
-                        document.getElementById('msg-carregando').style.display = "none";
-                        if (data.status === "sucesso" && data.pacientes.length > 0) renderizarTabela(data.pacientes);
-                        else { tabela.innerHTML = ""; document.getElementById('msg-vazio').style.display = "block"; }
-                    }).catch((err) => { if (err.name !== 'AbortError') console.error(err); });
+                    document.getElementById('msg-carregando').style.display = "none";
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        renderizarTabela(data);
+                    } else { 
+                        tabela.innerHTML = ""; 
+                        document.getElementById('msg-vazio').style.display = "block"; 
+                    }
+                } catch (err) {
+                    console.error("Erro na busca:", err);
+                    document.getElementById('msg-carregando').style.display = "none";
+                }
             }
 
             setInterval(atualizacaoSilenciosa, 15000);
 
-            function atualizacaoSilenciosa() {
+            async function atualizacaoSilenciosa() {
                 if (document.hidden || !inputData.value) return; 
                 
-                if (fetchController) fetchController.abort();
-                fetchController = new AbortController();
+                try {
+                    const { data, error } = await supabase
+                        .from('atendimentos')
+                        .select('*')
+                        .eq('data_exame', inputData.value);
 
-                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.status === "sucesso" && data.pacientes.length > 0) {
-                            const pacValidos = data.pacientes.filter(p => p.temClinico || p.temRaiox || p.temLab || p.temFono || p.temConsulta);
-                            if (pacValidos.length !== document.querySelectorAll('.linha-paciente').length) {
-                                renderizarTabela(data.pacientes);
-                                return;
-                            }
-                            
-                            data.pacientes.forEach(pac => {
-                                const linha = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
-                                if (linha) {
-                                    const updateCheck = (cls, val) => {
-                                        const cb = linha.querySelector(cls);
-                                        if (cb && cb.checked !== val) cb.checked = val;
-                                    };
-                                    
-                                    updateCheck('.c-clinico', pac.liberadoClinico);
-                                    updateCheck('.c-raiox', pac.liberadoRaiox);
-                                    updateCheck('.c-fono', pac.liberadoFono);
-                                    updateCheck('.c-lab', pac.liberadoLab);
-                                    updateCheck('.c-consulta', pac.liberadoConsulta);
-                                    
-                                    const obs = linha.querySelector('.obs-read'); 
-                                    if(obs && obs.textContent !== (pac.obsLab || '')) obs.textContent = pac.obsLab;
-                                    
-                                    verificarStatusFilaLocal(linha);
-                                }
-                            });
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        const pacValidos = data.filter(p => 
+                            (p.exames_clinicos && p.exames_clinicos !== 'Nenhum') || 
+                            (p.exames_raiox && p.exames_raiox !== 'Nenhum') || 
+                            (p.exames_lab && p.exames_lab !== 'Nenhum') || 
+                            p.audiometria === true || p.consulta_clinica === true
+                        );
+                        
+                        // Se entrou gente nova, recarrega a tabela inteira
+                        if (pacValidos.length !== document.querySelectorAll('.linha-paciente').length) {
+                            renderizarTabela(data);
+                            return;
                         }
-                    }).catch((err) => { if (err.name !== 'AbortError') console.error(err); });
+                        
+                        // Se não, só atualiza os checkboxes invisivelmente
+                        data.forEach(pac => {
+                            const linha = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
+                            if (linha) {
+                                const updateCheck = (cls, val) => {
+                                    const cb = linha.querySelector(cls);
+                                    if (cb && cb.checked !== val) cb.checked = val;
+                                };
+                                
+                                updateCheck('.c-clinico', pac.liberado_clinico);
+                                updateCheck('.c-raiox', pac.liberado_raiox);
+                                updateCheck('.c-fono', pac.liberado_fono);
+                                updateCheck('.c-lab', pac.liberado_lab);
+                                updateCheck('.c-consulta', pac.liberado_consulta);
+                                
+                                const obs = linha.querySelector('.obs-read'); 
+                                if(obs && obs.textContent !== (pac.observacao || '')) obs.textContent = pac.observacao;
+                                
+                                verificarStatusFilaLocal(linha);
+                            }
+                        });
+                    }
+                } catch (err) { console.error("Erro no polling:", err); }
             }
 
             function renderizarTabela(pacientes) {
                 tabela.innerHTML = "";
                 pacientes.forEach(pac => {
-                    if (!pac.temClinico && !pac.temRaiox && !pac.temLab && !pac.temFono && !pac.temConsulta) return;
+                    const temClinico = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
+                    const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
+                    const temLab = pac.exames_lab && pac.exames_lab !== 'Nenhum';
+                    const temFono = pac.audiometria === true;
+                    const temConsulta = pac.consulta_clinica === true;
+
+                    if (!temClinico && !temRaiox && !temLab && !temFono && !temConsulta) return;
 
                     const cell = (exame, checked, classe) => `
                         <div class="celula-exame">
-                            <input type="checkbox" class="${classe}" ${checked ? 'checked' : ''} onclick="return false;" style="cursor:not-allowed;">
-                            <div class="detalhe-exame">${exame}</div>
+                            <input type="checkbox" class="${classe}" ${checked ? 'checked' : ''} onclick="return false;" style="cursor:not-allowed; transform: scale(1.2);">
+                            <div class="detalhe-exame" style="margin-top:5px;">${exame}</div>
                         </div>
                     `;
                     const cellLab = (exame, checked, obs) => `
                         <div class="celula-exame">
-                            <input type="checkbox" class="c-lab" ${checked ? 'checked' : ''} onclick="return false;" style="cursor:not-allowed;">
-                            <div class="detalhe-exame">${exame}</div>
-                            <div class="obs-read" style="font-size:10px; color:var(--danger); background:var(--danger-soft); padding:3px; border-radius:3px; width:100%; text-align:center; min-height: 18px;">${obs || ''}</div>
+                            <input type="checkbox" class="c-lab" ${checked ? 'checked' : ''} onclick="return false;" style="cursor:not-allowed; transform: scale(1.2);">
+                            <div class="detalhe-exame" style="margin-top:5px;">${exame}</div>
+                            <div class="obs-read" style="font-size:10px; color:var(--danger); background:var(--danger-soft); padding:3px; border-radius:3px; width:100%; text-align:center; min-height: 18px; margin-top:5px;">${obs || ''}</div>
                         </div>
                     `;
 
-                    const tdC = pac.temClinico ? cell(pac.examesClinicos, pac.liberadoClinico, 'c-clinico') : `<span class="text-na">—</span>`;
-                    const tdR = pac.temRaiox ? cell(pac.examesRaioX, pac.liberadoRaiox, 'c-raiox') : `<span class="text-na">—</span>`;
-                    const tdF = pac.temFono ? cell("Audiometria", pac.liberadoFono, 'c-fono') : `<span class="text-na">—</span>`;
-                    const tdL = pac.temLab ? cellLab(pac.examesLab, pac.liberadoLab, pac.obsLab) : `<span class="text-na">—</span>`;
-                    const tdM = pac.temConsulta ? cell("Médico do Trabalho", pac.liberadoConsulta, 'c-consulta') : `<span class="text-na">—</span>`;
+                    const tdC = temClinico ? cell(pac.exames_clinicos, pac.liberado_clinico, 'c-clinico') : `<span class="text-na">—</span>`;
+                    const tdR = temRaiox ? cell(pac.exames_raiox, pac.liberado_raiox, 'c-raiox') : `<span class="text-na">—</span>`;
+                    const tdF = temFono ? cell("Audiometria", pac.liberado_fono, 'c-fono') : `<span class="text-na">—</span>`;
+                    const tdL = temLab ? cellLab(pac.exames_lab, pac.liberado_lab, pac.observacao) : `<span class="text-na">—</span>`;
+                    const tdM = temConsulta ? cell("Médico do Trabalho", pac.liberado_consulta, 'c-consulta') : `<span class="text-na">—</span>`;
 
                     const iniciais = (pac.nome || '-').split(" ").map((n, i, a) => i === 0 || i === a.length - 1 ? n[0] : "").join("").toUpperCase();
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
                     tr.dataset.cpf = pac.cpf;
-                    tr.dataset.clinico = pac.temClinico;
-                    tr.dataset.raiox = pac.temRaiox;
-                    tr.dataset.fono = pac.temFono;
-                    tr.dataset.lab = pac.temLab;
-                    tr.dataset.consulta = pac.temConsulta;
+                    tr.dataset.clinico = temClinico;
+                    tr.dataset.raiox = temRaiox;
+                    tr.dataset.fono = temFono;
+                    tr.dataset.lab = temLab;
+                    tr.dataset.consulta = temConsulta;
 
                     tr.innerHTML = `
                         <td><span class="tag-empresa">${pac.empresa || '-'}</span></td>

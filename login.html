@@ -60,56 +60,70 @@
         </div>
     </main>
 
+    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            // ==========================================================
-            // NÃO SE ESQUEÇA DE COLAR A SUA URL AQUI ABAIXO:
-            const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
-            // ==========================================================
             
             const btn = document.getElementById('submitBtn');
             const erroBox = document.getElementById('erro-box');
-            const user = document.getElementById('username').value;
-            const senha = document.getElementById('password').value;
+            
+            // Pega os dados digitados (passando o usuário para minúsculo para evitar erros)
+            const user = document.getElementById('username').value.trim().toLowerCase();
+            const senha = document.getElementById('password').value.trim();
             
             erroBox.style.display = "none";
             btn.disabled = true;
             btn.textContent = "Autenticando...";
             
-            fetch(URL_GOOGLE_SCRIPT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ acao: "EFETUAR_LOGIN", usuario: user, senha: senha })
-            })
-            .then(r => r.json())
-            .then(res => {
-                if (res.status === "sucesso") {
-                    localStorage.setItem('monad_token', res.token);
-                    localStorage.setItem('monad_setor', res.setor);
-                    
-                    if (res.setor === "recepcao") {
-                        window.location.href = "index.html";
-                    } else if (res.setor === "todos") {
-                        window.location.href = "checkin.html";
-                    } else if (res.setor === "admin") {
-                        window.location.href = "admin.html";
-                    } else {
-                        window.location.href = "setor.html";
-                    }
-                } else {
-                    throw new Error(res.mensagem || "Credenciais incorretas.");
+            try {
+                // ==========================================================
+                // CONSULTA DIRETA AO BANCO SUPABASE
+                // ==========================================================
+                const { data, error } = await supabase
+                    .from('usuarios')
+                    .select('setor')
+                    .eq('usuario', user)
+                    .eq('senha', senha)
+                    .single(); // O .single() garante que se a senha estiver errada, caia no catch
+
+                if (error || !data) {
+                    throw new Error("Usuário ou senha incorretos.");
                 }
-            })
-            .catch(err => {
-                erroBox.textContent = err.message || "Erro ao conectar com o servidor.";
+
+                // ==========================================================
+                // SUCESSO: SALVA OS DADOS E REDIRECIONA
+                // ==========================================================
+                localStorage.setItem('monad_token', 'autenticado_supabase'); // Token simbólico
+                localStorage.setItem('monad_setor', data.setor);
+                
+                // Mantida a sua lógica original de redirecionamento por setor
+                if (data.setor === "recepcao") {
+                    window.location.href = "index.html";
+                } else if (data.setor === "todos") {
+                    window.location.href = "checkin.html";
+                } else if (data.setor === "admin") {
+                    window.location.href = "admin.html";
+                } else {
+                    window.location.href = "setor.html";
+                }
+
+            } catch (err) {
+                // Tratamento de erro (senha errada ou sem internet)
+                erroBox.textContent = err.message === "JSON object requested, multiple (or no) rows returned" 
+                                      ? "Usuário ou senha incorretos." 
+                                      : err.message || "Erro ao conectar com o servidor.";
                 erroBox.style.display = "block";
                 btn.disabled = false;
                 btn.textContent = "Entrar no Painel";
-            });
+            }
         });
     </script>
+    <!-- FIM DA ADAPTAÇÃO -->
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const btnTheme = document.getElementById('btn-theme-toggle');

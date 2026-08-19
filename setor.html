@@ -94,26 +94,29 @@
         </div>
     </main>
 
+    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // ==========================================
-            // 1. CONFIGURAÇÃO DE SETOR
+            // 1. CONFIGURAÇÃO DE SETOR PARA O SUPABASE
             // ==========================================
-            const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
             const setor = localStorage.getItem('monad_setor');
             
+            // Adaptado para ler exatamente os nomes das colunas que criamos no SQL
             const configSetores = {
-                'clinico': { titulo: 'Avaliação Clínica / Neurológica', flag: 'temClinico', exames: 'examesClinicos', lib: 'liberadoClinico' },
-                'raiox': { titulo: 'Radiologia (Raio-X)', flag: 'temRaiox', exames: 'examesRaioX', lib: 'liberadoRaiox' },
-                'lab': { titulo: 'Laboratório de Coletas', flag: 'temLab', exames: 'examesLab', lib: 'liberadoLab' },
-                'fono': { titulo: 'Fonoaudiologia', flag: 'temFono', exames: null, texto: 'Audiometria Ocupacional', lib: 'liberadoFono' },
-                'consulta': { titulo: 'Consultório Médico', flag: 'temConsulta', exames: null, texto: 'Avaliação Médica Ocupacional', lib: 'liberadoConsulta' }
+                'clinico': { titulo: 'Avaliação Clínica / Neurológica', flag: p => p.exames_clinicos && p.exames_clinicos !== 'Nenhum', exames: 'exames_clinicos', lib: 'liberado_clinico' },
+                'raiox': { titulo: 'Radiologia (Raio-X)', flag: p => p.exames_raiox && p.exames_raiox !== 'Nenhum', exames: 'exames_raiox', lib: 'liberado_raiox' },
+                'lab': { titulo: 'Laboratório de Coletas', flag: p => p.exames_lab && p.exames_lab !== 'Nenhum', exames: 'exames_lab', lib: 'liberado_lab' },
+                'fono': { titulo: 'Fonoaudiologia', flag: p => p.audiometria === true, exames: null, texto: 'Audiometria Ocupacional', lib: 'liberado_fono' },
+                'consulta': { titulo: 'Consultório Médico', flag: p => p.consulta_clinica === true, exames: null, texto: 'Avaliação Médica Ocupacional', lib: 'liberado_consulta' }
             };
 
             const myConfig = configSetores[setor] || { titulo: 'Setor Desconhecido', flag: null };
             document.getElementById('titulo-setor').textContent = myConfig.titulo;
 
-            // Se for laboratório, mostra o botão para imprimir a relação de envio
             if (setor === 'lab') {
                 document.getElementById('btn-relacao-lab').style.display = 'inline-flex';
             }
@@ -122,73 +125,84 @@
             // 2. LÓGICA DE DADOS E RENDERIZAÇÃO
             // ==========================================
             let databaseSetor = [];
-            let fetchController = null;
-
             const inputData = document.getElementById('filtro-data');
             const inputPesq = document.getElementById('pesquisa-paciente');
             const listaDiv = document.getElementById('lista-atendimentos');
+            
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
-            function buscarDados() {
+            async function buscarDados() {
                 if(!inputData.value || !myConfig.flag) return;
                 document.getElementById('msg-carregando').style.display = "block";
                 
-                if (fetchController) fetchController.abort();
-                fetchController = new AbortController();
+                try {
+                    const { data, error } = await supabase
+                        .from('atendimentos')
+                        .select('*')
+                        .eq('data_exame', inputData.value)
+                        .order('created_at', { ascending: false });
 
-                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`, { signal: fetchController.signal })
-                    .then(r => r.json())
-                    .then(data => {
-                        document.getElementById('msg-carregando').style.display = "none";
-                        if (data.status === "sucesso" && data.pacientes.length > 0) {
-                            // Filtra apenas os que têm exame marcado para ESTE setor
-                            databaseSetor = data.pacientes.filter(p => p[myConfig.flag] === true);
-                            renderizarLista(databaseSetor);
-                        } else {
-                            databaseSetor = [];
-                            renderizarLista([]);
-                        }
-                    }).catch(err => { if (err.name !== 'AbortError') console.error(err); });
+                    document.getElementById('msg-carregando').style.display = "none";
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        // Filtra usando a função mapeada no configSetores para descobrir se o paciente vem pra cá
+                        databaseSetor = data.filter(myConfig.flag);
+                        renderizarLista(databaseSetor);
+                    } else {
+                        databaseSetor = [];
+                        renderizarLista([]);
+                    }
+                } catch (err) {
+                    console.error("Erro ao buscar dados:", err);
+                    document.getElementById('msg-carregando').style.display = "none";
+                }
             }
 
-            // Polling silencioso a cada 15s para manter a tela viva
-            setInterval(() => {
-                if (document.hidden || !inputData.value) return;
-                fetch(`${URL_GOOGLE_SCRIPT}?dataExame=${inputData.value}`)
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.status === "sucesso") {
-                            const filtrados = data.pacientes.filter(p => p[myConfig.flag] === true);
-                            // Se a quantidade de pessoas mudou, re-renderiza tudo
-                            if (filtrados.length !== document.querySelectorAll('.card-paciente').length) {
-                                databaseSetor = filtrados;
-                                renderizarLista(databaseSetor);
-                                return;
-                            }
-                            // Se a quantidade é a mesma, só atualiza os vistos/checkboxes silenciosamente
-                            filtrados.forEach(pac => {
-                                const card = document.querySelector(`.card-paciente[data-cpf="${pac.cpf}"]`);
-                                if (card) {
-                                    const cb = card.querySelector('.cb-liberar-setor');
-                                    if (cb && !cb.disabled && cb.checked !== pac[myConfig.lib]) {
-                                        cb.checked = pac[myConfig.lib];
-                                        if (pac[myConfig.lib]) card.classList.add('concluido');
-                                        else card.classList.remove('concluido');
-                                    }
-                                    
-                                    // Sincroniza campo de observação se for lab e se o técnico não estiver a escrever nele
-                                    if (setor === 'lab') {
-                                        const obs = card.querySelector('.obs-setor');
-                                        if (obs && document.activeElement !== obs && !obs.disabled && obs.value !== (pac.obsLab || '')) {
-                                            obs.value = pac.obsLab || '';
-                                        }
+            // Polling silencioso a cada 15s com Supabase
+            setInterval(async () => {
+                if (document.hidden || !inputData.value || !myConfig.flag) return;
+                try {
+                    const { data, error } = await supabase
+                        .from('atendimentos')
+                        .select('*')
+                        .eq('data_exame', inputData.value);
+
+                    if (error) throw error;
+
+                    if (data) {
+                        const filtrados = data.filter(myConfig.flag);
+                        
+                        // Se a quantidade mudou, re-renderiza tudo
+                        if (filtrados.length !== document.querySelectorAll('.card-paciente').length) {
+                            databaseSetor = filtrados;
+                            renderizarLista(databaseSetor);
+                            return;
+                        }
+                        
+                        // Atualiza status e inputs na tela silenciosamente
+                        filtrados.forEach(pac => {
+                            const card = document.querySelector(`.card-paciente[data-cpf="${pac.cpf}"]`);
+                            if (card) {
+                                const cb = card.querySelector('.cb-liberar-setor');
+                                if (cb && !cb.disabled && cb.checked !== pac[myConfig.lib]) {
+                                    cb.checked = pac[myConfig.lib];
+                                    if (pac[myConfig.lib]) card.classList.add('concluido');
+                                    else card.classList.remove('concluido');
+                                }
+                                
+                                if (setor === 'lab') {
+                                    const obs = card.querySelector('.obs-setor');
+                                    if (obs && document.activeElement !== obs && !obs.disabled && obs.value !== (pac.observacao || '')) {
+                                        obs.value = pac.observacao || '';
                                     }
                                 }
-                            });
-                            databaseSetor = filtrados;
-                        }
-                    }).catch(e => console.error(e));
+                            }
+                        });
+                        databaseSetor = filtrados;
+                    }
+                } catch (e) { console.error("Erro no polling:", e); }
             }, 15000);
 
             function renderizarLista(pacientes) {
@@ -202,9 +216,8 @@
                 pacientes.forEach((pac) => {
                     const examesListados = myConfig.exames ? pac[myConfig.exames] : myConfig.texto;
                     const concluido = pac[myConfig.lib];
-                    const tipoStr = pac.tipoExame ? `<span style="color:var(--accent); font-weight:600;">(${pac.tipoExame})</span>` : '';
+                    const tipoStr = pac.tipo_exame ? `<span style="color:var(--accent); font-weight:600;">(${pac.tipo_exame})</span>` : '';
                     
-                    // LÓGICA DO BOTÃO CHAMAR (Exclusivo para Consultório Médico)
                     let btnChamar = "";
                     if (setor === 'consulta') {
                         btnChamar = `
@@ -214,16 +227,16 @@
                         `;
                     }
 
-                    // LÓGICA DA OBSERVAÇÃO (Apenas Laboratório)
                     let boxObs = "";
                     if (setor === 'lab') {
                         boxObs = `
                             <div class="obs-box">
-                                <textarea class="obs-setor" data-cpf="${pac.cpf}" rows="2" placeholder="Observações de coleta (Ex: Veia difícil, Recusou-se...)" title="Salva automaticamente ao sair do campo">${pac.obsLab || ''}</textarea>
+                                <textarea class="obs-setor" data-cpf="${pac.cpf}" rows="2" placeholder="Observações de coleta (Ex: Veia difícil, Recusou-se...)" title="Salva automaticamente ao sair do campo">${pac.observacao || ''}</textarea>
                             </div>
                         `;
                     }
 
+                    // Observação: Utilizado pac.data_nascimento de acordo com as colunas do SQL
                     const card = document.createElement('div');
                     card.className = `card-paciente ${concluido ? 'concluido' : ''}`;
                     card.dataset.cpf = pac.cpf;
@@ -231,7 +244,7 @@
                     card.innerHTML = `
                         <div class="info-paciente">
                             <div style="font-size: 18px; font-weight: bold; color: var(--text-strong);">${pac.nome}</div>
-                            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">CPF: ${pac.cpf} • Nasc: ${pac.dn}</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">CPF: ${pac.cpf} • Nasc: ${pac.data_nascimento || '-'}</div>
                             <div style="font-size: 13px; color: var(--text-main);"><strong>Empresa:</strong> ${pac.empresa} ${tipoStr}</div>
                             <div style="font-size: 13px; color: var(--text-main); margin-top: 5px;">
                                 <strong>Procedimento(s):</strong> <span style="color: var(--accent); font-weight: 500;">${examesListados}</span>
@@ -255,34 +268,33 @@
             // 3. AÇÕES (CHAMAR, CHECKBOX, OBS)
             // ==========================================
 
-            // FUNÇÃO GLOBAL: O Médico clica e o sistema envia o comando
-            window.chamarPaciente = function(nome, cpf) {
-                // Feedback visual temporário no botão
+            window.chamarPaciente = async function(nome, cpf) {
                 const btns = document.querySelectorAll('.btn-chamar');
-                btns.forEach(b => { 
+                btns.forEach(async b => { 
                     if(b.getAttribute('onclick').includes(cpf)) {
                         const textoOriginal = b.innerHTML;
                         b.innerHTML = "Avisando Receção... ⏳";
-                        b.style.backgroundColor = "#10b981"; // Fica verde
+                        b.style.backgroundColor = "#10b981";
                         b.style.color = "white";
                         
-                        // Envia para o backend
-                        fetch(URL_GOOGLE_SCRIPT, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "CHAMAR_PACIENTE", nome: nome, cpf: cpf })
-                        }).then(r => r.json()).then(res => {
+                        try {
+                            const { error } = await supabase.from('chamadas').insert([{ nome: nome, cpf: cpf }]);
+                            if (error) throw error;
+                            
                             setTimeout(() => { 
                                 b.innerHTML = "✅ Paciente Chamado"; 
                                 setTimeout(() => { b.innerHTML = textoOriginal; b.style.backgroundColor = ""; b.style.color = ""; }, 3000);
                             }, 500);
-                        }).catch(err => { alert("Erro ao chamar. Verifique a internet."); b.innerHTML = textoOriginal; b.style.backgroundColor = ""; b.style.color = ""; });
+                        } catch (err) {
+                            alert("Erro ao chamar. Verifique a conexão."); 
+                            b.innerHTML = textoOriginal; b.style.backgroundColor = ""; b.style.color = "";
+                        }
                     }
                 });
             };
 
-            // Evento de Checkbox de Conclusão
-            listaDiv.addEventListener('change', function(e) {
+            listaDiv.addEventListener('change', async function(e) {
+                // SALVAR CONCLUÍDO (CHECKBOX)
                 if (e.target.classList.contains('cb-liberar-setor')) {
                     const cb = e.target;
                     const cpf = cb.dataset.cpf;
@@ -292,47 +304,51 @@
                     cb.disabled = true;
                     card.style.opacity = "0.4";
 
-                    fetch(URL_GOOGLE_SCRIPT, {
-                        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_SETOR", cpf: cpf, setor: setor, liberado: liberado })
-                    }).then(r => r.json()).then(res => {
-                        if(res.status !== "sucesso") throw new Error();
+                    try {
+                        const updateObj = {};
+                        updateObj[myConfig.lib] = liberado;
+
+                        const { error } = await supabase.from('atendimentos').update(updateObj).eq('cpf', cpf);
+                        if (error) throw error;
+
                         card.style.opacity = "1";
                         cb.disabled = false;
                         if(liberado) card.classList.add('concluido');
                         else card.classList.remove('concluido');
-                    }).catch(() => { 
-                        alert("Erro ao salvar status. Tente novamente."); 
+
+                    } catch (err) {
+                        alert("Erro ao salvar status no banco. Tente novamente."); 
                         cb.checked = !liberado; 
                         card.style.opacity = "1"; 
                         cb.disabled = false; 
-                    });
+                    }
                 }
 
-                // Evento de Gravação de Observação (Laboratório)
+                // SALVAR OBSERVAÇÃO (LAB)
                 if (e.target.classList.contains('obs-setor')) {
                     const obsInput = e.target;
                     const cpf = obsInput.dataset.cpf;
                     obsInput.disabled = true;
                     obsInput.style.opacity = "0.5";
                     
-                    fetch(URL_GOOGLE_SCRIPT, {
-                        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ token: localStorage.getItem('monad_token'), acao: "ATUALIZAR_OBS", cpf: cpf, obs: obsInput.value })
-                    }).then(r => r.json()).then(res => {
+                    try {
+                        const { error } = await supabase.from('atendimentos').update({ observacao: obsInput.value }).eq('cpf', cpf);
+                        if (error) throw error;
+
                         obsInput.style.opacity = "1"; 
                         obsInput.disabled = false;
                         obsInput.style.borderColor = "var(--success)"; // Pisca verde
                         setTimeout(() => obsInput.style.borderColor = "var(--border-strong)", 2000);
-                    }).catch(() => { 
+
+                    } catch (err) {
                         alert("Erro ao guardar observação."); 
                         obsInput.style.opacity = "1"; 
                         obsInput.disabled = false;
-                    });
+                    }
                 }
             });
 
-            // Filtro de Pesquisa Local
+            // Filtro Local
             function aplicarFiltros() {
                 const termo = inputPesq.value.toLowerCase();
                 let visiveis = 0;
@@ -348,7 +364,7 @@
             inputPesq.addEventListener('input', aplicarFiltros);
             document.getElementById('btn-buscar-data').addEventListener('click', buscarDados);
             
-            buscarDados(); // Inicia a busca ao carregar
+            buscarDados(); 
         });
 
         // Toggle Dark Mode
@@ -371,5 +387,6 @@
             }
         });
     </script>
+    <!-- FIM DA ADAPTAÇÃO -->
 </body>
 </html>
