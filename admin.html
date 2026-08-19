@@ -147,7 +147,6 @@
                 return true;
             }
 
-            // Mapeamento dos setores para as colunas do banco
             const colMap = {
                 'clinico': 'liberado_clinico',
                 'raiox': 'liberado_raiox',
@@ -156,7 +155,6 @@
                 'consulta': 'liberado_consulta'
             };
 
-            // Função mestre de busca (Aceita parâmetro para saber se é global ou diária)
             async function buscarDados(isGlobal = false) {
                 modoBuscaGlobal = isGlobal; 
                 
@@ -172,7 +170,6 @@
                     if (!isGlobal) {
                         query = query.eq('data_exame', inputData.value);
                     } else {
-                        // Se for global, limita a 500 registros para não travar o navegador
                         query = query.limit(500); 
                     }
 
@@ -194,12 +191,17 @@
                 }
             }
 
-            // Polling de 15 segundos (Pausa automaticamente se estiver em Busca Global)
+            // Polling com ordenação mantida para não bagunçar a memória
             setInterval(async () => {
                 if (document.hidden || modoBuscaGlobal || !inputData.value) return; 
                 
                 try {
-                    const { data, error } = await supabase.from('atendimentos').select('*').eq('data_exame', inputData.value);
+                    const { data, error } = await supabase
+                        .from('atendimentos')
+                        .select('*')
+                        .eq('data_exame', inputData.value)
+                        .order('created_at', { ascending: false });
+
                     if (error) throw error;
 
                     if (data && data.length > 0) {
@@ -243,7 +245,7 @@
 
             function renderizarTabela(pacientes) {
                 tabela.innerHTML = "";
-                pacientes.forEach((pac, index) => {
+                pacientes.forEach((pac) => {
                     const temClinico = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
                     const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
                     const temFono = pac.audiometria === true;
@@ -293,7 +295,8 @@
                         <td style="text-align: center; background:var(--surface-muted);">${tdM}</td>
                         <td style="text-align: center;">
                             <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <button class="btn-editar" data-index="${index}" style="background:var(--accent); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">✏️ Editar Dados</button>
+                                <!-- AGORA O BOTÃO BUSCA PELO CPF E NÃO MAIS PELA POSIÇÃO -->
+                                <button class="btn-editar" data-cpf="${pac.cpf}" style="background:var(--accent); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">✏️ Editar Dados</button>
                                 <button class="btn-apagar" style="background:var(--danger); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">🗑️ Excluir</button>
                             </div>
                         </td>
@@ -318,7 +321,6 @@
                 const tr = e.target.closest('tr');
                 const cpf = tr.dataset.cpf;
 
-                // CHECKBOX DE SETOR
                 if (e.target.classList.contains('check-setor-admin')) {
                     const cb = e.target;
                     const setor = cb.dataset.setor;
@@ -345,7 +347,6 @@
                     }
                 }
 
-                // OBSERVAÇÃO DO LABORATÓRIO
                 if (e.target.classList.contains('obs-input-admin')) {
                     const obsInput = e.target;
                     obsInput.disabled = true;
@@ -368,7 +369,6 @@
             });
 
             tabela.addEventListener('click', async function(e) {
-                // BOTÃO DE EXCLUIR
                 if (e.target.classList.contains('btn-apagar')) {
                     const btn = e.target;
                     const tr = btn.closest('tr');
@@ -383,7 +383,7 @@
                                 .from('atendimentos')
                                 .delete()
                                 .eq('cpf', tr.dataset.cpf)
-                                .eq('data_exame', tr.dataset.dataexame); // Garante que apaga apenas o exame daquele dia
+                                .eq('data_exame', tr.dataset.dataexame); 
                                 
                             if (error) throw error;
                             tr.remove();
@@ -395,11 +395,16 @@
                     }
                 }
 
-                // ABRIR MODAL DE EDIÇÃO
                 if (e.target.classList.contains('btn-editar')) {
-                    const index = e.target.dataset.index;
-                    const pac = databaseAdmin[index];
-                    abrirModalEdicao(pac);
+                    // Busca pelo CPF no banco de dados local na memória
+                    const cpfBusca = e.target.dataset.cpf;
+                    const pac = databaseAdmin.find(p => p.cpf === cpfBusca);
+                    
+                    if (pac) {
+                        abrirModalEdicao(pac);
+                    } else {
+                        alert("Erro: Paciente não encontrado na memória. Tente atualizar a página.");
+                    }
                 }
             });
 
@@ -430,6 +435,7 @@
                 document.getElementById('modal-editar').style.display = 'none';
             };
 
+            // NOVA LÓGICA DE SALVAMENTO COM RASTREAMENTO DE ERROS E SELECT()
             document.getElementById('btn-salvar-edicao').addEventListener('click', async function(e) {
                 const btn = e.target;
                 
@@ -443,14 +449,14 @@
                 let dataRaw = document.getElementById('edit-data-exame').value.trim();
                 
                 const dadosEdicao = {
-                    nome: document.getElementById('edit-nome').value,
-                    empresa: document.getElementById('edit-empresa').value,
-                    tipo_exame: document.getElementById('edit-tipo').value,
-                    funcao: document.getElementById('edit-funcao').value,
-                    data_nascimento: document.getElementById('edit-dn').value,
-                    rg: document.getElementById('edit-rg').value,
+                    nome: document.getElementById('edit-nome').value.trim(),
+                    empresa: document.getElementById('edit-empresa').value.trim(),
+                    tipo_exame: document.getElementById('edit-tipo').value.trim(),
+                    funcao: document.getElementById('edit-funcao').value.trim(),
+                    data_nascimento: document.getElementById('edit-dn').value.trim(),
+                    rg: document.getElementById('edit-rg').value.trim(),
                     cpf: cpfNovo,
-                    telefone: document.getElementById('edit-tel').value,
+                    telefone: document.getElementById('edit-tel').value.trim(),
                     exames_clinicos: document.getElementById('edit-ex-clinico').value || "Nenhum",
                     exames_raiox: document.getElementById('edit-ex-raiox').value || "Nenhum",
                     exames_lab: document.getElementById('edit-ex-lab').value || "Nenhum",
@@ -462,37 +468,40 @@
                 btn.disabled = true;
 
                 try {
-                    const { error } = await supabase
+                    const { data, error } = await supabase
                         .from('atendimentos')
                         .update(dadosEdicao)
                         .eq('cpf', cpfAntigo)
-                        .eq('data_exame', dataRaw);
+                        .eq('data_exame', dataRaw)
+                        .select(); 
 
                     if (error) throw error;
+
+                    if (!data || data.length === 0) {
+                        throw new Error(`O sistema não encontrou o paciente (CPF: ${cpfAntigo} / Data: ${dataRaw}) para atualizar.`);
+                    }
 
                     btn.textContent = "Salvar Alterações";
                     btn.disabled = false;
                     fecharModal();
-                    buscarDados(modoBuscaGlobal); // Atualiza a tela mantendo a configuração atual de busca
+                    buscarDados(modoBuscaGlobal); 
 
                 } catch (err) {
-                    alert("Falha Crítica ao tentar editar: " + err.message); 
+                    console.error("ERRO COMPLETO DO SUPABASE:", err);
+                    alert("❌ Falha Crítica ao tentar editar:\n\n" + err.message); 
                     btn.textContent = "Salvar Alterações";
                     btn.disabled = false;
                 }
             });
 
-            // Atribuição de Eventos aos Botões
-            document.getElementById('btn-buscar-data').addEventListener('click', () => buscarDados(false)); // Busca por data
-            document.getElementById('btn-busca-global').addEventListener('click', () => buscarDados(true)); // Busca em toda a base
+            document.getElementById('btn-buscar-data').addEventListener('click', () => buscarDados(false)); 
+            document.getElementById('btn-busca-global').addEventListener('click', () => buscarDados(true)); 
 
             inputPesq.addEventListener('input', aplicarFiltros);
             
-            // Busca inicial (apenas a data de hoje)
             buscarDados(false);
         });
 
-        // Theme Toggle Logic
         document.addEventListener('DOMContentLoaded', () => {
             const btnTheme = document.getElementById('btn-theme-toggle');
             if (btnTheme) {
