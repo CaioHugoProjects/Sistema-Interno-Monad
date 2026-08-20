@@ -234,24 +234,33 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (error) throw new Error(error.message);
                 
                 // =======================================================
-                // 2. BACKUP INVISÍVEL NA PLANILHA (Fire and Forget)
+                // 2. BACKUP INVISÍVEL NA PLANILHA (Atualizado com todos os dados)
                 // =======================================================
-                // ATENÇÃO: Substitua pela URL da sua nova implantação do Apps Script
+                // ATENÇÃO: Substitua pela NOVA URL da sua implantação do Apps Script
                 const URL_GOOGLE_BACKUP = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
                 
+                // Gera a data e hora do momento do registro no formato brasileiro (DD/MM/YYYY HH:MM:SS)
+                const dataHoraAtual = new Date().toLocaleString('pt-BR');
+
                 const pacotePlanilha = {
                     acao: "SALVAR_BACKUP",
+                    data_registro: dataHoraAtual,
                     empresa: empresa,
                     nome: nome,
                     funcao: funcao,
-                    data_nascimento: dn,
+                    dn: dn,
                     rg: dadosBanco.rg,
                     cpf: dadosBanco.cpf,
+                    telefone: dadosBanco.telefone,
                     tipo_exame: tipoExame,
-                    data_exame: dataExame
+                    data_exame: dataExame,
+                    clinico: dadosBanco.exames_clinicos,
+                    raiox: dadosBanco.exames_raiox,
+                    coleta: dadosBanco.exames_lab,
+                    audiometria: dadosBanco.audiometria ? "Sim" : "Não",
+                    consulta_medica: dadosBanco.consulta_clinica ? "Sim" : "Não"
                 };
 
-                // Enviamos para a planilha sem usar "await", para não prender a tela da receção
                 fetch(URL_GOOGLE_BACKUP, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -259,9 +268,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 }).catch(err => console.log("Erro silencioso ao espelhar na planilha:", err));
                 // =======================================================
 
-                // =======================================================
-                // FEEDBACK DE RASTREABILIDADE (TABOCAS) E SUCESSO
-                // =======================================================
                 const protocolo_gerado = data[0].protocolo;
 
                 if (protocolo_gerado && protocolo_gerado !== "") {
@@ -279,7 +285,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     btnSalvarImprimir.disabled = false;
                     btnSalvarImprimir.style.opacity = "1";
                     
-                    window.print(); // Mantém a impressão automática da ficha
+                    window.print();
                 }, 1500);
 
             } catch (err) {
