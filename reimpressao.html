@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
-        // GATEKEEPER DE SEGURANÇA ATUALIZADO
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
@@ -34,7 +33,6 @@
             </ul>
         </nav>
         <script>
-            // Revela o botão do Admin apenas se quem estiver logado for o admin
             if (localStorage.getItem('monad_setor') === 'admin') {
                 document.getElementById('menu-admin').style.display = 'block';
             }
@@ -159,7 +157,6 @@
         </div>
     </main>
 
-    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
 
@@ -174,6 +171,15 @@
             
             let databasePacientes = []; 
 
+            // Função para converter data para BR
+            function formatarDataBR(data) {
+                if (!data) return '-';
+                if (data.includes('/')) return data; // Se já tiver barra, ignora
+                const partes = data.split('T')[0].split('-'); // Corta os traços
+                if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+                return data;
+            }
+
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
@@ -186,7 +192,6 @@
                 if(!dataFormatada) return;
 
                 try {
-                    // Busca os dados diretamente do Supabase
                     const { data, error } = await supabase
                         .from('atendimentos')
                         .select('*')
@@ -214,7 +219,6 @@
             function renderizarTabela(pacientes) {
                 tabela.innerHTML = "";
                 pacientes.forEach((pac) => {
-                    // Mapeia as lógicas verificando as colunas do banco
                     const temClinico = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
                     const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
                     const temFono = pac.audiometria === true;
@@ -231,12 +235,13 @@
                     const resumoSetores = setores.length > 0 ? setores.join(", ") : "Nenhum exame marcado";
 
                     const tipoStr = pac.tipo_exame ? (pac.tipo_exame.includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
-                    const dataNascimento = pac.data_nascimento || '-';
+                    
+                    // APLICANDO A CONVERSÃO NA TABELA
+                    const dataNascimento = formatarDataBR(pac.data_nascimento);
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
                     
-                    // CORREÇÃO: O botão não usa mais o Index (posição na tabela), mas sim o ID do banco ou o Nome+CPF
                     tr.innerHTML = `
                         <td><span class="tag-empresa">${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></span></td>
                         <td>
@@ -260,7 +265,6 @@
                 });
             }
 
-            // O Filtro atualiza a tela chamando o renderizarTabela, MAS agora os botões sabem quem eles são!
             inputPesquisa.addEventListener('input', function(e) {
                 const termo = e.target.value.toLowerCase();
                 const filtrados = databasePacientes.filter(pac => 
@@ -273,7 +277,6 @@
             document.getElementById('btn-buscar-data').addEventListener('click', buscarPacientesDoBanco);
             buscarPacientesDoBanco();
 
-            // Intercepta o clique no botão de impressão de forma segura
             tabela.addEventListener('click', function(e) {
                 const btn = e.target.closest('.btn-imprimir-ficha');
                 if (btn) {
@@ -283,7 +286,6 @@
                     
                     let pacAlvo = null;
                     
-                    // Busca na memória pelo ID único, ou usa Nome+CPF como contingência
                     if (id && id !== 'undefined' && id !== '') {
                         pacAlvo = databasePacientes.find(p => String(p.id) === String(id));
                     } else {
@@ -299,23 +301,19 @@
             });
 
             function imprimirFicha(pac) {
-                let dataParaImpressao = pac.data_exame;
-                if (dataParaImpressao && dataParaImpressao.includes('-')) {
-                    const p = dataParaImpressao.split('-');
-                    if (p.length === 3) dataParaImpressao = `${p[2]}/${p[1]}/${p[0]}`;
-                }
-
                 const tipoFormatado = pac.tipo_exame ? (pac.tipo_exame.includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
                 const empresaFormatada = pac.empresa + (tipoFormatado ? ` ${tipoFormatado}` : '');
 
                 document.querySelectorAll('.out-empresa').forEach(el => el.textContent = empresaFormatada);
                 document.querySelectorAll('.out-nome').forEach(el => el.textContent = pac.nome);
                 document.querySelectorAll('.out-funcao').forEach(el => el.textContent = pac.funcao || '');
-                document.querySelectorAll('.out-dn').forEach(el => el.textContent = pac.data_nascimento || '-');
-                document.querySelectorAll('.out-cpf').forEach(el => el.textContent = pac.cpf || '');
                 document.querySelectorAll('.out-rg').forEach(el => el.textContent = pac.rg || '');
+                document.querySelectorAll('.out-cpf').forEach(el => el.textContent = pac.cpf || '');
                 document.querySelectorAll('.out-telefone').forEach(el => el.textContent = pac.telefone || '');
-                document.querySelectorAll('.out-data').forEach(el => el.textContent = dataParaImpressao || '-');
+                
+                // APLICANDO A CONVERSÃO NA IMPRESSÃO
+                document.querySelectorAll('.out-dn').forEach(el => el.textContent = formatarDataBR(pac.data_nascimento));
+                document.querySelectorAll('.out-data').forEach(el => el.textContent = formatarDataBR(pac.data_exame));
 
                 function renderizarLista(idElemento, stringExames) {
                     const ul = document.getElementById(idElemento);
@@ -340,7 +338,6 @@
                 if(totalExames > 10) document.body.classList.add('print-compacto');
                 else document.body.classList.remove('print-compacto');
 
-                // Tempo para a interface se ajustar visualmente antes da janela do sistema abrir
                 setTimeout(() => window.print(), 300);
             }
         });
