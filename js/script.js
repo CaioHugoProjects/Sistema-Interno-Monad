@@ -235,7 +235,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 // =======================================================
                 // 2. NOVA IMPLEMENTAÇÃO: BACKUP NA PLANILHA (Segundo Plano)
                 // =======================================================
-                const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
+                const URL_GOOGLE = "https://script.google.com/macros/library/d/1jOc8pqLrTyxiqiZ07GoRjohfY1OHNdn2biaZeOAjqOgUJPw-shSczEoc/54";
                 
                 const pacotePlanilha = {
                     acao: "SALVAR_BACKUP",
