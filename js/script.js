@@ -176,7 +176,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     if (btnSalvarImprimir) {
-        // Transformado para async para permitir o 'await' do Supabase
         btnSalvarImprimir.addEventListener('click', async function() {
             if (btnSalvarImprimir.disabled) return;
 
@@ -206,7 +205,6 @@ document.addEventListener("DOMContentLoaded", function() {
             msgStatus.style.background = "var(--accent-soft)";
             msgStatus.textContent = "⏳ A gravar registo no sistema e a gerar ficha...";
 
-            // Mapeia os dados exatamente para os nomes das colunas criadas no PostgreSQL
             const dadosBanco = {
                 empresa: empresa,
                 nome: nome,
@@ -223,8 +221,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 audiometria: checkAudio ? checkAudio.checked : false,
                 consulta_clinica: document.getElementById('check-consulta') ? document.getElementById('check-consulta').checked : false
             };
+
             try {
-                // 1. CONEXÃO DIRETA COM SUPABASE (Rápida)
+                // =======================================================
+                // 1. CONEXÃO DIRETA COM SUPABASE (Velocidade Máxima)
+                // =======================================================
                 const { data, error } = await supabase
                     .from('atendimentos')
                     .insert([dadosBanco])
@@ -233,9 +234,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (error) throw new Error(error.message);
                 
                 // =======================================================
-                // 2. NOVA IMPLEMENTAÇÃO: BACKUP NA PLANILHA (Segundo Plano)
+                // 2. BACKUP INVISÍVEL NA PLANILHA (Fire and Forget)
                 // =======================================================
-                const URL_GOOGLE = "https://script.google.com/macros/library/d/1jOc8pqLrTyxiqiZ07GoRjohfY1OHNdn2biaZeOAjqOgUJPw-shSczEoc/54";
+                // ATENÇÃO: Substitua pela URL da sua nova implantação do Apps Script
+                const URL_GOOGLE_BACKUP = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
                 
                 const pacotePlanilha = {
                     acao: "SALVAR_BACKUP",
@@ -243,54 +245,20 @@ document.addEventListener("DOMContentLoaded", function() {
                     nome: nome,
                     funcao: funcao,
                     data_nascimento: dn,
-                    rg: document.querySelector('[name="rg"]').value.trim(),
-                    cpf: document.querySelector('[name="cpf"]').value.trim(),
+                    rg: dadosBanco.rg,
+                    cpf: dadosBanco.cpf,
                     tipo_exame: tipoExame,
                     data_exame: dataExame
                 };
 
-                // O fetch é disparado, mas não usamos "await" para não travar a tela
-                fetch(URL_GOOGLE, {
+                // Enviamos para a planilha sem usar "await", para não prender a tela da receção
+                fetch(URL_GOOGLE_BACKUP, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(pacotePlanilha)
                 }).catch(err => console.log("Erro silencioso ao espelhar na planilha:", err));
                 // =======================================================
 
-                const protocolo_gerado = data[0].protocolo;
-
-                if (protocolo_gerado && protocolo_gerado !== "") {
-                    msgStatus.textContent = "✅ Guardado! PROTOCOLO GERADO: " + protocolo_gerado;
-                    alert("Atenção, Receção!\n\nColaborador da TABOCAS registado com Gota Espessa.\nAnote o Protocolo Gerado: " + protocolo_gerado);
-                } else {
-                    msgStatus.textContent = "✅ Guardado com sucesso! A preparar impressão...";
-                }
-
-                msgStatus.style.color = "var(--success)";
-                msgStatus.style.background = "var(--success-soft)";
-                
-                setTimeout(() => {
-                    msgStatus.style.display = "none";
-                    btnSalvarImprimir.disabled = false;
-                    btnSalvarImprimir.style.opacity = "1";
-                    
-                    window.print();
-                }, 1500);
-
-            } catch (err) {
-                // ... tratamento de erro original ...
-
-            try {
-                // =======================================================
-                // CONEXÃO DIRETA COM SUPABASE (Substitui o fetch do GAS)
-                // =======================================================
-                const { data, error } = await supabase
-                    .from('atendimentos')
-                    .insert([dadosBanco])
-                    .select('protocolo'); // Pede para o banco retornar o protocolo (se gerado)
-
-                if (error) throw new Error(error.message);
-                
                 // =======================================================
                 // FEEDBACK DE RASTREABILIDADE (TABOCAS) E SUCESSO
                 // =======================================================
