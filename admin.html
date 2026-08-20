@@ -87,6 +87,9 @@
         <div class="modal-box">
             <h3>✏️ Editar Dados do Paciente</h3>
             <div class="edit-grid">
+                <!-- Chaves invisíveis para segurança cirúrgica no banco -->
+                <input type="hidden" id="edit-id-banco">
+                <input type="hidden" id="edit-nome-antigo">
                 <input type="hidden" id="edit-cpf-antigo">
                 <input type="hidden" id="edit-data-exame">
                 
@@ -191,7 +194,6 @@
                 }
             }
 
-            // Polling com ordenação mantida para não bagunçar a memória
             setInterval(async () => {
                 if (document.hidden || modoBuscaGlobal || !inputData.value) return; 
                 
@@ -218,8 +220,9 @@
                             return;
                         }
                         
-                        data.forEach(pac => {
-                            const l = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
+                        // Atualização silenciosa usando o index exato
+                        data.forEach((pac, index) => {
+                            const l = document.querySelector(`tr[data-index="${index}"]`);
                             if (l && document.getElementById('modal-editar').style.display === 'none') {
                                 const updateCheck = (setor, valor) => {
                                     const cb = l.querySelector(`.check-setor-admin[data-setor="${setor}"]`);
@@ -245,7 +248,7 @@
 
             function renderizarTabela(pacientes) {
                 tabela.innerHTML = "";
-                pacientes.forEach((pac) => {
+                pacientes.forEach((pac, index) => {
                     const temClinico = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
                     const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
                     const temFono = pac.audiometria === true;
@@ -264,7 +267,7 @@
                         <div class="celula-exame">
                             <input type="checkbox" class="check-setor-admin" data-setor="lab" ${checked ? 'checked' : ''} style="cursor:pointer; transform: scale(1.3);">
                             <div class="detalhe-exame" style="margin-top:4px;">${exame}</div>
-                            <textarea class="obs-input-admin" data-cpf="${pac.cpf}" rows="2">${obs || ''}</textarea>
+                            <textarea class="obs-input-admin" rows="2">${obs || ''}</textarea>
                         </div>
                     `;
 
@@ -278,8 +281,8 @@
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
-                    tr.dataset.cpf = pac.cpf;
-                    tr.dataset.dataexame = pac.data_exame;
+                    // AGORA: Amarramos o index exato ao elemento HTML!
+                    tr.dataset.index = index;
 
                     tr.innerHTML = `
                         <td>
@@ -295,9 +298,9 @@
                         <td style="text-align: center; background:var(--surface-muted);">${tdM}</td>
                         <td style="text-align: center;">
                             <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <!-- AGORA O BOTÃO BUSCA PELO CPF E NÃO MAIS PELA POSIÇÃO -->
-                                <button class="btn-editar" data-cpf="${pac.cpf}" style="background:var(--accent); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">✏️ Editar Dados</button>
-                                <button class="btn-apagar" style="background:var(--danger); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">🗑️ Excluir</button>
+                                <!-- Botões procuram a pessoa certa pelo Index, independentemente de busca! -->
+                                <button class="btn-editar" data-index="${index}" style="background:var(--accent); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">✏️ Editar Dados</button>
+                                <button class="btn-apagar" data-index="${index}" style="background:var(--danger); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">🗑️ Excluir</button>
                             </div>
                         </td>
                     `;
@@ -319,7 +322,10 @@
 
             tabela.addEventListener('change', async function(e) {
                 const tr = e.target.closest('tr');
-                const cpf = tr.dataset.cpf;
+                if (!tr) return;
+                const index = tr.dataset.index;
+                const pac = databaseAdmin[index];
+                if (!pac) return;
 
                 if (e.target.classList.contains('check-setor-admin')) {
                     const cb = e.target;
@@ -334,7 +340,11 @@
                         const updateObj = {};
                         updateObj[colunaAlvo] = liberado;
 
-                        const { error } = await supabase.from('atendimentos').update(updateObj).eq('cpf', cpf);
+                        let query = supabase.from('atendimentos').update(updateObj);
+                        if (pac.id) query = query.eq('id', pac.id);
+                        else query = query.eq('nome', pac.nome).eq('data_exame', pac.data_exame);
+
+                        const { error } = await query;
                         if (error) throw error;
 
                         cb.style.opacity = "1";
@@ -353,7 +363,11 @@
                     obsInput.style.opacity = "0.4";
                     
                     try {
-                        const { error } = await supabase.from('atendimentos').update({ observacao: obsInput.value }).eq('cpf', cpf);
+                        let query = supabase.from('atendimentos').update({ observacao: obsInput.value });
+                        if (pac.id) query = query.eq('id', pac.id);
+                        else query = query.eq('nome', pac.nome).eq('data_exame', pac.data_exame);
+
+                        const { error } = await query;
                         if (error) throw error;
 
                         obsInput.style.opacity = "1"; 
@@ -369,36 +383,39 @@
             });
 
             tabela.addEventListener('click', async function(e) {
-                if (e.target.classList.contains('btn-apagar')) {
-                    const btn = e.target;
-                    const tr = btn.closest('tr');
-                    const nome = tr.querySelector('.col-nome').textContent;
+                const btnApagar = e.target.closest('.btn-apagar');
+                if (btnApagar) {
+                    const index = btnApagar.dataset.index;
+                    const pac = databaseAdmin[index];
                     
-                    if (confirm(`TEM A CERTEZA ABSOLUTA?\n\nDeseja excluir permanentemente o registo de:\n${nome}\n\nEsta ação não pode ser desfeita.`)) {
-                        btn.textContent = "Apagando...";
-                        btn.disabled = true;
+                    if (confirm(`TEM A CERTEZA ABSOLUTA?\n\nDeseja excluir permanentemente o registo de:\n${pac.nome}\n\nEsta ação não pode ser desfeita.`)) {
+                        btnApagar.textContent = "Apagando...";
+                        btnApagar.disabled = true;
 
                         try {
-                            const { error } = await supabase
-                                .from('atendimentos')
-                                .delete()
-                                .eq('cpf', tr.dataset.cpf)
-                                .eq('data_exame', tr.dataset.dataexame); 
+                            let query = supabase.from('atendimentos').delete();
+                            if (pac.id) {
+                                query = query.eq('id', pac.id);
+                            } else {
+                                query = query.eq('nome', pac.nome).eq('data_exame', pac.data_exame);
+                            }
                                 
+                            const { error } = await query;
                             if (error) throw error;
-                            tr.remove();
+                            
+                            btnApagar.closest('tr').remove();
                         } catch (err) {
                             alert("Falha na exclusão: " + err.message); 
-                            btn.textContent = "🗑️ Excluir"; 
-                            btn.disabled = false; 
+                            btnApagar.textContent = "🗑️ Excluir"; 
+                            btnApagar.disabled = false; 
                         }
                     }
                 }
 
-                if (e.target.classList.contains('btn-editar')) {
-                    // Busca pelo CPF no banco de dados local na memória
-                    const cpfBusca = e.target.dataset.cpf;
-                    const pac = databaseAdmin.find(p => p.cpf === cpfBusca);
+                const btnEditar = e.target.closest('.btn-editar');
+                if (btnEditar) {
+                    const index = btnEditar.dataset.index;
+                    const pac = databaseAdmin[index];
                     
                     if (pac) {
                         abrirModalEdicao(pac);
@@ -409,8 +426,11 @@
             });
 
             window.abrirModalEdicao = function(pac) {
-                document.getElementById('edit-cpf-antigo').value = pac.cpf;
-                document.getElementById('edit-data-exame').value = pac.data_exame;
+                // Guarda os dados originais silenciosamente no momento do clique para garantir alvo cirúrgico
+                document.getElementById('edit-id-banco').value = pac.id || "";
+                document.getElementById('edit-nome-antigo').value = pac.nome || "";
+                document.getElementById('edit-cpf-antigo').value = pac.cpf || "";
+                document.getElementById('edit-data-exame').value = pac.data_exame || "";
                 
                 document.getElementById('edit-nome').value = pac.nome || "";
                 document.getElementById('edit-empresa').value = pac.empresa || "";
@@ -435,7 +455,6 @@
                 document.getElementById('modal-editar').style.display = 'none';
             };
 
-            // NOVA LÓGICA DE SALVAMENTO COM RASTREAMENTO DE ERROS E SELECT()
             document.getElementById('btn-salvar-edicao').addEventListener('click', async function(e) {
                 const btn = e.target;
                 
@@ -445,8 +464,10 @@
                     return;
                 }
 
-                let cpfAntigo = document.getElementById('edit-cpf-antigo').value.trim();
-                let dataRaw = document.getElementById('edit-data-exame').value.trim();
+                // Recupera as informações estáticas da hora em que a janela abriu
+                const idBanco = document.getElementById('edit-id-banco').value;
+                const nomeAntigo = document.getElementById('edit-nome-antigo').value;
+                const dataExameAntiga = document.getElementById('edit-data-exame').value;
                 
                 const dadosEdicao = {
                     nome: document.getElementById('edit-nome').value.trim(),
@@ -468,22 +489,27 @@
                 btn.disabled = true;
 
                 try {
-                    const { data, error } = await supabase
-                        .from('atendimentos')
-                        .update(dadosEdicao)
-                        .eq('cpf', cpfAntigo)
-                        .eq('data_exame', dataRaw)
-                        .select(); 
+                    let query = supabase.from('atendimentos').update(dadosEdicao);
+
+                    // Atualização 100% à prova de falhas: Busca direto pelo ID interno
+                    if (idBanco) {
+                        query = query.eq('id', idBanco);
+                    } else {
+                        // Plano de contingência caso não haja coluna de ID
+                        query = query.eq('nome', nomeAntigo).eq('data_exame', dataExameAntiga);
+                    }
+
+                    // Força retorno imediato para verificarmos se deu certo
+                    const { data, error } = await query.select(); 
 
                     if (error) throw error;
-
-                    if (!data || data.length === 0) {
-                        throw new Error(`O sistema não encontrou o paciente (CPF: ${cpfAntigo} / Data: ${dataRaw}) para atualizar.`);
-                    }
+                    if (!data || data.length === 0) throw new Error("Paciente não encontrado no banco para aplicar as alterações.");
 
                     btn.textContent = "Salvar Alterações";
                     btn.disabled = false;
                     fecharModal();
+                    
+                    alert("✅ Dados de " + dadosEdicao.nome + " atualizados com sucesso!");
                     buscarDados(modoBuscaGlobal); 
 
                 } catch (err) {
