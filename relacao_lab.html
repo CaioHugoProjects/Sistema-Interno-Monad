@@ -200,13 +200,21 @@
         const painelFiltrosExames = document.getElementById('painel-filtros-exames');
         const listaCheckboxesExames = document.getElementById('lista-checkboxes-exames');
 
+        // Função para converter data para o padrão brasileiro (DD/MM/AAAA)
+        function formatarDataBR(data) {
+            if (!data) return '-';
+            if (data.includes('/')) return data; 
+            const partes = data.split('T')[0].split('-'); 
+            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            return data;
+        }
+
         const hoje = new Date();
         inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
         async function buscar() {
             if(!inputData.value) return;
             
-            // Limpa as edições manuais ao buscar nova data
             cpfsRemovidosDaRelacao = [];
             adicoesManuais = {};
             remocoesManuais = {};
@@ -224,7 +232,6 @@
             document.getElementById('out-data-geracao').textContent = `${String(dataAtual.getDate()).padStart(2, '0')}/${String(dataAtual.getMonth() + 1).padStart(2, '0')}/${dataAtual.getFullYear()} às ${String(dataAtual.getHours()).padStart(2, '0')}:${String(dataAtual.getMinutes()).padStart(2, '0')}`;
 
             try {
-                // Requisição direta ao Supabase
                 const { data, error } = await supabase
                     .from('atendimentos')
                     .select('*')
@@ -234,7 +241,6 @@
                 if (error) throw error;
 
                 if (data && data.length > 0) {
-                    // Filtra apenas pacientes que possuem exames de laboratório
                     pacientesLaboratorioOriginais = data.filter(p => p.exames_lab && p.exames_lab.trim() !== "Nenhum" && p.exames_lab.trim() !== "");
                     
                     if(pacientesLaboratorioOriginais.length > 0) {
@@ -254,7 +260,6 @@
             }
         }
 
-        // Gera a lista global de exames no topo
         function gerarCheckboxesGlobais() {
             listaCheckboxesExames.innerHTML = '';
             let conjuntoExames = new Set(); 
@@ -289,7 +294,6 @@
             renderizarTabela();
         };
 
-        // --- FUNÇÕES DE MICRO-GESTÃO POR PACIENTE ---
         window.removerPacienteDaRelacao = function(cpf) {
             cpfsRemovidosDaRelacao.push(cpf);
             renderizarTabela();
@@ -299,7 +303,6 @@
             if (!remocoesManuais[cpf]) remocoesManuais[cpf] = [];
             remocoesManuais[cpf].push(exame);
             
-            // Se o exame estava na lista de adições manuais, tira-o de lá para evitar conflito
             if (adicoesManuais[cpf]) {
                 adicoesManuais[cpf] = adicoesManuais[cpf].filter(e => e !== exame);
             }
@@ -316,7 +319,6 @@
                     adicoesManuais[cpf].push(exameNovo);
                 }
                 
-                // Se o exame tinha sido removido manualmente antes, remove o bloqueio dele
                 if (remocoesManuais[cpf]) {
                     remocoesManuais[cpf] = remocoesManuais[cpf].filter(e => e !== exameNovo);
                 }
@@ -324,7 +326,6 @@
             }
         };
 
-        // --- MOTOR DE RENDERIZAÇÃO INTELIGENTE ---
         function renderizarTabela() {
             tabela.innerHTML = '';
             
@@ -335,22 +336,17 @@
             pacientesCopia.sort((a, b) => a.nome.localeCompare(b.nome));
 
             pacientesCopia.forEach(pac => {
-                if (cpfsRemovidosDaRelacao.includes(pac.cpf)) return; // Ignora pacientes deletados no botão vermelho
+                if (cpfsRemovidosDaRelacao.includes(pac.cpf)) return; 
 
-                // 1. Pega os exames base vindos do Supabase
                 let examesDoPaciente = pac.exames_lab.split(',').map(e => e.trim()).filter(e => e !== "");
-                
-                // 2. Filtra pelas caixas globais marcadas no topo
                 let examesAtivos = examesDoPaciente.filter(exame => examesGlobaisSelecionados.includes(exame));
 
-                // 3. Aplica adições manuais (O "+" azul da tabela)
                 if (adicoesManuais[pac.cpf]) {
                     adicoesManuais[pac.cpf].forEach(e => {
                         if (!examesAtivos.includes(e)) examesAtivos.push(e);
                     });
                 }
                 
-                // 4. Aplica remoções manuais (O "x" de dentro da tabela)
                 if (remocoesManuais[pac.cpf]) {
                     examesAtivos = examesAtivos.filter(e => !remocoesManuais[pac.cpf].includes(e));
                 }
@@ -358,7 +354,6 @@
                 if (examesAtivos.length > 0) {
                     const tr = document.createElement('tr');
                     
-                    // Gera o HTML das etiquetas/tags
                     const tagsHTML = examesAtivos.map(exame => `
                         <span class="tag-exame-paciente">
                             ${exame}
@@ -367,6 +362,9 @@
                     `).join('');
                     
                     const btnAddHTML = `<button class="no-print btn-add-exame-pac" onclick="abrirPromptAddExame('${pac.cpf}')">+ Adicionar</button>`;
+
+                    // Conversão da data de nascimento para o padrão BR
+                    const dataNascFormatada = formatarDataBR(pac.data_nascimento);
 
                     tr.innerHTML = `
                         <td style="text-align: center; font-weight: bold; color: var(--text-muted);">${contador}</td>
@@ -377,7 +375,7 @@
                             </div>
                             <div class="cpf-label" style="font-size:11px; color:var(--text-muted);">CPF: ${pac.cpf}</div>
                         </td>
-                        <td style="font-size: 13px; color: var(--text-main);">${pac.data_nascimento || '-'}</td>
+                        <td style="font-size: 13px; color: var(--text-main);">${dataNascFormatada}</td>
                         <td>${pac.empresa || '-'}</td>
                         <td style="line-height: 1.6;">
                             <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
@@ -404,7 +402,6 @@
         btnBuscar.addEventListener('click', buscar);
         buscar(); 
 
-        // Dark Mode Logic
         document.addEventListener('DOMContentLoaded', () => {
             const btnTheme = document.getElementById('btn-theme-toggle');
             if (btnTheme) {
