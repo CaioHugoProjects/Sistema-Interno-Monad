@@ -223,6 +223,62 @@ document.addEventListener("DOMContentLoaded", function() {
                 audiometria: checkAudio ? checkAudio.checked : false,
                 consulta_clinica: document.getElementById('check-consulta') ? document.getElementById('check-consulta').checked : false
             };
+            try {
+                // 1. CONEXÃO DIRETA COM SUPABASE (Rápida)
+                const { data, error } = await supabase
+                    .from('atendimentos')
+                    .insert([dadosBanco])
+                    .select('protocolo'); 
+
+                if (error) throw new Error(error.message);
+                
+                // =======================================================
+                // 2. NOVA IMPLEMENTAÇÃO: BACKUP NA PLANILHA (Segundo Plano)
+                // =======================================================
+                const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbyf3csqhMdP2uwUa0JXNZ0zdCWji4W3UOngOK26DSWxf0OlNzyMxEwBJdDhuwZN06DXig/exec";
+                
+                const pacotePlanilha = {
+                    acao: "SALVAR_BACKUP",
+                    empresa: empresa,
+                    nome: nome,
+                    funcao: funcao,
+                    data_nascimento: dn,
+                    rg: document.querySelector('[name="rg"]').value.trim(),
+                    cpf: document.querySelector('[name="cpf"]').value.trim(),
+                    tipo_exame: tipoExame,
+                    data_exame: dataExame
+                };
+
+                // O fetch é disparado, mas não usamos "await" para não travar a tela
+                fetch(URL_GOOGLE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(pacotePlanilha)
+                }).catch(err => console.log("Erro silencioso ao espelhar na planilha:", err));
+                // =======================================================
+
+                const protocolo_gerado = data[0].protocolo;
+
+                if (protocolo_gerado && protocolo_gerado !== "") {
+                    msgStatus.textContent = "✅ Guardado! PROTOCOLO GERADO: " + protocolo_gerado;
+                    alert("Atenção, Receção!\n\nColaborador da TABOCAS registado com Gota Espessa.\nAnote o Protocolo Gerado: " + protocolo_gerado);
+                } else {
+                    msgStatus.textContent = "✅ Guardado com sucesso! A preparar impressão...";
+                }
+
+                msgStatus.style.color = "var(--success)";
+                msgStatus.style.background = "var(--success-soft)";
+                
+                setTimeout(() => {
+                    msgStatus.style.display = "none";
+                    btnSalvarImprimir.disabled = false;
+                    btnSalvarImprimir.style.opacity = "1";
+                    
+                    window.print();
+                }, 1500);
+
+            } catch (err) {
+                // ... tratamento de erro original ...
 
             try {
                 // =======================================================
