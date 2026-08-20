@@ -130,6 +130,15 @@
             let databaseAdmin = [];
             let modoBuscaGlobal = false;
 
+            // Função para converter data para BR
+            function formatarDataBR(data) {
+                if (!data) return '-';
+                if (data.includes('/')) return data; // Se já tiver barra, ignora
+                const partes = data.split('T')[0].split('-'); // Corta os traços
+                if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+                return data;
+            }
+
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
@@ -220,7 +229,6 @@
                             return;
                         }
                         
-                        // Atualização silenciosa usando o index exato
                         data.forEach((pac, index) => {
                             const l = document.querySelector(`tr[data-index="${index}"]`);
                             if (l && document.getElementById('modal-editar').style.display === 'none') {
@@ -281,13 +289,12 @@
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
-                    // AGORA: Amarramos o index exato ao elemento HTML!
                     tr.dataset.index = index;
 
                     tr.innerHTML = `
                         <td>
                             <div style="font-weight:bold; color:var(--text-strong);" class="col-nome">${pac.nome}</div>
-                            <div style="font-size:12px; color:var(--accent); font-weight: 600;">📅 Data: ${pac.data_exame || '-'}</div>
+                            <div style="font-size:12px; color:var(--accent); font-weight: 600;">📅 Data: ${formatarDataBR(pac.data_exame)}</div>
                             <div style="font-size:11px; color:var(--text-muted);">Empresa: ${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></div>
                             <div style="font-size:11px; color:var(--text-muted);">CPF: ${pac.cpf}</div>
                         </td>
@@ -298,7 +305,6 @@
                         <td style="text-align: center; background:var(--surface-muted);">${tdM}</td>
                         <td style="text-align: center;">
                             <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <!-- Botões procuram a pessoa certa pelo Index, independentemente de busca! -->
                                 <button class="btn-editar" data-index="${index}" style="background:var(--accent); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">✏️ Editar Dados</button>
                                 <button class="btn-apagar" data-index="${index}" style="background:var(--danger); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">🗑️ Excluir</button>
                             </div>
@@ -426,7 +432,6 @@
             });
 
             window.abrirModalEdicao = function(pac) {
-                // Guarda os dados originais silenciosamente no momento do clique para garantir alvo cirúrgico
                 document.getElementById('edit-id-banco').value = pac.id || "";
                 document.getElementById('edit-nome-antigo').value = pac.nome || "";
                 document.getElementById('edit-cpf-antigo').value = pac.cpf || "";
@@ -436,7 +441,7 @@
                 document.getElementById('edit-empresa').value = pac.empresa || "";
                 document.getElementById('edit-tipo').value = pac.tipo_exame || "";
                 document.getElementById('edit-funcao').value = pac.funcao || "";
-                document.getElementById('edit-dn').value = pac.data_nascimento || "";
+                document.getElementById('edit-dn').value = formatarDataBR(pac.data_nascimento) || "";
                 document.getElementById('edit-rg').value = pac.rg || "";
                 document.getElementById('edit-cpf').value = pac.cpf || "";
                 document.getElementById('edit-tel').value = pac.telefone || "";
@@ -464,7 +469,6 @@
                     return;
                 }
 
-                // Recupera as informações estáticas da hora em que a janela abriu
                 const idBanco = document.getElementById('edit-id-banco').value;
                 const nomeAntigo = document.getElementById('edit-nome-antigo').value;
                 const dataExameAntiga = document.getElementById('edit-data-exame').value;
@@ -491,15 +495,12 @@
                 try {
                     let query = supabase.from('atendimentos').update(dadosEdicao);
 
-                    // Atualização 100% à prova de falhas: Busca direto pelo ID interno
                     if (idBanco) {
                         query = query.eq('id', idBanco);
                     } else {
-                        // Plano de contingência caso não haja coluna de ID
                         query = query.eq('nome', nomeAntigo).eq('data_exame', dataExameAntiga);
                     }
 
-                    // Força retorno imediato para verificarmos se deu certo
                     const { data, error } = await query.select(); 
 
                     if (error) throw error;
