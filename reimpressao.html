@@ -213,7 +213,7 @@
 
             function renderizarTabela(pacientes) {
                 tabela.innerHTML = "";
-                pacientes.forEach((pac, index) => {
+                pacientes.forEach((pac) => {
                     // Mapeia as lógicas verificando as colunas do banco
                     const temClinico = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
                     const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
@@ -235,6 +235,8 @@
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
+                    
+                    // CORREÇÃO: O botão não usa mais o Index (posição na tabela), mas sim o ID do banco ou o Nome+CPF
                     tr.innerHTML = `
                         <td><span class="tag-empresa">${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></span></td>
                         <td>
@@ -242,14 +244,14 @@
                             <div style="font-size: 12px; color:var(--text-muted);">${pac.funcao || '-'} • Nasc: ${dataNascimento}</div>
                         </td>
                         <td>
-                            <div style="font-size: 13px; color:var(--text-main);"><strong>CPF:</strong> ${pac.cpf}</div>
+                            <div style="font-size: 13px; color:var(--text-main);"><strong>CPF:</strong> ${pac.cpf || 'Não informado'}</div>
                             <div style="font-size: 12px; color:var(--text-muted);"><strong>RG:</strong> ${pac.rg || '-'} • <strong>Tel:</strong> ${pac.telefone || '-'}</div>
                         </td>
                         <td style="font-size: 12px; color:var(--text-secondary); max-width: 200px; white-space: normal;">
                             ${resumoSetores}
                         </td>
                         <td style="text-align: center;">
-                            <button onclick="imprimirFicha(${index})" style="background-color: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto;">
+                            <button class="btn-imprimir-ficha" data-id="${pac.id || ''}" data-nome="${pac.nome}" data-cpf="${pac.cpf || ''}" style="background-color: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto;">
                                 🖨️ Imprimir
                             </button>
                         </td>
@@ -258,11 +260,12 @@
                 });
             }
 
+            // O Filtro atualiza a tela chamando o renderizarTabela, MAS agora os botões sabem quem eles são!
             inputPesquisa.addEventListener('input', function(e) {
                 const termo = e.target.value.toLowerCase();
                 const filtrados = databasePacientes.filter(pac => 
-                    pac.nome.toLowerCase().includes(termo) || 
-                    pac.cpf.toLowerCase().includes(termo)
+                    (pac.nome && pac.nome.toLowerCase().includes(termo)) || 
+                    (pac.cpf && pac.cpf.toLowerCase().includes(termo))
                 );
                 renderizarTabela(filtrados);
             });
@@ -270,9 +273,32 @@
             document.getElementById('btn-buscar-data').addEventListener('click', buscarPacientesDoBanco);
             buscarPacientesDoBanco();
 
-            window.imprimirFicha = function(index) {
-                const pac = databasePacientes[index];
+            // Intercepta o clique no botão de impressão de forma segura
+            tabela.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-imprimir-ficha');
+                if (btn) {
+                    const id = btn.dataset.id;
+                    const nome = btn.dataset.nome;
+                    const cpf = btn.dataset.cpf;
+                    
+                    let pacAlvo = null;
+                    
+                    // Busca na memória pelo ID único, ou usa Nome+CPF como contingência
+                    if (id && id !== 'undefined' && id !== '') {
+                        pacAlvo = databasePacientes.find(p => String(p.id) === String(id));
+                    } else {
+                        pacAlvo = databasePacientes.find(p => p.nome === nome && (p.cpf || '') === cpf);
+                    }
+                    
+                    if (pacAlvo) {
+                        imprimirFicha(pacAlvo);
+                    } else {
+                        alert("Erro: Paciente não encontrado na memória para impressão.");
+                    }
+                }
+            });
 
+            function imprimirFicha(pac) {
                 let dataParaImpressao = pac.data_exame;
                 if (dataParaImpressao && dataParaImpressao.includes('-')) {
                     const p = dataParaImpressao.split('-');
@@ -286,7 +312,7 @@
                 document.querySelectorAll('.out-nome').forEach(el => el.textContent = pac.nome);
                 document.querySelectorAll('.out-funcao').forEach(el => el.textContent = pac.funcao || '');
                 document.querySelectorAll('.out-dn').forEach(el => el.textContent = pac.data_nascimento || '-');
-                document.querySelectorAll('.out-cpf').forEach(el => el.textContent = pac.cpf);
+                document.querySelectorAll('.out-cpf').forEach(el => el.textContent = pac.cpf || '');
                 document.querySelectorAll('.out-rg').forEach(el => el.textContent = pac.rg || '');
                 document.querySelectorAll('.out-telefone').forEach(el => el.textContent = pac.telefone || '');
                 document.querySelectorAll('.out-data').forEach(el => el.textContent = dataParaImpressao || '-');
@@ -314,8 +340,9 @@
                 if(totalExames > 10) document.body.classList.add('print-compacto');
                 else document.body.classList.remove('print-compacto');
 
+                // Tempo para a interface se ajustar visualmente antes da janela do sistema abrir
                 setTimeout(() => window.print(), 300);
-            };
+            }
         });
     </script>
     <script>
