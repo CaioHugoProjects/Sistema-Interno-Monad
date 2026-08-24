@@ -52,9 +52,9 @@
                     <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
                         <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
                         <button id="btn-buscar-data" style="background-color: var(--danger); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn);">Atualizar Dia</button>
-                        <button id="btn-busca-global" style="background-color: var(--warning); color: #0f172a; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); transition: transform 0.2s;">🌍 Busca Global</button>
+                        <button id="btn-busca-global" style="background-color: var(--warning); color: #0f172a; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); transition: transform 0.2s;" title="Pesquisa em todo o banco de dados">🌍 Busca Global</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar nome ou CPF..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
+                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar nome ou CPF (Aperte Enter)..." style="padding: 8px; width: 260px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
                 </div>
             </div>
 
@@ -87,7 +87,6 @@
         <div class="modal-box">
             <h3>✏️ Editar Dados do Paciente</h3>
             <div class="edit-grid">
-                <!-- Chaves invisíveis para segurança cirúrgica no banco -->
                 <input type="hidden" id="edit-id-banco">
                 <input type="hidden" id="edit-nome-antigo">
                 <input type="hidden" id="edit-cpf-antigo">
@@ -133,8 +132,8 @@
             // Função para converter data para BR
             function formatarDataBR(data) {
                 if (!data) return '-';
-                if (data.includes('/')) return data; // Se já tiver barra, ignora
-                const partes = data.split('T')[0].split('-'); // Corta os traços
+                if (data.includes('/')) return data; 
+                const partes = data.split('T')[0].split('-'); 
                 if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
                 return data;
             }
@@ -169,6 +168,7 @@
 
             async function buscarDados(isGlobal = false) {
                 modoBuscaGlobal = isGlobal; 
+                const termoBanco = inputPesq.value.trim();
                 
                 if(!isGlobal && !inputData.value) return;
                 
@@ -180,9 +180,17 @@
                     let query = supabase.from('atendimentos').select('*').order('created_at', { ascending: false });
                     
                     if (!isGlobal) {
+                        // Busca somente do dia selecionado
                         query = query.eq('data_exame', inputData.value);
                     } else {
-                        query = query.limit(500); 
+                        // BUSCA GLOBAL PODEROSA
+                        if (termoBanco !== "") {
+                            // Se tiver texto, varre o banco todo em busca do nome ou CPF exato
+                            query = query.or(`nome.ilike.%${termoBanco}%,cpf.ilike.%${termoBanco}%`);
+                        } else {
+                            // Se não tiver texto, pega os últimos 5000 registros para exibir um histórico largo
+                            query = query.limit(5000); 
+                        }
                     }
 
                     const { data, error } = await query;
@@ -204,6 +212,7 @@
             }
 
             setInterval(async () => {
+                // Não atualiza automaticamente se estiver na Busca Global para não interromper o que o admin está vendo
                 if (document.hidden || modoBuscaGlobal || !inputData.value) return; 
                 
                 try {
@@ -325,6 +334,17 @@
                 });
                 document.getElementById('msg-vazio').style.display = visiveis === 0 ? 'block' : 'none';
             }
+
+            // Pesquisa Local Imediata (quando o usuário digita, já filtra o que está na tela)
+            inputPesq.addEventListener('input', aplicarFiltros);
+
+            // Gatilho do Enter: Quando apertar Enter, faz a busca profunda no Banco de Dados
+            inputPesq.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    buscarDados(true);
+                }
+            });
 
             tabela.addEventListener('change', async function(e) {
                 const tr = e.target.closest('tr');
@@ -523,8 +543,6 @@
 
             document.getElementById('btn-buscar-data').addEventListener('click', () => buscarDados(false)); 
             document.getElementById('btn-busca-global').addEventListener('click', () => buscarDados(true)); 
-
-            inputPesq.addEventListener('input', aplicarFiltros);
             
             buscarDados(false);
         });
