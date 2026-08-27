@@ -3,401 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Administrador - Clínica Monad</title>
+    <title>Monad Sistema Interno - Recepção</title>
     <link rel="stylesheet" href="styles/styles.css">
-    <link rel="stylesheet" href="styles/checkin.css">
     <script>
-        const tokenAtivo = localStorage.getItem('monad_token');
-        const setorLogado = localStorage.getItem('monad_setor');
-        if (!tokenAtivo || setorLogado !== "admin") window.location.href = "login.html";
-        if (localStorage.getItem('monad_theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        // GATEKEEPER E LEITURA DO MODO ESCURO
+        if (localStorage.getItem('monad_theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        const s = localStorage.getItem('monad_setor');
+        if (!s || (s !== 'recepcao' && s !== 'todos' && s !== 'admin')) { window.location.href = "login.html"; }
     </script>
-    <style>
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .modal-box { background: var(--surface); padding: 25px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .modal-box h3 { color: var(--danger); margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid var(--border-strong); padding-bottom: 10px; }
-        .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .edit-grid label { font-size: 13px; font-weight: bold; color: var(--text-muted); display: flex; flex-direction: column; gap: 5px; }
-        .edit-grid input[type="text"] { padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; font-size: 14px; background: var(--surface-muted); color: var(--text-strong);}
-        .edit-full { grid-column: span 2; }
-    </style>
 </head>
 <body>
     <header>
-        <h1 style="color: var(--danger);">Acesso Administrativo</h1>
-        <h2 style="color: var(--text-muted);">Supervisão, Edição e Exclusão de Registos</h2>
-        <div style="float: right; margin-top: 10px; display: flex; gap: 10px; align-items: center;" class="no-print">
+        <h1 style="color: var(--text-strong);">Sistema Interno</h1>
+        <h2>Clínica Monad Ocupacional - Oriximiná</h2>
+        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
             <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
         </div>
-        <nav>
+        <nav class="no-print">
             <ul>
-                <li><a href="index.html">Recepção</a></li>
+                <li><a href="index.html" style="background-color: #003366;">Recepção</a></li>
                 <li><a href="checkin.html">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
-                <li><a href="admin.html" style="background-color: #7f1d1d; color: white;">Painel Admin</a></li>
-            </ul>
+                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: #7f1d1d;">Painel Admin</a></li>
+            </ul>   
         </nav>
+        <script>
+            if (localStorage.getItem('monad_setor') === 'admin') {
+                document.getElementById('menu-admin').style.display = 'block';
+            }
+        </script>
     </header>
     
     <main>
-        <div class="painel-recepcao" style="border: 2px solid var(--danger);">
-            <h2 style="margin-top: 0; margin-bottom: 15px; color: var(--text-strong);">Gestão e Pesquisa Profunda</h2>
-            
-            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-end; background: var(--surface); padding: 15px; border-radius: 8px; border: 1px solid var(--border-strong);">
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="font-size: 12px; font-weight: bold; color: var(--text-muted);">📅 Ver por Data:</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="date" id="filtro-data" style="padding: 8px; border-radius: 5px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong);">
-                        <button onclick="executarBusca('data')" style="background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Carregar</button>
-                    </div>
-                </div>
+        <div class="sistema-fichas">
+            <div class="no-print painel-recepcao">
+                <h2>Painel de Cadastro (Recepção)</h2>
+                <form id="masterForm">
+                    <fieldset>
+                        <legend>Dados do Colaborador</legend>
+                        <div class="form-group row">
+                            <label>Empresa: <input type="text" class="master-input" name="empresa"></label>
+                            <label>Nome: <input type="text" class="master-input" name="nome"></label>
+                        </div>
+                        <div class="form-group row">
+                            <label>Função: <input type="text" class="master-input" name="funcao"></label>
+                            <label>Data de Nasc.: <input type="date" class="master-input" name="dn"></label>
+                        </div>
+                        <div class="form-group row">
+                            <label>RG: <input type="text" class="master-input" name="rg"></label>
+                            <label>CPF: 
+                                <input type="text" class="master-input" name="cpf" placeholder="000.000.000-00">
+                                <span id="cpf-error" style="color: var(--danger); font-size: 12px; display: none;">⚠️ CPF Inválido</span>
+                            </label>
+                        </div>
+                        <div class="form-group row">
+                            <label>Telefone: <input type="text" class="master-input" name="telefone" placeholder="(00) 00000-0000"></label>
+                            <label>Data Exame: <input type="date" class="master-input" name="data"></label>
+                        </div>
+                    </fieldset>
 
-                <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
-                    <label style="font-size: 12px; font-weight: bold; color: var(--text-muted);">🌍 Buscar em TODO o Histórico (Qualquer Data):</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="text" id="pesquisa-paciente" placeholder="Digite Empresa, Nome ou CPF e aperte Enter..." style="padding: 8px; border-radius: 5px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong); flex: 1;">
-                        <button onclick="executarBusca('texto')" style="background: var(--warning); color: #0f172a; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">🔎 Buscar</button>
-                        <button onclick="executarBusca('todos')" style="background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">📑 Listar Todos</button>
+                    <fieldset>
+                        <legend>Tipo de Exame</legend>
+                        <div class="tipo-exame-grid">
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="ADMISSIONAL"> ADMISSIONAL</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="PERIODICO"> PERIÓDICO</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="DEMISSIONAL"> DEMISSIONAL</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="MUDANÇA DE FUNÇÃO"> MUDANÇA DE FUNÇÃO</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="MUDANÇA DE RISCO"> MUDANÇA DE RISCO</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="COMPLEMENTAR"> COMPLEMENTAR</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="PARTICULAR"> PARTICULAR</label>
+                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="ENCAMINHAMENTO"> ENCAMINHAMENTO</label>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Exames Solicitados</legend>
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                            <div style="padding: 12px; background: var(--accent-soft, #e0f2fe); border: 1px solid var(--accent, #bae6fd); border-radius: 6px;">
+                                <label style="font-weight: bold; color: var(--accent); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 15px;">
+                                    <input type="checkbox" id="check-audiometria" checked style="transform: scale(1.5);"> 
+                                    INCLUIR FICHA DE FONOAUDIOLOGIA
+                                </label>
+                            </div>
+                            <div style="padding: 12px; background: var(--warning-soft, #fef3c7); border: 1px solid var(--warning, #fde68a); border-radius: 6px;">
+                                <label style="font-weight: bold; color: var(--warning); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 15px;">
+                                    <input type="checkbox" id="check-consulta" checked style="transform: scale(1.5);"> 
+                                    ENCAMINHAR PARA CONSULTA CLÍNICA
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="exames-grid-master">
+                            <div>
+                                <h4>Clínicos</h4>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Eletrocardiograma"> Eletrocardiograma</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Espirometria"> Espirometria</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Eletroencefalograma"> Eletroencefalograma</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Acuidade visual"> Acuidade visual</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Campimetria"> Campimetria</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Avaliação oftalmológica"> Avaliação oftalmológica</label>
+                            </div>
+                            
+                            <div>
+                                <h4>Raio-X</h4>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Tórax PA"> Raio-x torax PA</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Tórax OIT"> Raio-x tórax OIT</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Total"> Raio-x Coluna Total</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombar"> Raio-x coluna lombar</label><br>
+                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombo-Sacra"> Raio-x Coluna Lombo-Sacra</label>
+                                
+                                <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
+                                    <label style="font-size: 12px; color: var(--text-muted);">Adicionar Raio-X Extra:</label>
+                                    <div style="display: flex; gap: 5px; margin-top: 5px;">
+                                        <input type="text" id="input-exame-extra-raiox" placeholder="Nome do Raio-X..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
+                                        <button type="button" id="btn-add-exame-raiox" class="btn-inserir-seguro">Inserir</button>
+                                    </div>
+                                    <div id="lista-extras-painel-raiox" style="margin-top: 10px;"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4>Laboratoriais</h4>
+                                <div class="scroll-box">
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="HEMOGRAMA"> HEMOGRAMA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="GLICEMIA"> GLICEMIA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TGO/TGP"> TGO/TGP</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="GAMAGT"> GAMA GT</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ABELHA/MARIMBONDO"> ABELHA/MARIMBONDO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="GOTA-ESPESSA"> GOTA ESPESSA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="CROPOCULTURA"> COPROCULTURA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TIPAGEM"> TIPAGEM</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EAS"> EAS</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EPF"> EPF</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TOXICOLÓGICO"> TOXICOLÓGICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="HEMOG.-GLICADA"> HEMOG. GLICADA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="MICOLOGICO"> MICOLOGICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-HIPURICO"> ACIDO HIPÚRICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-METIL-HIPURICO"> ÁCIDO METIL HIPÚRICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="PSA"> PSA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-DELTA-AMINOLEVULINICO"> ACIDO DELTA AMINOLEVULINICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TRICLOROCOMPOSTOS-TOTAIS"> TRICOLOROCOMPOSTOS TOTAIS</label>
+                                    
+                                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
+                                        <label style="font-size: 12px; color: var(--text-muted);">Adicionar Exame Extra:</label>
+                                        <div style="display: flex; gap: 5px; margin-top: 5px;">
+                                            <input type="text" id="input-exame-extra" placeholder="Nome do exame..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
+                                            <button type="button" id="btn-add-exame" class="btn-inserir-seguro">Inserir</button>
+                                        </div>
+                                        <div id="lista-extras-painel" style="margin-top: 10px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div style="display: flex; gap: 15px; margin-top: 20px;">
+                        <button type="button" id="btn-salvar-imprimir" class="btn-imprimir">Salvar na Planilha e Imprimir</button>
                     </div>
-                </div>
+                    <p id="msg-status" style="font-weight: bold; margin-top: 10px; display: none;">A gravar dados...</p>
+                </form>
             </div>
 
-            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ Carregando base de dados...</div>
+            <div class="area-impressao">
+                <div class="ficha-setor" id="setor-clinico">
+                    <div class="cabecalho-setor">
+                        <h2>AVALIAÇÃO CLÍNICA / NEUROLÓGICA</h2>
+                        <div class="dados-espelhados">
+                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span> <span class="out-tipo-exame"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span> <span class="info-menor"><strong>Peso:</strong> _______ kg | <strong>Alt:</strong> _______ m</span></div>
+                        </div>
+                    </div>
+                    <div class="corpo-setor">
+                        <h3>Exames Solicitados:</h3>
+                        <ul class="lista-exames-print" id="lista-clinico"><li class="vazio">Nenhum exame</li></ul>
+                    </div>
+                    <div class="rodape-setor"><div class="area-assinatura">Assinatura do Profissional</div></div>
+                </div>
 
-            <div class="table-responsive">
-                <table class="tabela-liberacao">
-                    <thead>
-                        <tr>
-                            <th>Colaborador</th>
-                            <th style="text-align: center;">Clínico</th>
-                            <th style="text-align: center;">Raio-X</th>
-                            <th style="text-align: center;">Fono</th>
-                            <th style="text-align: center;">Laboratório</th>
-                            <th style="text-align: center;">Consulta</th>
-                            <th style="text-align: center; min-width:140px;">Ações Admin</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lista-liberacao"></tbody>
-                </table>
-            </div>
-            <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-top: 10px;">
-                <strong>Nenhum registro encontrado no banco de dados.</strong>
+                <div class="ficha-setor" id="setor-raiox">
+                    <div class="cabecalho-setor">
+                        <h2>RADIOLOGIA (RAIO-X)</h2>
+                        <div class="dados-espelhados">
+                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span> <span class="out-tipo-exame"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span></div>
+                        </div>
+                    </div>
+                    <div class="corpo-setor">
+                        <h3>Exames Solicitados:</h3>
+                        <ul class="lista-exames-print" id="lista-raiox"><li class="vazio">Nenhum exame</li></ul>
+                    </div>
+                    <div class="rodape-setor"><div class="area-assinatura">Assinatura do Técnico</div></div>
+                </div>
+
+                <div class="ficha-setor" id="setor-audio">
+                    <div class="cabecalho-setor">
+                        <h2>FONOAUDIOLOGIA</h2>
+                        <div class="dados-espelhados">
+                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span> <span class="out-tipo-exame"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span></div>
+                        </div>
+                    </div>
+                    <div class="corpo-setor">
+                        <h3>Registro Audiométrico:</h3>
+                        <table class="tabela-audiometria">
+                            <thead><tr><th>Hz</th><th>500</th><th>1K</th><th>2K</th><th>3K</th><th>4K</th><th>6K</th><th>8K</th></tr></thead>
+                            <tbody>
+                                <tr><td><strong>OD</strong></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                                <tr><td><strong>OE</strong></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="rodape-setor"><div class="area-assinatura">Fonoaudiólogo / CRM</div></div>
+                </div>
+
+                <div class="ficha-setor" id="setor-lab">
+                    <div class="cabecalho-setor">
+                        <h2>LABORATÓRIO (COLETAS)</h2>
+                        <div class="dados-espelhados">
+                            <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span> <span class="out-tipo-exame"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
+                            <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span></div>
+                        </div>
+                    </div>
+                    <div class="corpo-setor">
+                        <h3>Exames Solicitados:</h3>
+                        <ul class="lista-exames-print" id="lista-lab"><li class="vazio">Nenhum exame</li></ul>
+                    </div>
+                    <div class="rodape-setor"><div class="area-assinatura">Responsável pela Coleta</div></div>
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- Modal Editar -->
-    <div id="modal-editar" class="modal-overlay" style="display:none;">
-        <div class="modal-box">
-            <h3>✏️ Editar Dados do Paciente</h3>
-            <div class="edit-grid">
-                <input type="hidden" id="edit-id-banco"><input type="hidden" id="edit-nome-antigo"><input type="hidden" id="edit-cpf-antigo"><input type="hidden" id="edit-data-exame">
-                <label>Nome: <input type="text" id="edit-nome"></label><label>Empresa: <input type="text" id="edit-empresa"></label>
-                <label>Tipo de Exame: <input type="text" id="edit-tipo"></label><label>Função: <input type="text" id="edit-funcao"></label>
-                <label>Nascimento: <input type="text" id="edit-dn"></label><label>CPF: <input type="text" id="edit-cpf"></label>
-                <label>RG: <input type="text" id="edit-rg"></label><label>Telefone: <input type="text" id="edit-tel"></label>
-                <div class="edit-full"><hr style="border: 0; border-top: 1px dashed var(--border-strong); margin: 10px 0;"></div>
-                <label class="edit-full">Exames Clínicos: <input type="text" id="edit-ex-clinico"></label>
-                <label class="edit-full">Exames Raio-X: <input type="text" id="edit-ex-raiox"></label>
-                <label class="edit-full">Exames Lab: <input type="text" id="edit-ex-lab"></label>
-                <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-fono" style="transform: scale(1.3);"> Tem Fonoaudiologia?</label>
-                <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-consulta" style="transform: scale(1.3);"> Tem Consulta Médica?</label>
-            </div>
-            <div style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">
-                <button onclick="fecharModal()" style="padding:10px 15px; border-radius:5px; border:1px solid var(--border-strong); background:var(--surface-muted); color: var(--text-strong); cursor:pointer; font-weight:bold;">Cancelar</button>
-                <button id="btn-salvar-edicao" style="padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Salvar Alterações</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
+    <!-- 1. Biblioteca oficial do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 2. Arquivo com as chaves de conexão do banco de dados -->
     <script src="js/supabase.js"></script>
+    
+    <!-- 3. Seu script principal que agora fará a inserção direta -->
+    <script src="js/script.js"></script>
+    <!-- FIM DA ADAPTAÇÃO -->
 
     <script>
-        let databaseAdmin = [];
-        let modoBuscaGlobal = false;
-
-        function formatarDataBR(data) {
-            if (!data) return '-';
-            if (data.includes('/')) return data; 
-            const partes = data.split('T')[0].split('-'); 
-            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
-            return data;
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const inputData = document.getElementById('filtro-data');
-            const inputPesq = document.getElementById('pesquisa-paciente');
-            const tabela = document.getElementById('lista-liberacao');
-            
-            const hoje = new Date();
-            inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-
-            window.executarBusca = async function(tipo) {
-                document.getElementById('msg-carregando').style.display = "block";
-                tabela.innerHTML = "";
-                document.getElementById('msg-vazio').style.display = "none";
-
-                try {
-                    let query = supabase.from('atendimentos').select('*').order('created_at', { ascending: false });
-
-                    if (tipo === 'data') {
-                        modoBuscaGlobal = false;
-                        query = query.eq('data_exame', inputData.value);
-                    } else if (tipo === 'texto') {
-                        modoBuscaGlobal = true;
-                        const termo = inputPesq.value.trim();
-                        if (!termo) {
-                            alert("Digite um nome, CPF ou empresa para pesquisar em todo o banco.");
-                            document.getElementById('msg-carregando').style.display = "none";
-                            return;
-                        }
-                        query = query.or(`nome.ilike.%${termo}%,cpf.ilike.%${termo}%,empresa.ilike.%${termo}%`).limit(1000);
-                    } else if (tipo === 'todos') {
-                        modoBuscaGlobal = true;
-                        inputPesq.value = "";
-                        query = query.limit(2000); 
-                    }
-
-                    const { data, error } = await query;
-                    document.getElementById('msg-carregando').style.display = "none";
-                    if (error) throw error;
-
-                    if (data && data.length > 0) {
-                        databaseAdmin = data;
-                        renderizarTabela(databaseAdmin);
-                    } else {
-                        document.getElementById('msg-vazio').style.display = "block";
-                    }
-                } catch (err) {
-                    console.error("Erro na busca:", err);
-                    document.getElementById('msg-carregando').style.display = "none";
-                }
-            };
-
-            inputPesq.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') executarBusca('texto');
-            });
-
-            // GATILHO QUE SALVA OS CHECKBOXES NO BANCO DE DADOS
-            tabela.addEventListener('change', async function(e) {
-                const tr = e.target.closest('tr');
-                if (!tr) return;
-                const index = tr.dataset.index;
-                const pac = databaseAdmin[index];
-                if (!pac) return;
-
-                if (e.target.classList.contains('check-setor-admin')) {
-                    const cb = e.target;
-                    const setor = cb.dataset.setor;
-                    const liberado = cb.checked;
-                    
-                    cb.disabled = true;
-                    cb.style.opacity = "0.4";
-
-                    try {
-                        const colMap = {
-                            'clinico': 'liberado_clinico',
-                            'raiox': 'liberado_raiox',
-                            'fono': 'liberado_fono',
-                            'lab': 'liberado_lab',
-                            'consulta': 'liberado_consulta'
-                        };
-                        const colunaAlvo = colMap[setor];
-                        
-                        const updateObj = {};
-                        updateObj[colunaAlvo] = liberado;
-
-                        let query = supabase.from('atendimentos').update(updateObj);
-                        if (pac.id) query = query.eq('id', pac.id);
-                        else query = query.eq('nome', pac.nome).eq('data_exame', pac.data_exame);
-
-                        const { error } = await query.select();
-                        if (error) throw error;
-
-                        pac[colunaAlvo] = liberado; // Atualiza a memória para o checkbox não piscar
-                        cb.style.opacity = "1";
-                        cb.disabled = false;
-                    } catch (err) {
-                        alert("Erro ao forçar atualização no banco de dados."); 
-                        cb.checked = !liberado; 
-                        cb.style.opacity = "1"; 
-                        cb.disabled = false;
-                    }
-                }
-
-                if (e.target.classList.contains('obs-input-admin')) {
-                    const obsInput = e.target;
-                    obsInput.disabled = true;
-                    obsInput.style.opacity = "0.4";
-                    
-                    try {
-                        let query = supabase.from('atendimentos').update({ observacao: obsInput.value });
-                        if (pac.id) query = query.eq('id', pac.id);
-                        else query = query.eq('nome', pac.nome).eq('data_exame', pac.data_exame);
-
-                        const { error } = await query.select();
-                        if (error) throw error;
-                        
-                        pac.observacao = obsInput.value;
-                        obsInput.style.opacity = "1"; 
-                        obsInput.style.borderColor = "var(--success)";
-                        obsInput.disabled = false;
-                        setTimeout(() => obsInput.style.borderColor = "var(--border-strong)", 2000);
-                    } catch (err) {
-                        alert("Erro ao guardar observação."); 
-                        obsInput.style.opacity = "1"; 
-                        obsInput.disabled = false;
-                    }
-                }
-            });
-
-            // ATUALIZAÇÃO AUTOMÁTICA (POLLING)
-            setInterval(async () => {
-                if (document.hidden || modoBuscaGlobal || !inputData.value) return; 
-                try {
-                    const { data, error } = await supabase.from('atendimentos').select('*').eq('data_exame', inputData.value).order('created_at', { ascending: false });
-                    if (!error && data) {
-                        const pacValidos = data.filter(p => (p.exames_clinicos && p.exames_clinicos !== 'Nenhum') || (p.exames_raiox && p.exames_raiox !== 'Nenhum') || (p.exames_lab && p.exames_lab !== 'Nenhum') || p.audiometria || p.consulta_clinica);
-                        if (pacValidos.length !== document.querySelectorAll('.linha-paciente').length) {
-                            databaseAdmin = data;
-                            renderizarTabela(databaseAdmin);
-                        } else {
-                            data.forEach((pac, index) => {
-                                const tr = document.querySelector(`tr[data-index="${index}"]`);
-                                if (tr && document.getElementById('modal-editar').style.display === 'none') {
-                                    const updateCheck = (setor, valor) => {
-                                        const cb = tr.querySelector(`.check-setor-admin[data-setor="${setor}"]`);
-                                        if(cb && cb.checked !== (valor === true) && !cb.disabled) cb.checked = valor === true;
-                                    };
-                                    updateCheck('clinico', pac.liberado_clinico);
-                                    updateCheck('raiox', pac.liberado_raiox);
-                                    updateCheck('fono', pac.liberado_fono);
-                                    updateCheck('lab', pac.liberado_lab);
-                                    updateCheck('consulta', pac.liberado_consulta);
-                                }
-                            });
-                            databaseAdmin = data;
-                        }
-                    }
-                } catch (err) {}
-            }, 15000);
-
-            function renderizarTabela(pacientes) {
-                tabela.innerHTML = "";
-                pacientes.forEach((pac, index) => {
-                    const temC = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
-                    const temR = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
-                    const temF = pac.audiometria === true;
-                    const temL = pac.exames_lab && pac.exames_lab !== 'Nenhum';
-                    const temM = pac.consulta_clinica === true;
-                    if (!temC && !temR && !temL && !temF && !temM) return;
-
-                    const cell = (exame, checked, setor) => `<div class="celula-exame"><input type="checkbox" class="check-setor-admin" data-setor="${setor}" ${checked ? 'checked' : ''} style="cursor:pointer; transform: scale(1.3);"><div class="detalhe-exame" style="margin-top:4px;">${exame}</div></div>`;
-                    const cellLab = (exame, checked, obs) => `<div class="celula-exame"><input type="checkbox" class="check-setor-admin" data-setor="lab" ${checked ? 'checked' : ''} style="cursor:pointer; transform: scale(1.3);"><div class="detalhe-exame" style="margin-top:4px;">${exame}</div><textarea class="obs-input-admin" rows="2">${obs || ''}</textarea></div>`;
-
-                    const tr = document.createElement('tr');
-                    tr.className = 'linha-paciente';
-                    tr.dataset.index = index;
-                    tr.innerHTML = `
-                        <td>
-                            <div style="font-weight:bold; color:var(--text-strong);">${pac.nome}</div>
-                            <div style="font-size:12px; color:var(--accent); font-weight: 600;">📅 Data: ${formatarDataBR(pac.data_exame)}</div>
-                            <div style="font-size:11px; color:var(--text-muted);">Empresa: ${pac.empresa}</div>
-                            <div style="font-size:11px; color:var(--text-muted);">CPF: ${pac.cpf}</div>
-                        </td>
-                        <td style="text-align: center; background:var(--surface-muted);">${temC ? cell(pac.exames_clinicos, pac.liberado_clinico, 'clinico') : '—'}</td>
-                        <td style="text-align: center;">${temR ? cell(pac.exames_raiox, pac.liberado_raiox, 'raiox') : '—'}</td>
-                        <td style="text-align: center; background:var(--surface-muted);">${temF ? cell("Audiometria", pac.liberado_fono, 'fono') : '—'}</td>
-                        <td style="text-align: center;">${temL ? cellLab(pac.exames_lab, pac.liberado_lab, pac.observacao) : '—'}</td>
-                        <td style="text-align: center; background:var(--surface-muted);">${temM ? cell("Médico", pac.liberado_consulta, 'consulta') : '—'}</td>
-                        <td style="text-align: center;">
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <button class="btn-editar" data-index="${index}" style="background:var(--accent); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">✏️ Editar Dados</button>
-                                <button class="btn-apagar" data-index="${index}" style="background:var(--danger); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">🗑️ Excluir</button>
-                            </div>
-                        </td>
-                    `;
-                    tabela.appendChild(tr);
-                });
-            }
-
-            tabela.addEventListener('click', async function(e) {
-                const btnApagar = e.target.closest('.btn-apagar');
-                if (btnApagar) {
-                    const pac = databaseAdmin[btnApagar.dataset.index];
-                    if (confirm(`TEM A CERTEZA ABSOLUTA?\n\nDeseja excluir permanentemente o registo de:\n${pac.nome}\n\nEsta ação não pode ser desfeita.`)) {
-                        btnApagar.textContent = "Apagando..."; btnApagar.disabled = true;
-                        try {
-                            let query = supabase.from('atendimentos').delete();
-                            query = pac.id ? query.eq('id', pac.id) : query.eq('nome', pac.nome).eq('data_exame', pac.data_exame);
-                            const { error } = await query;
-                            if (error) throw error;
-                            btnApagar.closest('tr').remove();
-                        } catch (err) { alert("Falha na exclusão: " + err.message); btnApagar.textContent = "🗑️ Excluir"; btnApagar.disabled = false; }
-                    }
-                }
-                const btnEditar = e.target.closest('.btn-editar');
-                if (btnEditar) abrirModalEdicao(databaseAdmin[btnEditar.dataset.index]);
-            });
-
-            window.abrirModalEdicao = function(pac) {
-                document.getElementById('edit-id-banco').value = pac.id || "";
-                document.getElementById('edit-nome-antigo').value = pac.nome || "";
-                document.getElementById('edit-data-exame').value = pac.data_exame || "";
-                document.getElementById('edit-nome').value = pac.nome || "";
-                document.getElementById('edit-empresa').value = pac.empresa || "";
-                document.getElementById('edit-tipo').value = pac.tipo_exame || "";
-                document.getElementById('edit-funcao').value = pac.funcao || "";
-                document.getElementById('edit-dn').value = formatarDataBR(pac.data_nascimento) || "";
-                document.getElementById('edit-rg').value = pac.rg || "";
-                document.getElementById('edit-cpf').value = pac.cpf || "";
-                document.getElementById('edit-tel').value = pac.telefone || "";
-                document.getElementById('edit-ex-clinico').value = (!pac.exames_clinicos || pac.exames_clinicos === "Nenhum") ? "" : pac.exames_clinicos;
-                document.getElementById('edit-ex-raiox').value = (!pac.exames_raiox || pac.exames_raiox === "Nenhum") ? "" : pac.exames_raiox;
-                document.getElementById('edit-ex-lab').value = (!pac.exames_lab || pac.exames_lab === "Nenhum") ? "" : pac.exames_lab;
-                document.getElementById('edit-tem-fono').checked = pac.audiometria;
-                document.getElementById('edit-tem-consulta').checked = pac.consulta_clinica;
-                document.getElementById('modal-editar').style.display = 'flex';
-            };
-
-            window.fecharModal = function() { document.getElementById('modal-editar').style.display = 'none'; };
-
-            document.getElementById('btn-salvar-edicao').addEventListener('click', async function(e) {
-                const btn = e.target;
-                const idBanco = document.getElementById('edit-id-banco').value;
-                const dadosEdicao = {
-                    nome: document.getElementById('edit-nome').value.trim(),
-                    empresa: document.getElementById('edit-empresa').value.trim(),
-                    tipo_exame: document.getElementById('edit-tipo').value.trim(),
-                    funcao: document.getElementById('edit-funcao').value.trim(),
-                    data_nascimento: document.getElementById('edit-dn').value.trim(),
-                    rg: document.getElementById('edit-rg').value.trim(),
-                    cpf: document.getElementById('edit-cpf').value.trim(),
-                    telefone: document.getElementById('edit-tel').value.trim(),
-                    exames_clinicos: document.getElementById('edit-ex-clinico').value || "Nenhum",
-                    exames_raiox: document.getElementById('edit-ex-raiox').value || "Nenhum",
-                    exames_lab: document.getElementById('edit-ex-lab').value || "Nenhum",
-                    audiometria: document.getElementById('edit-tem-fono').checked,
-                    consulta_clinica: document.getElementById('edit-tem-consulta').checked
-                };
-                btn.textContent = "A gravar..."; btn.disabled = true;
-                try {
-                    let query = supabase.from('atendimentos').update(dadosEdicao);
-                    query = idBanco ? query.eq('id', idBanco) : query.eq('nome', document.getElementById('edit-nome-antigo').value).eq('data_exame', document.getElementById('edit-data-exame').value);
-                    const { data, error } = await query.select(); 
-                    if (error) throw error;
-                    btn.textContent = "Salvar Alterações"; btn.disabled = false;
-                    fecharModal();
-                    alert("✅ Dados atualizados com sucesso!");
-                    executarBusca(modoBuscaGlobal ? 'texto' : 'data'); 
-                } catch (err) { alert("❌ Falha Crítica ao tentar editar:\n\n" + err.message); btn.textContent = "Salvar Alterações"; btn.disabled = false; }
-            });
-
-            executarBusca('data');
-        });
-
         document.addEventListener('DOMContentLoaded', () => {
             const btnTheme = document.getElementById('btn-theme-toggle');
             if (btnTheme) {
@@ -405,11 +264,25 @@
                 btnTheme.textContent = isDark ? '☀️' : '🌙';
                 btnTheme.addEventListener('click', () => {
                     if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                        document.documentElement.removeAttribute('data-theme'); localStorage.setItem('monad_theme', 'light'); btnTheme.textContent = '🌙';
+                        document.documentElement.removeAttribute('data-theme');
+                        localStorage.setItem('monad_theme', 'light');
+                        btnTheme.textContent = '🌙';
                     } else {
-                        document.documentElement.setAttribute('data-theme', 'dark'); localStorage.setItem('monad_theme', 'dark'); btnTheme.textContent = '☀️';
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        localStorage.setItem('monad_theme', 'dark');
+                        btnTheme.textContent = '☀️';
                     }
                 });
+            }
+
+            // AUTO-ATUALIZAR DATA DE EXAME
+            const campoDataExame = document.querySelector('input[type="date"][name="data"]');
+            if (campoDataExame) {
+                const hoje = new Date();
+                const ano = hoje.getFullYear();
+                const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+                const dia = String(hoje.getDate()).padStart(2, '0');
+                campoDataExame.value = `${ano}-${mes}-${dia}`;
             }
         });
     </script>
