@@ -44,7 +44,6 @@
         <div class="painel-recepcao" style="border: 2px solid var(--danger);">
             <h2 style="margin-top: 0; margin-bottom: 15px; color: var(--text-strong);">Gestão e Pesquisa Profunda</h2>
             
-            <!-- NOVO PAINEL DE BUSCA DE ALTA PRECISÃO -->
             <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-end; background: var(--surface); padding: 15px; border-radius: 8px; border: 1px solid var(--border-strong);">
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <label style="font-size: 12px; font-weight: bold; color: var(--text-muted);">📅 Ver por Data:</label>
@@ -57,7 +56,7 @@
                 <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
                     <label style="font-size: 12px; font-weight: bold; color: var(--text-muted);">🌍 Buscar em TODO o Histórico (Qualquer Data):</label>
                     <div style="display: flex; gap: 5px;">
-                        <input type="text" id="pesquisa-paciente" placeholder="Digite Nome ou CPF e aperte Enter..." style="padding: 8px; border-radius: 5px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong); flex: 1;">
+                        <input type="text" id="pesquisa-paciente" placeholder="Digite Empresa, Nome ou CPF e aperte Enter..." style="padding: 8px; border-radius: 5px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong); flex: 1;">
                         <button onclick="executarBusca('texto')" style="background: var(--warning); color: #0f172a; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">🔎 Buscar</button>
                         <button onclick="executarBusca('todos')" style="background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">📑 Listar Todos</button>
                     </div>
@@ -88,7 +87,7 @@
         </div>
     </main>
 
-    <!-- Modal Editar (Igual ao anterior) -->
+    <!-- Modal Editar -->
     <div id="modal-editar" class="modal-overlay" style="display:none;">
         <div class="modal-box">
             <h3>✏️ Editar Dados do Paciente</h3>
@@ -150,16 +149,16 @@
                         modoBuscaGlobal = true;
                         const termo = inputPesq.value.trim();
                         if (!termo) {
-                            alert("Digite um nome ou CPF para pesquisar em todo o banco.");
+                            alert("Digite um nome, CPF ou empresa para pesquisar em todo o banco.");
                             document.getElementById('msg-carregando').style.display = "none";
                             return;
                         }
-                        // Busca em qualquer data se o nome ou CPF bater
-                        query = query.or(`nome.ilike.%${termo}%,cpf.ilike.%${termo}%`).limit(1000);
+                        // Agora a busca or() engloba também a coluna 'empresa'
+                        query = query.or(`nome.ilike.%${termo}%,cpf.ilike.%${termo}%,empresa.ilike.%${termo}%`).limit(1000);
                     } else if (tipo === 'todos') {
                         modoBuscaGlobal = true;
                         inputPesq.value = "";
-                        query = query.limit(2000); // Traz os últimos 2000 do banco
+                        query = query.limit(2000); 
                     }
 
                     const { data, error } = await query;
@@ -178,12 +177,10 @@
                 }
             };
 
-            // Dispara busca global ao apertar Enter
             inputPesq.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') executarBusca('texto');
             });
 
-            // Polling continua apenas se não estivermos na busca global
             setInterval(async () => {
                 if (document.hidden || modoBuscaGlobal || !inputData.value) return; 
                 try {
@@ -237,7 +234,6 @@
                 });
             }
 
-            // (Aqui continuam as suas regras antigas inalteradas para exclusão e edição)
             tabela.addEventListener('click', async function(e) {
                 const btnApagar = e.target.closest('.btn-apagar');
                 if (btnApagar) {
