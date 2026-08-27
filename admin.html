@@ -153,7 +153,6 @@
                             document.getElementById('msg-carregando').style.display = "none";
                             return;
                         }
-                        // Agora a busca or() engloba também a coluna 'empresa'
                         query = query.or(`nome.ilike.%${termo}%,cpf.ilike.%${termo}%,empresa.ilike.%${termo}%`).limit(1000);
                     } else if (tipo === 'todos') {
                         modoBuscaGlobal = true;
@@ -181,6 +180,80 @@
                 if (e.key === 'Enter') executarBusca('texto');
             });
 
+            // GATILHO QUE SALVA OS CHECKBOXES NO BANCO DE DADOS
+            tabela.addEventListener('change', async function(e) {
+                const tr = e.target.closest('tr');
+                if (!tr) return;
+                const index = tr.dataset.index;
+                const pac = databaseAdmin[index];
+                if (!pac) return;
+
+                if (e.target.classList.contains('check-setor-admin')) {
+                    const cb = e.target;
+                    const setor = cb.dataset.setor;
+                    const liberado = cb.checked;
+                    
+                    cb.disabled = true;
+                    cb.style.opacity = "0.4";
+
+                    try {
+                        const colMap = {
+                            'clinico': 'liberado_clinico',
+                            'raiox': 'liberado_raiox',
+                            'fono': 'liberado_fono',
+                            'lab': 'liberado_lab',
+                            'consulta': 'liberado_consulta'
+                        };
+                        const colunaAlvo = colMap[setor];
+                        
+                        const updateObj = {};
+                        updateObj[colunaAlvo] = liberado;
+
+                        let query = supabase.from('atendimentos').update(updateObj);
+                        if (pac.id) query = query.eq('id', pac.id);
+                        else query = query.eq('nome', pac.nome).eq('data_exame', pac.data_exame);
+
+                        const { error } = await query.select();
+                        if (error) throw error;
+
+                        pac[colunaAlvo] = liberado; // Atualiza a memória para o checkbox não piscar
+                        cb.style.opacity = "1";
+                        cb.disabled = false;
+                    } catch (err) {
+                        alert("Erro ao forçar atualização no banco de dados."); 
+                        cb.checked = !liberado; 
+                        cb.style.opacity = "1"; 
+                        cb.disabled = false;
+                    }
+                }
+
+                if (e.target.classList.contains('obs-input-admin')) {
+                    const obsInput = e.target;
+                    obsInput.disabled = true;
+                    obsInput.style.opacity = "0.4";
+                    
+                    try {
+                        let query = supabase.from('atendimentos').update({ observacao: obsInput.value });
+                        if (pac.id) query = query.eq('id', pac.id);
+                        else query = query.eq('nome', pac.nome).eq('data_exame', pac.data_exame);
+
+                        const { error } = await query.select();
+                        if (error) throw error;
+                        
+                        pac.observacao = obsInput.value;
+                        obsInput.style.opacity = "1"; 
+                        obsInput.style.borderColor = "var(--success)";
+                        obsInput.disabled = false;
+                        setTimeout(() => obsInput.style.borderColor = "var(--border-strong)", 2000);
+                    } catch (err) {
+                        alert("Erro ao guardar observação."); 
+                        obsInput.style.opacity = "1"; 
+                        obsInput.disabled = false;
+                    }
+                }
+            });
+
+            // ATUALIZAÇÃO AUTOMÁTICA (POLLING)
             setInterval(async () => {
                 if (document.hidden || modoBuscaGlobal || !inputData.value) return; 
                 try {
@@ -190,6 +263,22 @@
                         if (pacValidos.length !== document.querySelectorAll('.linha-paciente').length) {
                             databaseAdmin = data;
                             renderizarTabela(databaseAdmin);
+                        } else {
+                            data.forEach((pac, index) => {
+                                const tr = document.querySelector(`tr[data-index="${index}"]`);
+                                if (tr && document.getElementById('modal-editar').style.display === 'none') {
+                                    const updateCheck = (setor, valor) => {
+                                        const cb = tr.querySelector(`.check-setor-admin[data-setor="${setor}"]`);
+                                        if(cb && cb.checked !== (valor === true) && !cb.disabled) cb.checked = valor === true;
+                                    };
+                                    updateCheck('clinico', pac.liberado_clinico);
+                                    updateCheck('raiox', pac.liberado_raiox);
+                                    updateCheck('fono', pac.liberado_fono);
+                                    updateCheck('lab', pac.liberado_lab);
+                                    updateCheck('consulta', pac.liberado_consulta);
+                                }
+                            });
+                            databaseAdmin = data;
                         }
                     }
                 } catch (err) {}
