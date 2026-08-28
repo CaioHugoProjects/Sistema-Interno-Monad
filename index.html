@@ -61,7 +61,7 @@
                         </div>
                         <div class="form-group row">
                             <label>Telefone: <input type="text" class="master-input" name="telefone" placeholder="(00) 00000-0000"></label>
-                            <label>Data Exame: <input type="date" class="master-input" name="data"></label>
+                            <label>Data Exame: <input type="date" class="master-input" name="data" id="input-data-exame"></label>
                         </div>
                     </fieldset>
 
@@ -246,13 +246,8 @@
     </main>
 
     <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
-    <!-- 1. Biblioteca oficial do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- 2. Arquivo com as chaves de conexão do banco de dados -->
     <script src="js/supabase.js"></script>
-    
-    <!-- 3. Seu script principal que agora fará a inserção direta -->
     <script src="js/script.js"></script>
     <!-- FIM DA ADAPTAÇÃO -->
 
@@ -275,14 +270,40 @@
                 });
             }
 
-            // AUTO-ATUALIZAR DATA DE EXAME
-            const campoDataExame = document.querySelector('input[type="date"][name="data"]');
+            // AUTO-ATUALIZAR DATA DE EXAME E ESPELHAR IMEDIATAMENTE NAS FICHAS
+            const campoDataExame = document.getElementById('input-data-exame');
+            
+            function espelharDataImpressao() {
+                if (!campoDataExame || !campoDataExame.value) return;
+                const partes = campoDataExame.value.split('-');
+                if(partes.length === 3) {
+                    const dataBR = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                    document.querySelectorAll('.out-data').forEach(el => {
+                        el.textContent = dataBR;
+                    });
+                }
+            }
+
             if (campoDataExame) {
                 const hoje = new Date();
                 const ano = hoje.getFullYear();
                 const mes = String(hoje.getMonth() + 1).padStart(2, '0');
                 const dia = String(hoje.getDate()).padStart(2, '0');
                 campoDataExame.value = `${ano}-${mes}-${dia}`;
+                
+                // Força o preenchimento inicial na área de impressão
+                espelharDataImpressao();
+
+                // Se a pessoa mudar a data no calendário, atualiza a impressão também
+                campoDataExame.addEventListener('change', espelharDataImpressao);
+            }
+
+            // Evento extra no botão de imprimir para garantir que a data não se perca
+            const btnImprimir = document.getElementById('btn-salvar-imprimir');
+            if(btnImprimir) {
+                btnImprimir.addEventListener('click', () => {
+                    setTimeout(espelharDataImpressao, 100); 
+                });
             }
         });
     </script>
