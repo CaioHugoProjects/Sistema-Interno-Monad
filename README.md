@@ -11,7 +11,7 @@ Principais Funcionalidades:
 
 -Layout Print-Ready: CSS avançado configurado com @media print para garantir margens milimétricas, ocultação de elementos de interface e formatação tipográfica exata para folhas A4, mimetizando a estrutura de editores de texto tradicionais (Word).
 
-Prontuário e Anamnese: Geração automática da ficha médica do paciente contendo anamnese detalhada, antecedentes familiares e ocupacionais para preenchimento à caneta.
+-Prontuário e Anamnese: Geração automática da ficha médica do paciente contendo anamnese detalhada, antecedentes familiares e ocupacionais para preenchimento à caneta.
 
 Tecnologias Utilizadas:
 
