@@ -5,11 +5,11 @@ Um sistema web single-page desenvolvido para automatizar e padronizar a emissão
 
 Principais Funcionalidades:
 
-Busca Integrada: Consulta assíncrona ao banco de dados para localizar colaboradores por data de exame, nome ou CPF.
+-Busca Integrada: Consulta assíncrona ao banco de dados para localizar colaboradores por data de exame, nome ou CPF.
 
-Preenchimento Rápido (Modal): Interface dinâmica para inserção de dados complementares antes da impressão, incluindo Mapeamento de Riscos (PGR), dados da empresa, conclusão médica (Apto/Inapto) e controle dinâmico de Normas Regulamentadoras (NRs).
+-Preenchimento Rápido (Modal): Interface dinâmica para inserção de dados complementares antes da impressão, incluindo Mapeamento de Riscos (PGR), dados da empresa, conclusão médica (Apto/Inapto) e controle dinâmico de Normas Regulamentadoras (NRs).
 
-Layout Print-Ready: CSS avançado configurado com @media print para garantir margens milimétricas, ocultação de elementos de interface e formatação tipográfica exata para folhas A4, mimetizando a estrutura de editores de texto tradicionais (Word).
+-Layout Print-Ready: CSS avançado configurado com @media print para garantir margens milimétricas, ocultação de elementos de interface e formatação tipográfica exata para folhas A4, mimetizando a estrutura de editores de texto tradicionais (Word).
 
 Prontuário e Anamnese: Geração automática da ficha médica do paciente contendo anamnese detalhada, antecedentes familiares e ocupacionais para preenchimento à caneta.
 
