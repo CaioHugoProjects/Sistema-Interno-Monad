@@ -192,9 +192,18 @@
                     let query = supabase.from('atendimentos').select('*').order('created_at', { ascending: false });
                     
                     if (!isGlobal) {
+                        // Busca Diária Normal
                         query = query.eq('data_exame', inputData.value);
                     } else {
-                        query = query.limit(500); 
+                        // BUSCA GLOBAL INTELIGENTE NO BANCO DE DADOS
+                        const termo = inputPesq.value.trim();
+                        if (termo) {
+                            // Se algo foi digitado, procura em toda a história do banco por aquele Nome ou CPF
+                            query = query.or(`nome.ilike.%${termo}%,cpf.ilike.%${termo}%`);
+                        } else {
+                            // Se a pesquisa estiver vazia, carrega um lote grande e seguro dos mais recentes
+                            query = query.limit(1000); 
+                        }
                     }
 
                     const { data, error } = await query;
