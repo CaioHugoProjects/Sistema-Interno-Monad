@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
+        // GATEKEEPER DE SEGURANÇA ATUALIZADO
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
@@ -33,6 +34,7 @@
             </ul>
         </nav>
         <script>
+            // Revela o botão do Admin apenas se quem estiver logado for o admin
             if (localStorage.getItem('monad_setor') === 'admin') {
                 document.getElementById('menu-admin').style.display = 'block';
             }
@@ -157,6 +159,7 @@
         </div>
     </main>
 
+    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
 
@@ -171,15 +174,6 @@
             
             let databasePacientes = []; 
 
-            // Função para converter data para BR
-            function formatarDataBR(data) {
-                if (!data) return '-';
-                if (data.includes('/')) return data; // Se já tiver barra, ignora
-                const partes = data.split('T')[0].split('-'); // Corta os traços
-                if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
-                return data;
-            }
-
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
@@ -192,6 +186,7 @@
                 if(!dataFormatada) return;
 
                 try {
+                    // Busca os dados diretamente do Supabase
                     const { data, error } = await supabase
                         .from('atendimentos')
                         .select('*')
@@ -218,7 +213,8 @@
 
             function renderizarTabela(pacientes) {
                 tabela.innerHTML = "";
-                pacientes.forEach((pac) => {
+                pacientes.forEach((pac, index) => {
+                    // Mapeia as lógicas verificando as colunas do banco
                     const temClinico = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
                     const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
                     const temFono = pac.audiometria === true;
@@ -235,13 +231,10 @@
                     const resumoSetores = setores.length > 0 ? setores.join(", ") : "Nenhum exame marcado";
 
                     const tipoStr = pac.tipo_exame ? (pac.tipo_exame.includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
-                    
-                    // APLICANDO A CONVERSÃO NA TABELA
-                    const dataNascimento = formatarDataBR(pac.data_nascimento);
+                    const dataNascimento = pac.data_nascimento || '-';
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
-                    
                     tr.innerHTML = `
                         <td><span class="tag-empresa">${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></span></td>
                         <td>
@@ -249,14 +242,14 @@
                             <div style="font-size: 12px; color:var(--text-muted);">${pac.funcao || '-'} • Nasc: ${dataNascimento}</div>
                         </td>
                         <td>
-                            <div style="font-size: 13px; color:var(--text-main);"><strong>CPF:</strong> ${pac.cpf || 'Não informado'}</div>
+                            <div style="font-size: 13px; color:var(--text-main);"><strong>CPF:</strong> ${pac.cpf}</div>
                             <div style="font-size: 12px; color:var(--text-muted);"><strong>RG:</strong> ${pac.rg || '-'} • <strong>Tel:</strong> ${pac.telefone || '-'}</div>
                         </td>
                         <td style="font-size: 12px; color:var(--text-secondary); max-width: 200px; white-space: normal;">
                             ${resumoSetores}
                         </td>
                         <td style="text-align: center;">
-                            <button class="btn-imprimir-ficha" data-id="${pac.id || ''}" data-nome="${pac.nome}" data-cpf="${pac.cpf || ''}" style="background-color: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto;">
+                            <button onclick="imprimirFicha(${index})" style="background-color: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto;">
                                 🖨️ Imprimir
                             </button>
                         </td>
@@ -268,8 +261,8 @@
             inputPesquisa.addEventListener('input', function(e) {
                 const termo = e.target.value.toLowerCase();
                 const filtrados = databasePacientes.filter(pac => 
-                    (pac.nome && pac.nome.toLowerCase().includes(termo)) || 
-                    (pac.cpf && pac.cpf.toLowerCase().includes(termo))
+                    pac.nome.toLowerCase().includes(termo) || 
+                    pac.cpf.toLowerCase().includes(termo)
                 );
                 renderizarTabela(filtrados);
             });
@@ -277,43 +270,26 @@
             document.getElementById('btn-buscar-data').addEventListener('click', buscarPacientesDoBanco);
             buscarPacientesDoBanco();
 
-            tabela.addEventListener('click', function(e) {
-                const btn = e.target.closest('.btn-imprimir-ficha');
-                if (btn) {
-                    const id = btn.dataset.id;
-                    const nome = btn.dataset.nome;
-                    const cpf = btn.dataset.cpf;
-                    
-                    let pacAlvo = null;
-                    
-                    if (id && id !== 'undefined' && id !== '') {
-                        pacAlvo = databasePacientes.find(p => String(p.id) === String(id));
-                    } else {
-                        pacAlvo = databasePacientes.find(p => p.nome === nome && (p.cpf || '') === cpf);
-                    }
-                    
-                    if (pacAlvo) {
-                        imprimirFicha(pacAlvo);
-                    } else {
-                        alert("Erro: Paciente não encontrado na memória para impressão.");
-                    }
-                }
-            });
+            window.imprimirFicha = function(index) {
+                const pac = databasePacientes[index];
 
-            function imprimirFicha(pac) {
+                let dataParaImpressao = pac.data_exame;
+                if (dataParaImpressao && dataParaImpressao.includes('-')) {
+                    const p = dataParaImpressao.split('-');
+                    if (p.length === 3) dataParaImpressao = `${p[2]}/${p[1]}/${p[0]}`;
+                }
+
                 const tipoFormatado = pac.tipo_exame ? (pac.tipo_exame.includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
                 const empresaFormatada = pac.empresa + (tipoFormatado ? ` ${tipoFormatado}` : '');
 
                 document.querySelectorAll('.out-empresa').forEach(el => el.textContent = empresaFormatada);
                 document.querySelectorAll('.out-nome').forEach(el => el.textContent = pac.nome);
                 document.querySelectorAll('.out-funcao').forEach(el => el.textContent = pac.funcao || '');
+                document.querySelectorAll('.out-dn').forEach(el => el.textContent = pac.data_nascimento || '-');
+                document.querySelectorAll('.out-cpf').forEach(el => el.textContent = pac.cpf);
                 document.querySelectorAll('.out-rg').forEach(el => el.textContent = pac.rg || '');
-                document.querySelectorAll('.out-cpf').forEach(el => el.textContent = pac.cpf || '');
                 document.querySelectorAll('.out-telefone').forEach(el => el.textContent = pac.telefone || '');
-                
-                // APLICANDO A CONVERSÃO NA IMPRESSÃO
-                document.querySelectorAll('.out-dn').forEach(el => el.textContent = formatarDataBR(pac.data_nascimento));
-                document.querySelectorAll('.out-data').forEach(el => el.textContent = formatarDataBR(pac.data_exame));
+                document.querySelectorAll('.out-data').forEach(el => el.textContent = dataParaImpressao || '-');
 
                 function renderizarLista(idElemento, stringExames) {
                     const ul = document.getElementById(idElemento);
@@ -339,7 +315,7 @@
                 else document.body.classList.remove('print-compacto');
 
                 setTimeout(() => window.print(), 300);
-            }
+            };
         });
     </script>
     <script>

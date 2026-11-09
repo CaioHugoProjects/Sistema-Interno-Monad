@@ -7,64 +7,70 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
-        // GATEKEEPER E TEMA
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
         const tokenAtivo = localStorage.getItem('monad_token');
         const setorLogado = localStorage.getItem('monad_setor');
         
-        // Se não houver token, ou se for admin/recepcao (que têm painéis próprios), expulsa
         if (!tokenAtivo || setorLogado === "admin" || setorLogado === "recepcao") {
             window.location.href = "login.html";
         }
     </script>
     <style>
         .card-paciente {
-            background: var(--surface);
-            border: 1px solid var(--border-strong);
-            border-radius: var(--radius-md);
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: var(--shadow-float);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            transition: all 0.3s ease;
+            background: var(--surface); border: 1px solid var(--border-strong);
+            border-radius: var(--radius-md); padding: 20px; margin-bottom: 15px;
+            box-shadow: var(--shadow-float); display: flex; justify-content: space-between;
+            align-items: center; gap: 15px; transition: all 0.3s ease;
         }
         .card-paciente.concluido {
-            opacity: 0.6;
-            border-left: 4px solid var(--success);
-            background: var(--surface-muted);
+            opacity: 0.6; border-left: 4px solid var(--success); background: var(--surface-muted);
         }
         .info-paciente { flex: 1; min-width: 250px; }
-        .acao-setor { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 200px; }
+        .acao-setor { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 220px; }
         
         .obs-box { width: 100%; margin-top: 10px; }
         .obs-box textarea {
             width: 100%; padding: 10px; border: 1px solid var(--border-strong);
             border-radius: 6px; background: var(--surface-muted); color: var(--text-strong);
-            font-size: 13px; resize: vertical; transition: all 0.2s;
+            font-size: 13px; resize: vertical; transition: all 0.2s; font-family: inherit;
         }
         .obs-box textarea:focus { border-color: var(--accent); outline: none; }
         
         .btn-chamar {
-            background-color: var(--warning); color: #0f172a; border: none; padding: 8px 15px;
+            background-color: var(--warning); color: #0f172a; border: none; padding: 10px 15px;
             border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s, background 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;
+            display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-family: inherit;
         }
         .btn-chamar:hover { transform: translateY(-2px); background-color: #f59e0b; }
         .btn-chamar:active { transform: translateY(0); }
+
+        /* Classes de Toolbar para Responsividade (Mobile First) */
+        .toolbar-setor { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .toolbar-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .input-moderno { padding: 9px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong); font-family: inherit; font-size: 13px;}
+        .btn-acao { background-color: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); font-family: inherit; font-size: 13px; }
+        .input-pesquisa { width: 220px; }
+
+        @media (max-width: 768px) {
+            .toolbar-setor { flex-direction: column; align-items: stretch; }
+            .toolbar-group { flex-direction: column; align-items: stretch; width: 100%; }
+            .input-moderno, .btn-acao, .input-pesquisa { width: 100%; }
+            
+            .card-paciente { flex-direction: column; align-items: stretch; }
+            .info-paciente { min-width: 100%; }
+            .acao-setor { min-width: 100%; align-items: stretch; }
+            .acao-setor label { justify-content: center; width: 100%; }
+        }
     </style>
 </head>
 <body>
     <header class="no-print">
         <h1 style="color: var(--text-strong);" id="titulo-setor">Painel Técnico</h1>
         <h2>Atendimentos do Dia</h2>
-        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;">
+        <div class="header-controls">
             <button onclick="window.location.href='relacao_lab.html'" id="btn-relacao-lab" class="btn-header-outline" style="display: none; background: #10b981 !important; color: white !important; border: none !important;">🧪 Relação de Envio</button>
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
             <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
@@ -73,20 +79,20 @@
     
     <main>
         <div class="painel-recepcao no-print">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="toolbar-setor">
+                <div class="toolbar-group">
                     <label style="font-weight: bold; color: var(--text-strong);">Data:</label>
-                    <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
-                    <button id="btn-buscar-data" style="background-color: var(--accent); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn);">Atualizar</button>
+                    <input type="date" id="filtro-data" class="input-moderno">
+                    <button id="btn-buscar-data" class="btn-acao">Atualizar</button>
                 </div>
-                <input type="text" id="pesquisa-paciente" placeholder="Pesquisar paciente..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
+                <div class="toolbar-group">
+                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar paciente..." class="input-moderno input-pesquisa">
+                </div>
             </div>
 
             <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ Sincronizando com a base de dados...</div>
             
-            <div id="lista-atendimentos">
-                <!-- Cards injetados via JS -->
-            </div>
+            <div id="lista-atendimentos"></div>
             
             <div id="msg-vazio" style="text-align: center; padding: 40px; color: var(--text-muted); display: none; background: var(--surface-muted); border-radius: 8px; border: 1px dashed var(--border-strong);">
                 <strong>Nenhum paciente aguardando neste setor para a data selecionada.</strong>
@@ -100,12 +106,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ==========================================
-            // 1. CONFIGURAÇÃO DE SETOR PARA O SUPABASE
-            // ==========================================
             const setor = localStorage.getItem('monad_setor');
             
-            // Adaptado para ler exatamente os nomes das colunas que criamos no SQL
             const configSetores = {
                 'clinico': { titulo: 'Avaliação Clínica / Neurológica', flag: p => p.exames_clinicos && p.exames_clinicos !== 'Nenhum', exames: 'exames_clinicos', lib: 'liberado_clinico' },
                 'raiox': { titulo: 'Radiologia (Raio-X)', flag: p => p.exames_raiox && p.exames_raiox !== 'Nenhum', exames: 'exames_raiox', lib: 'liberado_raiox' },
@@ -121,9 +123,6 @@
                 document.getElementById('btn-relacao-lab').style.display = 'inline-flex';
             }
 
-            // ==========================================
-            // 2. LÓGICA DE DADOS E RENDERIZAÇÃO
-            // ==========================================
             let databaseSetor = [];
             const inputData = document.getElementById('filtro-data');
             const inputPesq = document.getElementById('pesquisa-paciente');
@@ -147,7 +146,6 @@
                     if (error) throw error;
 
                     if (data && data.length > 0) {
-                        // Filtra usando a função mapeada no configSetores para descobrir se o paciente vem pra cá
                         databaseSetor = data.filter(myConfig.flag);
                         renderizarLista(databaseSetor);
                     } else {
@@ -160,7 +158,6 @@
                 }
             }
 
-            // Polling silencioso a cada 15s com Supabase
             setInterval(async () => {
                 if (document.hidden || !inputData.value || !myConfig.flag) return;
                 try {
@@ -174,14 +171,12 @@
                     if (data) {
                         const filtrados = data.filter(myConfig.flag);
                         
-                        // Se a quantidade mudou, re-renderiza tudo
                         if (filtrados.length !== document.querySelectorAll('.card-paciente').length) {
                             databaseSetor = filtrados;
                             renderizarLista(databaseSetor);
                             return;
                         }
                         
-                        // Atualiza status e inputs na tela silenciosamente
                         filtrados.forEach(pac => {
                             const card = document.querySelector(`.card-paciente[data-cpf="${pac.cpf}"]`);
                             if (card) {
@@ -216,7 +211,7 @@
                 pacientes.forEach((pac) => {
                     const examesListados = myConfig.exames ? pac[myConfig.exames] : myConfig.texto;
                     const concluido = pac[myConfig.lib];
-                    const tipoStr = pac.tipo_exame ? `<span style="color:var(--accent); font-weight:600;">(${pac.tipo_exame})</span>` : '';
+                    const tipoStr = pac.tipo_exame ? `<span style="color:var(--accent); font-weight:600;">${pac.tipo_exame}</span>` : '';
                     
                     let btnChamar = "";
                     if (setor === 'consulta') {
@@ -236,7 +231,6 @@
                         `;
                     }
 
-                    // Observação: Utilizado pac.data_nascimento de acordo com as colunas do SQL
                     const card = document.createElement('div');
                     card.className = `card-paciente ${concluido ? 'concluido' : ''}`;
                     card.dataset.cpf = pac.cpf;
@@ -264,10 +258,6 @@
                 aplicarFiltros();
             }
 
-            // ==========================================
-            // 3. AÇÕES (CHAMAR, CHECKBOX, OBS)
-            // ==========================================
-
             window.chamarPaciente = async function(nome, cpf) {
                 const btns = document.querySelectorAll('.btn-chamar');
                 btns.forEach(async b => { 
@@ -294,7 +284,6 @@
             };
 
             listaDiv.addEventListener('change', async function(e) {
-                // SALVAR CONCLUÍDO (CHECKBOX)
                 if (e.target.classList.contains('cb-liberar-setor')) {
                     const cb = e.target;
                     const cpf = cb.dataset.cpf;
@@ -324,7 +313,6 @@
                     }
                 }
 
-                // SALVAR OBSERVAÇÃO (LAB)
                 if (e.target.classList.contains('obs-setor')) {
                     const obsInput = e.target;
                     const cpf = obsInput.dataset.cpf;
@@ -337,7 +325,7 @@
 
                         obsInput.style.opacity = "1"; 
                         obsInput.disabled = false;
-                        obsInput.style.borderColor = "var(--success)"; // Pisca verde
+                        obsInput.style.borderColor = "var(--success)";
                         setTimeout(() => obsInput.style.borderColor = "var(--border-strong)", 2000);
 
                     } catch (err) {
@@ -348,7 +336,6 @@
                 }
             });
 
-            // Filtro Local
             function aplicarFiltros() {
                 const termo = inputPesq.value.toLowerCase();
                 let visiveis = 0;
@@ -367,7 +354,6 @@
             buscarDados(); 
         });
 
-        // Toggle Dark Mode
         document.addEventListener('DOMContentLoaded', () => {
             const btnTheme = document.getElementById('btn-theme-toggle');
             if (btnTheme) {
@@ -387,6 +373,5 @@
             }
         });
     </script>
-    <!-- FIM DA ADAPTAÇÃO -->
 </body>
 </html>

@@ -110,7 +110,7 @@ header {
     color: white; 
     padding: 24px 20px; 
     text-align: center;
-    justify-content: center; 
+    position: relative;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
@@ -121,6 +121,10 @@ header {
 
 header h1 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; text-align: center;}
 header h2 { margin: 6px 0 20px 0; font-size: 15px; font-weight: 500; color: #bfdbfe; text-align: center;}
+
+.header-controls {
+    position: absolute; right: 20px; top: 24px; display: flex; align-items: center; gap: 15px;
+}
 
 nav ul { list-style: none; padding: 0; margin: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
 nav a { color: #e2e8f0; text-decoration: none; font-weight: 600; font-size: 14px; padding: 10px 16px; border-radius: 8px; transition: all 0.2s ease;}
@@ -193,9 +197,7 @@ legend { font-weight: 600; background: var(--surface); padding: 4px 12px; color:
 
 /* =========================================
    BOTÕES À PROVA DE FALHAS (CORREÇÃO DE CORES)
-   Garante 100% de visibilidade contra fundos brancos ou escuros
    ========================================= */
-
 .btn-header-outline {
     background-color: rgba(255, 255, 255, 0.15) !important;
     color: #ffffff !important;
@@ -245,48 +247,38 @@ legend { font-weight: 600; background: var(--surface); padding: 4px 12px; color:
 
 /* =========================================
    🛡️ ESCUDO DE DARK MODE (OVERRIDE DE CORES INLINE DO JAVASCRIPT)
-   Deteta cores "fixas" injetadas pelo JS nas tabelas e converte-as
    ========================================= */
+[data-theme="dark"] [style*="background:#f8fafc"], [data-theme="dark"] [style*="background: #f8fafc"], [data-theme="dark"] [style*="background-color:#f8fafc"], [data-theme="dark"] [style*="background-color: #f8fafc"] { background-color: var(--surface-muted) !important; }
+[data-theme="dark"] [style*="background:#e2e8f0"], [data-theme="dark"] [style*="background: #e2e8f0"], [data-theme="dark"] [style*="background:#f1f5f9"], [data-theme="dark"] [style*="background: #f1f5f9"] { background-color: var(--surface-strong) !important; }
+[data-theme="dark"] [style*="color:#0f172a"], [data-theme="dark"] [style*="color: #0f172a"], [data-theme="dark"] [style*="color:#1e293b"], [data-theme="dark"] [style*="color: #1e293b"], [data-theme="dark"] [style*="color:#334155"], [data-theme="dark"] [style*="color: #334155"] { color: var(--text-strong) !important; }
+[data-theme="dark"] [style*="color:#475569"], [data-theme="dark"] [style*="color: #475569"], [data-theme="dark"] [style*="color:#64748b"], [data-theme="dark"] [style*="color: #64748b"] { color: var(--text-muted) !important; }
+[data-theme="dark"] .tabela-liberacao td { border-color: var(--border-strong) !important; color: var(--text-main) !important; }
 
-/* 1. Converte fundos brancos/cinzas injetados para fundos escuros */
-[data-theme="dark"] [style*="background:#f8fafc"],
-[data-theme="dark"] [style*="background: #f8fafc"],
-[data-theme="dark"] [style*="background-color:#f8fafc"],
-[data-theme="dark"] [style*="background-color: #f8fafc"] {
-    background-color: var(--surface-muted) !important;
+/* =========================================
+   📱 RESPONSIVIDADE (MOBILE FIRST & TWEAKS)
+   ========================================= */
+@media (max-width: 768px) {
+    header { padding: 20px 15px; display: flex; flex-direction: column; align-items: center;}
+    header h1 { font-size: 22px; }
+    header h2 { font-size: 13px; margin-bottom: 10px; }
+    
+    .header-controls {
+        position: static;
+        justify-content: center;
+        margin-top: 15px;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    
+    .header-controls button { font-size: 12px; padding: 8px 12px; }
+
+    main { margin: 20px auto; padding: 0 12px; }
+    .painel-recepcao { padding: 15px; }
+    
+    .row { grid-template-columns: 1fr; gap: 15px; }
+    .btn-imprimir, .btn-login { width: 100%; min-width: unset; }
+    .exames-grid-master { grid-template-columns: 1fr; }
 }
-
-[data-theme="dark"] [style*="background:#e2e8f0"],
-[data-theme="dark"] [style*="background: #e2e8f0"],
-[data-theme="dark"] [style*="background:#f1f5f9"],
-[data-theme="dark"] [style*="background: #f1f5f9"] {
-    background-color: var(--surface-strong) !important;
-}
-
-/* 2. Converte textos pretos/azul-escuros injetados para branco/gelo */
-[data-theme="dark"] [style*="color:#0f172a"],
-[data-theme="dark"] [style*="color: #0f172a"],
-[data-theme="dark"] [style*="color:#1e293b"],
-[data-theme="dark"] [style*="color: #1e293b"],
-[data-theme="dark"] [style*="color:#334155"],
-[data-theme="dark"] [style*="color: #334155"] {
-    color: var(--text-strong) !important;
-}
-
-/* 3. Converte textos cinzentos médios injetados para cinza claro legível */
-[data-theme="dark"] [style*="color:#475569"],
-[data-theme="dark"] [style*="color: #475569"],
-[data-theme="dark"] [style*="color:#64748b"],
-[data-theme="dark"] [style*="color: #64748b"] {
-    color: var(--text-muted) !important;
-}
-
-/* 4. Força as células das tabelas a respeitarem o modo escuro integralmente */
-[data-theme="dark"] .tabela-liberacao td {
-    border-color: var(--border-strong) !important;
-    color: var(--text-main) !important;
-}
-
 
 /* =======================================================
    REGRAS DE IMPRESSÃO (PERFEIÇÃO A4 MANTIDA)
