@@ -18,21 +18,39 @@
             window.location.href = "login.html";
         }
     </script>
+    <style>
+        /* Classes de Toolbar para Responsividade (Mobile First) */
+        .toolbar-geral { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .toolbar-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .input-moderno { padding: 9px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong); font-family: inherit; font-size: 13px;}
+        .btn-acao { background-color: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); font-family: inherit; font-size: 13px; transition: opacity 0.2s; }
+        .btn-acao:hover { opacity: 0.9; }
+        .input-pesquisa { width: 220px; }
+
+        @media (max-width: 768px) {
+            .toolbar-geral { flex-direction: column; align-items: stretch; }
+            .toolbar-group { flex-direction: column; align-items: stretch; width: 100%; }
+            .input-moderno, .btn-acao, .input-pesquisa { width: 100%; }
+            
+            .tabs-setores { display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
+            .tab-btn { flex: 0 0 auto; }
+        }
+    </style>
 </head>
 <body>
-    <header>
+    <header class="no-print">
         <h1 style="color: var(--text-strong);">Sistema Interno</h1>
         <h2>Painel de Gestão (Visão Geral)</h2>
-        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
+        <div class="header-controls">
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
+            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
         </div>
-        <nav>
+        <nav style="margin-top: 15px;">
             <ul>
                 <li><a href="index.html">Recepção</a></li>
-                <li><a href="checkin.html" style="background-color: #003366;">Visão Geral</a></li>
+                <li><a href="checkin.html" style="background-color: var(--accent) !important; color: white !important;">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
-                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: #7f1d1d;">Painel Admin</a></li>
+                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
             </ul>
         </nav>
         <script>
@@ -43,16 +61,16 @@
     </header>
     
     <main>
-        <div class="painel-recepcao">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="margin: 0; color: var(--text-strong);">Acompanhamento Global</h2>
+        <div class="painel-recepcao no-print">
+            <div class="toolbar-geral">
+                <h2 style="margin: 0; color: var(--text-strong); font-size: 22px; border-bottom: 2px solid var(--surface-strong); padding-bottom: 12px; margin-bottom: 5px;">Acompanhamento Global</h2>
                 
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
-                        <button id="btn-buscar-data" style="background-color: var(--accent); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Atualizar</button>
+                <div class="toolbar-group">
+                    <div style="display: flex; align-items: center; gap: 5px; width: 100%;">
+                        <input type="date" id="filtro-data" class="input-moderno" style="flex: 1;">
+                        <button id="btn-buscar-data" class="btn-acao">Atualizar</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
+                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar..." class="input-moderno input-pesquisa">
                 </div>
             </div>
 
@@ -86,7 +104,7 @@
             </div>
             
             <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-top: 10px;">
-                <strong>Nenhum paciente encontrado.</strong>
+                <strong>Nenhum paciente encontrado para esta data.</strong>
             </div>
         </div>
     </main>
@@ -142,6 +160,7 @@
 
             setInterval(atualizacaoSilenciosa, 15000);
 
+            // POLLING: Agora mapeia as atualizações de tela puramente pelo ID da chave primária (pac.id)
             async function atualizacaoSilenciosa() {
                 if (document.hidden || !inputData.value) return; 
                 
@@ -161,15 +180,14 @@
                             p.audiometria === true || p.consulta_clinica === true
                         );
                         
-                        // Se entrou gente nova, recarrega a tabela inteira
                         if (pacValidos.length !== document.querySelectorAll('.linha-paciente').length) {
                             renderizarTabela(data);
                             return;
                         }
                         
-                        // Se não, só atualiza os checkboxes invisivelmente
                         data.forEach(pac => {
-                            const linha = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
+                            // Encontra a linha exata pela Chave Primária (data-id)
+                            const linha = document.querySelector(`tr[data-id="${pac.id}"]`);
                             if (linha) {
                                 const updateCheck = (cls, val) => {
                                     const cb = linha.querySelector(cls);
@@ -227,7 +245,7 @@
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
-                    tr.dataset.cpf = pac.cpf;
+                    tr.dataset.id = pac.id; // Alterado de cpf para ID Único
                     tr.dataset.clinico = temClinico;
                     tr.dataset.raiox = temRaiox;
                     tr.dataset.fono = temFono;
@@ -236,7 +254,15 @@
 
                     tr.innerHTML = `
                         <td><span class="tag-empresa">${pac.empresa || '-'}</span></td>
-                        <td><div class="perfil-paciente"><div class="avatar">${iniciais}</div><span class="col-nome">${pac.nome}</span></div></td>
+                        <td>
+                            <div class="perfil-paciente">
+                                <div class="avatar">${iniciais}</div>
+                                <div style="display: flex; flex-direction: column;">
+                                    <span class="col-nome">${pac.nome}</span>
+                                    <span style="font-size: 11px; color: var(--text-muted);">CPF: ${pac.cpf || '-'}</span>
+                                </div>
+                            </div>
+                        </td>
                         <td class="col-clinico" style="text-align: center;">${tdC}</td>
                         <td class="col-raiox" style="text-align: center;">${tdR}</td>
                         <td class="col-fono" style="text-align: center;">${tdF}</td>
@@ -280,8 +306,7 @@
             inputPesq.addEventListener('input', aplicarFiltros);
             buscarDados();
         });
-    </script>
-    <script>
+
         document.addEventListener('DOMContentLoaded', () => {
             const btnTheme = document.getElementById('btn-theme-toggle');
             if (btnTheme) {

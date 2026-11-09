@@ -6,28 +6,51 @@
     <title>Monad Sistema Interno - Recepção</title>
     <link rel="stylesheet" href="styles/styles.css">
     <script>
-        // GATEKEEPER E LEITURA DO MODO ESCURO
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
         const s = localStorage.getItem('monad_setor');
         if (!s || (s !== 'recepcao' && s !== 'todos' && s !== 'admin')) { window.location.href = "login.html"; }
     </script>
+    <style>
+        /* Ajustes Estruturais para Mobile First */
+        .painel-recepcao { padding: 30px; }
+        
+        .form-row { display: flex; gap: 20px; margin-bottom: 15px; }
+        .form-col { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        
+        .input-moderno { padding: 12px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); color: var(--text-strong); font-size: 14px; font-family: inherit; transition: border-color 0.2s; width: 100%; }
+        .input-moderno:focus { outline: none; border-color: var(--accent); }
+        
+        .tipo-exame-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; }
+        .tipo-exame-grid label { display: flex; align-items: center; gap: 8px; padding: 12px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); cursor: pointer; transition: background-color 0.2s; font-size: 13px; font-weight: 500; }
+        .tipo-exame-grid label:hover { background-color: var(--surface-muted); border-color: var(--accent); }
+
+        .btn-imprimir-largo { background-color: var(--accent); color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; box-shadow: var(--shadow-btn); font-family: inherit; width: 100%; transition: opacity 0.2s; }
+        .btn-imprimir-largo:hover { opacity: 0.9; }
+
+        @media (max-width: 768px) {
+            .painel-recepcao { padding: 15px; }
+            .form-row { flex-direction: column; gap: 15px; margin-bottom: 10px;}
+            fieldset { padding: 15px 10px; }
+            .exames-grid-master { display: flex; flex-direction: column; gap: 20px; }
+        }
+    </style>
 </head>
 <body>
-    <header>
+    <header class="no-print">
         <h1 style="color: var(--text-strong);">Sistema Interno</h1>
         <h2>Clínica Monad Ocupacional - Oriximiná</h2>
-        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
+        <div class="header-controls">
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
             <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
         </div>
-        <nav class="no-print">
+        <nav style="margin-top: 15px;">
             <ul>
-                <li><a href="index.html" style="background-color: #003366;">Recepção</a></li>
+                <li><a href="index.html" style="background-color: var(--accent) !important; color: white !important;">Recepção</a></li>
                 <li><a href="checkin.html">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
-                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: #7f1d1d;">Painel Admin</a></li>
+                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
             </ul>   
         </nav>
         <script>
@@ -40,29 +63,51 @@
     <main>
         <div class="sistema-fichas">
             <div class="no-print painel-recepcao">
-                <h2>Painel de Cadastro (Recepção)</h2>
+                <h2 style="margin-top: 0; color: var(--text-strong); font-size: 22px; border-bottom: 2px solid var(--surface-strong); padding-bottom: 12px; margin-bottom: 24px;">Painel de Cadastro (Recepção)</h2>
                 <form id="masterForm">
                     <fieldset>
                         <legend>Dados do Colaborador</legend>
-                        <div class="form-group row">
-                            <label>Empresa: <input type="text" class="master-input nav-enter" name="empresa"></label>
-                            <label>CPF: 
-                                <input type="text" class="master-input nav-enter" name="cpf" id="in-cpf" placeholder="000.000.000-00" maxlength="14">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Empresa:</label>
+                                <input type="text" class="input-moderno nav-enter" name="empresa">
+                            </div>
+                            <div class="form-col">
+                                <label>CPF:</label>
+                                <input type="text" class="input-moderno nav-enter" name="cpf" id="in-cpf" placeholder="000.000.000-00" maxlength="14">
                                 <span id="cpf-error" style="color: var(--danger); font-size: 12px; display: none;">⚠️ CPF Inválido</span>
                                 <div id="msg-cpf-feedback" style="font-size: 12px; font-weight: bold; margin-top: 2px;"></div>
-                            </label>
+                            </div>
                         </div>
-                        <div class="form-group row">
-                            <label>Nome: <input type="text" class="master-input nav-enter" name="nome" id="in-nome"></label>
-                            <label>Função: <input type="text" class="master-input nav-enter" name="funcao"></label>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Nome:</label>
+                                <input type="text" class="input-moderno nav-enter" name="nome" id="in-nome">
+                            </div>
+                            <div class="form-col">
+                                <label>Função:</label>
+                                <input type="text" class="input-moderno nav-enter" name="funcao">
+                            </div>
                         </div>
-                        <div class="form-group row">
-                            <label>Data de Nasc.: <input type="date" class="master-input nav-enter" name="dn" id="in-dn"></label>
-                            <label>RG: <input type="text" class="master-input nav-enter" name="rg" id="in-rg"></label>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Data de Nasc.:</label>
+                                <input type="date" class="input-moderno nav-enter" name="dn" id="in-dn">
+                            </div>
+                            <div class="form-col">
+                                <label>RG:</label>
+                                <input type="text" class="input-moderno nav-enter" name="rg" id="in-rg">
+                            </div>
                         </div>
-                        <div class="form-group row">
-                            <label>Telefone: <input type="text" class="master-input nav-enter" name="telefone" id="in-telefone" placeholder="(00) 00000-0000" maxlength="15"></label>
-                            <label>Data Exame: <input type="date" class="master-input nav-enter" name="data"></label>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Telefone:</label>
+                                <input type="text" class="input-moderno nav-enter" name="telefone" id="in-telefone" placeholder="(00) 00000-0000" maxlength="15">
+                            </div>
+                            <div class="form-col">
+                                <label>Data Exame:</label>
+                                <input type="date" class="input-moderno nav-enter" name="data">
+                            </div>
                         </div>
                     </fieldset>
 
@@ -72,8 +117,8 @@
                             <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="ADMISSIONAL"> ADMISSIONAL</label>
                             <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="PERIODICO"> PERIÓDICO</label>
                             <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="DEMISSIONAL"> DEMISSIONAL</label>
-                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="MUDANÇA DE FUNÇÃO"> MUDANÇA DE FUNÇÃO</label>
-                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="MUDANÇA DE RISCO"> MUDANÇA DE RISCO</label>
+                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="MUDANÇA DE FUNÇÃO"> MUD. DE FUNÇÃO</label>
+                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="MUDANÇA DE RISCO"> MUD. DE RISCO</label>
                             <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="COMPLEMENTAR"> COMPLEMENTAR</label>
                             <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="PARTICULAR"> PARTICULAR</label>
                             <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="ENCAMINHAMENTO"> ENCAMINHAMENTO</label>
@@ -83,15 +128,15 @@
                     <fieldset>
                         <legend>Exames Solicitados</legend>
                         <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-                            <div style="padding: 12px; background: var(--accent-soft, #e0f2fe); border: 1px solid var(--accent, #bae6fd); border-radius: 6px;">
-                                <label style="font-weight: bold; color: var(--accent); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 15px;">
-                                    <input type="checkbox" id="check-audiometria" class="nav-enter" checked style="transform: scale(1.5);"> 
+                            <div style="padding: 12px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 6px;">
+                                <label style="font-weight: bold; color: var(--accent); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px;">
+                                    <input type="checkbox" id="check-audiometria" class="nav-enter" checked style="transform: scale(1.3);"> 
                                     INCLUIR FICHA DE FONOAUDIOLOGIA
                                 </label>
                             </div>
-                            <div style="padding: 12px; background: var(--warning-soft, #fef3c7); border: 1px solid var(--warning, #fde68a); border-radius: 6px;">
-                                <label style="font-weight: bold; color: var(--warning); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 15px;">
-                                    <input type="checkbox" id="check-consulta" class="nav-enter" checked style="transform: scale(1.5);"> 
+                            <div style="padding: 12px; background: var(--warning-soft); border: 1px solid var(--warning); border-radius: 6px;">
+                                <label style="font-weight: bold; color: var(--warning); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px;">
+                                    <input type="checkbox" id="check-consulta" class="nav-enter" checked style="transform: scale(1.3);"> 
                                     ENCAMINHAR PARA CONSULTA CLÍNICA
                                 </label>
                             </div>
@@ -119,8 +164,8 @@
                                 <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
                                     <label style="font-size: 12px; color: var(--text-muted);">Adicionar Raio-X Extra:</label>
                                     <div style="display: flex; gap: 5px; margin-top: 5px;">
-                                        <input type="text" id="input-exame-extra-raiox" class="nav-enter" placeholder="Nome do Raio-X..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
-                                        <button type="button" id="btn-add-exame-raiox" class="btn-inserir-seguro">Inserir</button>
+                                        <input type="text" id="input-exame-extra-raiox" class="input-moderno nav-enter" placeholder="Nome do Raio-X..." style="padding: 8px;">
+                                        <button type="button" id="btn-add-exame-raiox" class="btn-header-outline" style="background-color: var(--accent) !important;">Inserir</button>
                                     </div>
                                     <div id="lista-extras-painel-raiox" style="margin-top: 10px;"></div>
                                 </div>
@@ -151,8 +196,8 @@
                                     <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
                                         <label style="font-size: 12px; color: var(--text-muted);">Adicionar Exame Extra:</label>
                                         <div style="display: flex; gap: 5px; margin-top: 5px;">
-                                            <input type="text" id="input-exame-extra" class="nav-enter" placeholder="Nome do exame..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
-                                            <button type="button" id="btn-add-exame" class="btn-inserir-seguro">Inserir</button>
+                                            <input type="text" id="input-exame-extra" class="input-moderno nav-enter" placeholder="Nome do exame..." style="padding: 8px;">
+                                            <button type="button" id="btn-add-exame" class="btn-header-outline" style="background-color: var(--accent) !important;">Inserir</button>
                                         </div>
                                         <div id="lista-extras-painel" style="margin-top: 10px;"></div>
                                     </div>
@@ -161,13 +206,14 @@
                         </div>
                     </fieldset>
 
-                    <div style="display: flex; gap: 15px; margin-top: 20px;">
-                        <button type="button" id="btn-salvar-imprimir" class="btn-imprimir">Salvar na Planilha e Imprimir</button>
+                    <div style="margin-top: 25px;">
+                        <button type="button" id="btn-salvar-imprimir" class="btn-imprimir-largo">Salvar Cadastro e Imprimir Fichas</button>
                     </div>
-                    <p id="msg-status" style="font-weight: bold; margin-top: 10px; display: none;">A gravar dados...</p>
+                    <p id="msg-status" style="font-weight: bold; margin-top: 10px; display: none; text-align: center;">A gravar dados...</p>
                 </form>
             </div>
 
+            <!-- ÁREA DE IMPRESSÃO (Mantida intacta para script.js processar) -->
             <div class="area-impressao">
                 <div class="ficha-setor" id="setor-clinico">
                     <div class="cabecalho-setor">
@@ -271,9 +317,7 @@
                 });
             }
 
-            // ==========================================
             // NAVEGAÇÃO RÁPIDA COM A TECLA ENTER
-            // ==========================================
             const camposNav = document.querySelectorAll('.nav-enter');
             camposNav.forEach((campo, index) => {
                 campo.addEventListener('keydown', function(e) {
@@ -289,9 +333,7 @@
                 });
             });
 
-            // ==========================================
             // MÁSCARA E AUTOCOMPLETAR DE CPF
-            // ==========================================
             const cpfInput = document.getElementById('in-cpf');
             const msgFeedback = document.getElementById('msg-cpf-feedback');
 
@@ -327,7 +369,6 @@
                     if (data && data.length > 0) {
                         const pac = data[0];
                         
-                        // Função rápida para converter DD/MM/YYYY para YYYY-MM-DD
                         function formatarDataParaInput(dataBanco) {
                             if (!dataBanco) return '';
                             if (dataBanco.includes('/')) {
@@ -357,9 +398,7 @@
                 }
             }
 
-            // ==========================================
             // MÁSCARA DE TELEFONE
-            // ==========================================
             document.getElementById('in-telefone').addEventListener('input', (e) => {
                 let val = e.target.value.replace(/\D/g, '');
                 val = val.replace(/^(\d{2})(\d)/g, '($1) $2');

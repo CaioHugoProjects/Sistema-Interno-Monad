@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
-        // GATEKEEPER DE SEGURANÇA ATUALIZADO
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
@@ -16,25 +15,40 @@
             window.location.href = "login.html"; 
         }
     </script>
+    <style>
+        /* Classes de Toolbar para Responsividade (Mobile First) */
+        .toolbar-geral { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .toolbar-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .input-moderno { padding: 9px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong); font-family: inherit; font-size: 13px;}
+        .btn-acao { background-color: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); font-family: inherit; font-size: 13px; transition: opacity 0.2s; }
+        .btn-acao:hover { opacity: 0.9; }
+        .input-pesquisa { width: 220px; }
+        .btn-imprimir-ficha { background-color: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto; width: 100%; max-width: 140px;}
+
+        @media (max-width: 768px) {
+            .toolbar-geral { flex-direction: column; align-items: stretch; }
+            .toolbar-group { flex-direction: column; align-items: stretch; width: 100%; }
+            .input-moderno, .btn-acao, .input-pesquisa, .btn-imprimir-ficha { width: 100%; max-width: none;}
+        }
+    </style>
 </head>
 <body>
-    <header>
+    <header class="no-print">
         <h1 style="color: var(--text-strong);">Sistema Interno</h1>
         <h2>Painel de Reimpressão e Agendamentos</h2>
-        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
+        <div class="header-controls">
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;">Sair</button>
+            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
         </div>
-        <nav>
+        <nav style="margin-top: 15px;">
             <ul>
                 <li><a href="index.html">Recepção</a></li>
                 <li><a href="checkin.html">Visão Geral</a></li>
-                <li><a href="reimpressao.html" style="background-color: #003366;">Reimpressão / Agendados</a></li>
-                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: #7f1d1d;">Painel Admin</a></li>
+                <li><a href="reimpressao.html" style="background-color: var(--accent) !important; color: white !important;">Reimpressão / Agendados</a></li>
+                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
             </ul>
         </nav>
         <script>
-            // Revela o botão do Admin apenas se quem estiver logado for o admin
             if (localStorage.getItem('monad_setor') === 'admin') {
                 document.getElementById('menu-admin').style.display = 'block';
             }
@@ -43,15 +57,15 @@
     
     <main>
         <div class="painel-recepcao no-print">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="margin: 0; color: var(--text-strong);">Arquivo e Reimpressão de Fichas</h2>
+            <div class="toolbar-geral">
+                <h2 style="margin: 0; color: var(--text-strong); font-size: 22px; border-bottom: 2px solid var(--surface-strong); padding-bottom: 12px; margin-bottom: 5px;">Arquivo e Reimpressão de Fichas</h2>
                 
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
-                        <button id="btn-buscar-data" style="background-color: var(--accent); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Buscar</button>
+                <div class="toolbar-group">
+                    <div style="display: flex; align-items: center; gap: 5px; width: 100%;">
+                        <input type="date" id="filtro-data" class="input-moderno" style="flex: 1;">
+                        <button id="btn-buscar-data" class="btn-acao">Buscar</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; box-sizing: border-box; background: var(--surface-muted); color: var(--text-strong);">
+                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar paciente..." class="input-moderno input-pesquisa">
                 </div>
             </div>
 
@@ -82,6 +96,7 @@
             </div>
         </div>
 
+        <!-- ÁREA DE IMPRESSÃO (Mantida Intacta para o script.js agir) -->
         <div class="area-impressao">
             <div class="ficha-setor" id="setor-clinico">
                 <div class="cabecalho-setor">
@@ -186,7 +201,6 @@
                 if(!dataFormatada) return;
 
                 try {
-                    // Busca os dados diretamente do Supabase
                     const { data, error } = await supabase
                         .from('atendimentos')
                         .select('*')
@@ -213,8 +227,7 @@
 
             function renderizarTabela(pacientes) {
                 tabela.innerHTML = "";
-                pacientes.forEach((pac, index) => {
-                    // Mapeia as lógicas verificando as colunas do banco
+                pacientes.forEach((pac) => {
                     const temClinico = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
                     const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
                     const temFono = pac.audiometria === true;
@@ -235,6 +248,8 @@
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
+                    tr.dataset.id = pac.id; // Chave primária atrelada à linha
+                    
                     tr.innerHTML = `
                         <td><span class="tag-empresa">${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></span></td>
                         <td>
@@ -249,7 +264,7 @@
                             ${resumoSetores}
                         </td>
                         <td style="text-align: center;">
-                            <button onclick="imprimirFicha(${index})" style="background-color: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto;">
+                            <button onclick="imprimirFichaPeloId('${pac.id}')" class="btn-imprimir-ficha">
                                 🖨️ Imprimir
                             </button>
                         </td>
@@ -270,8 +285,13 @@
             document.getElementById('btn-buscar-data').addEventListener('click', buscarPacientesDoBanco);
             buscarPacientesDoBanco();
 
-            window.imprimirFicha = function(index) {
-                const pac = databasePacientes[index];
+            // NOVA FUNÇÃO DE IMPRESSÃO: Usa o ID Único para encontrar os dados
+            window.imprimirFichaPeloId = function(idUnico) {
+                const pac = databasePacientes.find(p => p.id == idUnico);
+                if(!pac) {
+                    alert("Erro: Dados do paciente não encontrados em memória.");
+                    return;
+                }
 
                 let dataParaImpressao = pac.data_exame;
                 if (dataParaImpressao && dataParaImpressao.includes('-')) {

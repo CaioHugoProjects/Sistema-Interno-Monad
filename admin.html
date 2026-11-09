@@ -17,6 +17,18 @@
         }
     </script>
     <style>
+        /* Classes de Toolbar para Responsividade */
+        .toolbar-geral { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .toolbar-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; justify-content: flex-end;}
+        
+        /* NO COMPUTADOR: Ocupa apenas o espaço necessário para caber a pesquisa do lado */
+        .botoes-filtro { display: flex; align-items: center; gap: 10px; } 
+        
+        .input-moderno { padding: 9px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong); font-family: inherit; font-size: 13px;}
+        .btn-acao { color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); font-family: inherit; font-size: 13px; transition: opacity 0.2s; }
+        .btn-acao:hover { opacity: 0.9; }
+        .input-pesquisa { width: 220px; }
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; justify-content: center; align-items: center; }
         .modal-box { background: var(--surface); padding: 25px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-box h3 { color: var(--danger); margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid var(--border-strong); padding-bottom: 10px; }
@@ -24,37 +36,49 @@
         .edit-grid label { font-size: 13px; font-weight: bold; color: var(--text-muted); display: flex; flex-direction: column; gap: 5px; }
         .edit-grid input[type="text"] { padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; font-size: 14px; background: var(--surface-muted); color: var(--text-strong);}
         .edit-full { grid-column: span 2; }
+
+        /* REGRAS EXCLUSIVAS PARA CELULAR */
+        @media (max-width: 768px) {
+            .toolbar-geral { flex-direction: column; align-items: stretch; }
+            .toolbar-group { flex-direction: column; align-items: stretch; width: 100%; justify-content: center; }
+            /* NO CELULAR: Força os botões a empilharem e ocuparem 100% */
+            .botoes-filtro { flex-direction: column; align-items: stretch; width: 100%; } 
+            .input-moderno, .btn-acao, .input-pesquisa { width: 100%; }
+            .edit-grid { grid-template-columns: 1fr; }
+            .edit-full { grid-column: span 1; }
+        }
     </style>
 </head>
 <body>
-    <header>
+    <header class="no-print">
         <h1 style="color: var(--danger);">Acesso Administrativo</h1>
         <h2 style="color: var(--text-muted);">Supervisão, Edição e Exclusão de Registos</h2>
-        <div style="float: right; margin-top: 10px; display: flex; gap: 10px; align-items: center;" class="no-print">
+        <div class="header-controls">
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
             <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
         </div>
-        <nav>
+        <nav style="margin-top: 15px;">
             <ul>
                 <li><a href="index.html">Recepção</a></li>
                 <li><a href="checkin.html">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
-                <li><a href="admin.html" style="background-color: #7f1d1d; color: white;">Painel Admin</a></li>
+                <li><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
             </ul>
         </nav>
     </header>
     
     <main>
         <div class="painel-recepcao" style="border: 2px solid var(--danger);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="margin: 0; color: var(--text-strong);">Gestão de Fila e Exclusão</h2>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap; flex: 1; justify-content: flex-end;">
-                    <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
-                        <input type="date" id="filtro-data" style="padding: 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
-                        <button id="btn-buscar-data" style="background-color: var(--danger); color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn);">Atualizar Dia</button>
-                        <button id="btn-busca-global" style="background-color: var(--warning); color: #0f172a; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); transition: transform 0.2s;">🌍 Busca Global</button>
+            <div class="toolbar-geral">
+                <h2 style="margin: 0; color: var(--text-strong); font-size: 22px;">Gestão de Fila e Exclusão</h2>
+                
+                <div class="toolbar-group">
+                    <div class="botoes-filtro">
+                        <input type="date" id="filtro-data" class="input-moderno">
+                        <button id="btn-buscar-data" class="btn-acao" style="background-color: var(--danger);">Atualizar Dia</button>
+                        <button id="btn-busca-global" class="btn-acao" style="background-color: var(--warning); color: #0f172a;">🌍 Busca Global</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar nome ou CPF..." style="padding: 8px; width: 220px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong);">
+                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar Nome, Empresa ou CPF..." class="input-moderno input-pesquisa">
                 </div>
             </div>
 
@@ -82,13 +106,13 @@
         </div>
     </main>
 
-    <!-- MODAL DE EDIÇÃO -->
+    <!-- MODAL DE EDIÇÃO INTEGRADO COM ID ÚNICO -->
     <div id="modal-editar" class="modal-overlay" style="display:none;">
         <div class="modal-box">
             <h3>✏️ Editar Dados do Paciente</h3>
             <div class="edit-grid">
-                <input type="hidden" id="edit-cpf-antigo">
-                <input type="hidden" id="edit-data-exame">
+                <!-- Chave Primária Oculta para garantir update seguro -->
+                <input type="hidden" id="edit-id-unico">
                 
                 <label>Nome: <input type="text" id="edit-nome"></label>
                 <label>Empresa: <input type="text" id="edit-empresa"></label>
@@ -147,7 +171,6 @@
                 return true;
             }
 
-            // Mapeamento dos setores para as colunas do banco
             const colMap = {
                 'clinico': 'liberado_clinico',
                 'raiox': 'liberado_raiox',
@@ -156,7 +179,6 @@
                 'consulta': 'liberado_consulta'
             };
 
-            // Função mestre de busca (Aceita parâmetro para saber se é global ou diária)
             async function buscarDados(isGlobal = false) {
                 modoBuscaGlobal = isGlobal; 
                 
@@ -172,7 +194,6 @@
                     if (!isGlobal) {
                         query = query.eq('data_exame', inputData.value);
                     } else {
-                        // Se for global, limita a 500 registros para não travar o navegador
                         query = query.limit(500); 
                     }
 
@@ -194,7 +215,7 @@
                 }
             }
 
-            // Polling de 15 segundos (Pausa automaticamente se estiver em Busca Global)
+            // Polling via ID Único
             setInterval(async () => {
                 if (document.hidden || modoBuscaGlobal || !inputData.value) return; 
                 
@@ -217,7 +238,7 @@
                         }
                         
                         data.forEach(pac => {
-                            const l = document.querySelector(`tr[data-cpf="${pac.cpf}"]`);
+                            const l = document.querySelector(`tr[data-id="${pac.id}"]`);
                             if (l && document.getElementById('modal-editar').style.display === 'none') {
                                 const updateCheck = (setor, valor) => {
                                     const cb = l.querySelector(`.check-setor-admin[data-setor="${setor}"]`);
@@ -262,7 +283,7 @@
                         <div class="celula-exame">
                             <input type="checkbox" class="check-setor-admin" data-setor="lab" ${checked ? 'checked' : ''} style="cursor:pointer; transform: scale(1.3);">
                             <div class="detalhe-exame" style="margin-top:4px;">${exame}</div>
-                            <textarea class="obs-input-admin" data-cpf="${pac.cpf}" rows="2">${obs || ''}</textarea>
+                            <textarea class="obs-input-admin" rows="2">${obs || ''}</textarea>
                         </div>
                     `;
 
@@ -276,8 +297,7 @@
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
-                    tr.dataset.cpf = pac.cpf;
-                    tr.dataset.dataexame = pac.data_exame;
+                    tr.dataset.id = pac.id; // Vinculando Chave Primária
 
                     tr.innerHTML = `
                         <td>
@@ -316,7 +336,7 @@
 
             tabela.addEventListener('change', async function(e) {
                 const tr = e.target.closest('tr');
-                const cpf = tr.dataset.cpf;
+                const idUnico = tr.dataset.id; // Extrai o ID
 
                 // CHECKBOX DE SETOR
                 if (e.target.classList.contains('check-setor-admin')) {
@@ -332,7 +352,7 @@
                         const updateObj = {};
                         updateObj[colunaAlvo] = liberado;
 
-                        const { error } = await supabase.from('atendimentos').update(updateObj).eq('cpf', cpf);
+                        const { error } = await supabase.from('atendimentos').update(updateObj).eq('id', idUnico);
                         if (error) throw error;
 
                         cb.style.opacity = "1";
@@ -352,7 +372,7 @@
                     obsInput.style.opacity = "0.4";
                     
                     try {
-                        const { error } = await supabase.from('atendimentos').update({ observacao: obsInput.value }).eq('cpf', cpf);
+                        const { error } = await supabase.from('atendimentos').update({ observacao: obsInput.value }).eq('id', idUnico);
                         if (error) throw error;
 
                         obsInput.style.opacity = "1"; 
@@ -373,6 +393,7 @@
                     const btn = e.target;
                     const tr = btn.closest('tr');
                     const nome = tr.querySelector('.col-nome').textContent;
+                    const idUnico = tr.dataset.id;
                     
                     if (confirm(`TEM A CERTEZA ABSOLUTA?\n\nDeseja excluir permanentemente o registo de:\n${nome}\n\nEsta ação não pode ser desfeita.`)) {
                         btn.textContent = "Apagando...";
@@ -382,8 +403,7 @@
                             const { error } = await supabase
                                 .from('atendimentos')
                                 .delete()
-                                .eq('cpf', tr.dataset.cpf)
-                                .eq('data_exame', tr.dataset.dataexame); // Garante que apaga apenas o exame daquele dia
+                                .eq('id', idUnico); // Exclusão estrita por ID
                                 
                             if (error) throw error;
                             tr.remove();
@@ -404,8 +424,7 @@
             });
 
             window.abrirModalEdicao = function(pac) {
-                document.getElementById('edit-cpf-antigo').value = pac.cpf;
-                document.getElementById('edit-data-exame').value = pac.data_exame;
+                document.getElementById('edit-id-unico').value = pac.id; // Guarda o ID oculto
                 
                 document.getElementById('edit-nome').value = pac.nome || "";
                 document.getElementById('edit-empresa').value = pac.empresa || "";
@@ -439,8 +458,7 @@
                     return;
                 }
 
-                let cpfAntigo = document.getElementById('edit-cpf-antigo').value.trim();
-                let dataRaw = document.getElementById('edit-data-exame').value.trim();
+                const idUnico = document.getElementById('edit-id-unico').value; // Recupera o ID oculto
                 
                 const dadosEdicao = {
                     nome: document.getElementById('edit-nome').value,
@@ -462,18 +480,18 @@
                 btn.disabled = true;
 
                 try {
+                    // Update blindado por Chave Primária
                     const { error } = await supabase
                         .from('atendimentos')
                         .update(dadosEdicao)
-                        .eq('cpf', cpfAntigo)
-                        .eq('data_exame', dataRaw);
+                        .eq('id', idUnico);
 
                     if (error) throw error;
 
                     btn.textContent = "Salvar Alterações";
                     btn.disabled = false;
                     fecharModal();
-                    buscarDados(modoBuscaGlobal); // Atualiza a tela mantendo a configuração atual de busca
+                    buscarDados(modoBuscaGlobal); 
 
                 } catch (err) {
                     alert("Falha Crítica ao tentar editar: " + err.message); 
@@ -482,17 +500,12 @@
                 }
             });
 
-            // Atribuição de Eventos aos Botões
-            document.getElementById('btn-buscar-data').addEventListener('click', () => buscarDados(false)); // Busca por data
-            document.getElementById('btn-busca-global').addEventListener('click', () => buscarDados(true)); // Busca em toda a base
-
+            document.getElementById('btn-buscar-data').addEventListener('click', () => buscarDados(false)); 
+            document.getElementById('btn-busca-global').addEventListener('click', () => buscarDados(true)); 
             inputPesq.addEventListener('input', aplicarFiltros);
-            
-            // Busca inicial (apenas a data de hoje)
             buscarDados(false);
         });
 
-        // Theme Toggle Logic
         document.addEventListener('DOMContentLoaded', () => {
             const btnTheme = document.getElementById('btn-theme-toggle');
             if (btnTheme) {
