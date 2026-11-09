@@ -70,7 +70,7 @@
                         <div class="form-row">
                             <div class="form-col">
                                 <label>Empresa:</label>
-                                <input type="text" class="input-moderno nav-enter" name="empresa">
+                                <input type="text" class="input-moderno nav-enter" name="empresa" id="in-empresa">
                             </div>
                             <div class="form-col">
                                 <label>CPF:</label>
@@ -86,7 +86,7 @@
                             </div>
                             <div class="form-col">
                                 <label>Função:</label>
-                                <input type="text" class="input-moderno nav-enter" name="funcao">
+                                <input type="text" class="input-moderno nav-enter" name="funcao" id="in-funcao">
                             </div>
                         </div>
                         <div class="form-row">
@@ -106,7 +106,7 @@
                             </div>
                             <div class="form-col">
                                 <label>Data Exame:</label>
-                                <input type="date" class="input-moderno nav-enter" name="data">
+                                <input type="date" class="input-moderno nav-enter" name="data" id="in-data">
                             </div>
                         </div>
                     </fieldset>
@@ -213,7 +213,7 @@
                 </form>
             </div>
 
-            <!-- ÁREA DE IMPRESSÃO (Mantida intacta para script.js processar) -->
+            <!-- ÁREA DE IMPRESSÃO -->
             <div class="area-impressao">
                 <div class="ficha-setor" id="setor-clinico">
                     <div class="cabecalho-setor">
@@ -317,7 +317,79 @@
                 });
             }
 
-            // NAVEGAÇÃO RÁPIDA COM A TECLA ENTER
+            // ==============================================================
+            // ESPELHAMENTO EM TEMPO REAL PARA AS FICHAS DE IMPRESSÃO
+            // ==============================================================
+            function atualizarEspelhamento() {
+                const getVal = (idOuName) => document.querySelector(idOuName)?.value || '';
+
+                // Formatação de Datas (YYYY-MM-DD para DD/MM/YYYY)
+                const formatarData = (dataStr) => {
+                    if (!dataStr) return '';
+                    const [ano, mes, dia] = dataStr.split('-');
+                    return `${dia}/${mes}/${ano}`;
+                };
+
+                // Coleta dos Textos
+                const nome = getVal('#in-nome');
+                const empresa = getVal('#in-empresa');
+                const cpf = getVal('#in-cpf');
+                const funcao = getVal('#in-funcao');
+                const rg = getVal('#in-rg');
+                const telefone = getVal('#in-telefone');
+                const dn = formatarData(getVal('#in-dn'));
+                const dataExame = formatarData(getVal('#in-data'));
+
+                // Coleta dos Tipos de Exame (ADMISSIONAL, PERIODICO...)
+                const tiposMarcados = Array.from(document.querySelectorAll('.master-tipo:checked')).map(cb => cb.value);
+                const tipoStr = tiposMarcados.length > 0 ? `(${tiposMarcados.join(', ')})` : '';
+
+                // Atualização dos Spans de Impressão
+                document.querySelectorAll('.out-nome').forEach(el => el.textContent = nome);
+                document.querySelectorAll('.out-empresa').forEach(el => el.textContent = empresa);
+                document.querySelectorAll('.out-cpf').forEach(el => el.textContent = cpf);
+                document.querySelectorAll('.out-funcao').forEach(el => el.textContent = funcao);
+                document.querySelectorAll('.out-rg').forEach(el => el.textContent = rg);
+                document.querySelectorAll('.out-telefone').forEach(el => el.textContent = telefone);
+                document.querySelectorAll('.out-dn').forEach(el => el.textContent = dn);
+                document.querySelectorAll('.out-data').forEach(el => el.textContent = dataExame);
+                document.querySelectorAll('.out-tipo-exame').forEach(el => el.textContent = tipoStr);
+
+                // Preenchimento Automático das Listas de Exames (UL/LI)
+                const renderizarExames = (setorDataset, ulId) => {
+                    const marcados = Array.from(document.querySelectorAll(`.master-checkbox[data-setor="${setorDataset}"]:checked`)).map(cb => cb.dataset.nome);
+                    const ul = document.getElementById(ulId);
+                    if (ul) {
+                        if (marcados.length === 0) {
+                            ul.innerHTML = '<li class="vazio">Nenhum exame</li>';
+                        } else {
+                            ul.innerHTML = marcados.map(ex => `<li>${ex}</li>`).join('');
+                        }
+                    }
+                };
+
+                renderizarExames('clinico', 'lista-clinico');
+                renderizarExames('raiox', 'lista-raiox');
+                renderizarExames('lab', 'lista-lab');
+
+                // Fonoaudiologia - Ocultar/Mostrar ficha baseada no checkbox
+                const fono = document.getElementById('check-audiometria')?.checked;
+                const setorAudio = document.getElementById('setor-audio');
+                if (setorAudio) {
+                    setorAudio.style.display = fono ? 'flex' : 'none';
+                }
+            }
+
+            // Ouve as digitações ou cliques e atualiza tudo simultaneamente
+            const masterForm = document.getElementById('masterForm');
+            if(masterForm) {
+                masterForm.addEventListener('input', atualizarEspelhamento);
+                masterForm.addEventListener('change', atualizarEspelhamento);
+            }
+
+            // ==========================================
+            // RESTANTE DO CÓDIGO EXISTENTE (Máscaras, etc)
+            // ==========================================
             const camposNav = document.querySelectorAll('.nav-enter');
             camposNav.forEach((campo, index) => {
                 campo.addEventListener('keydown', function(e) {
@@ -333,7 +405,6 @@
                 });
             });
 
-            // MÁSCARA E AUTOCOMPLETAR DE CPF
             const cpfInput = document.getElementById('in-cpf');
             const msgFeedback = document.getElementById('msg-cpf-feedback');
 
@@ -378,10 +449,13 @@
                             return dataBanco; 
                         }
                         
-                        if(pac.nome) document.getElementById('in-nome').value = pac.nome;
-                        if(pac.rg) document.getElementById('in-rg').value = pac.rg;
-                        if(pac.data_nascimento) document.getElementById('in-dn').value = formatarDataParaInput(pac.data_nascimento);
-                        if(pac.telefone) document.getElementById('in-telefone').value = pac.telefone;
+                        if(pac.nome) { document.getElementById('in-nome').value = pac.nome; }
+                        if(pac.rg) { document.getElementById('in-rg').value = pac.rg; }
+                        if(pac.data_nascimento) { document.getElementById('in-dn').value = formatarDataParaInput(pac.data_nascimento); }
+                        if(pac.telefone) { document.getElementById('in-telefone').value = pac.telefone; }
+                        
+                        // Forçar atualização do layout com os dados carregados do banco
+                        atualizarEspelhamento();
                         
                         msgFeedback.textContent = '✅ Dados carregados do último cadastro.';
                         msgFeedback.style.color = '#10b981'; 
@@ -398,7 +472,6 @@
                 }
             }
 
-            // MÁSCARA DE TELEFONE
             document.getElementById('in-telefone').addEventListener('input', (e) => {
                 let val = e.target.value.replace(/\D/g, '');
                 val = val.replace(/^(\d{2})(\d)/g, '($1) $2');
