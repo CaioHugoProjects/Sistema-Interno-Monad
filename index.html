@@ -45,37 +45,38 @@
                     <fieldset>
                         <legend>Dados do Colaborador</legend>
                         <div class="form-group row">
-                            <label>Empresa: <input type="text" class="master-input" name="empresa"></label>
-                            <label>Nome: <input type="text" class="master-input" name="nome"></label>
-                        </div>
-                        <div class="form-group row">
-                            <label>Função: <input type="text" class="master-input" name="funcao"></label>
-                            <label>Data de Nasc.: <input type="date" class="master-input" name="dn"></label>
-                        </div>
-                        <div class="form-group row">
-                            <label>RG: <input type="text" class="master-input" name="rg"></label>
+                            <label>Empresa: <input type="text" class="master-input nav-enter" name="empresa"></label>
                             <label>CPF: 
-                                <input type="text" class="master-input" name="cpf" placeholder="000.000.000-00">
+                                <input type="text" class="master-input nav-enter" name="cpf" id="in-cpf" placeholder="000.000.000-00" maxlength="14">
                                 <span id="cpf-error" style="color: var(--danger); font-size: 12px; display: none;">⚠️ CPF Inválido</span>
+                                <div id="msg-cpf-feedback" style="font-size: 12px; font-weight: bold; margin-top: 2px;"></div>
                             </label>
                         </div>
                         <div class="form-group row">
-                            <label>Telefone: <input type="text" class="master-input" name="telefone" placeholder="(00) 00000-0000"></label>
-                            <label>Data Exame: <input type="date" class="master-input" name="data" id="input-data-exame"></label>
+                            <label>Nome: <input type="text" class="master-input nav-enter" name="nome" id="in-nome"></label>
+                            <label>Função: <input type="text" class="master-input nav-enter" name="funcao"></label>
+                        </div>
+                        <div class="form-group row">
+                            <label>Data de Nasc.: <input type="date" class="master-input nav-enter" name="dn" id="in-dn"></label>
+                            <label>RG: <input type="text" class="master-input nav-enter" name="rg" id="in-rg"></label>
+                        </div>
+                        <div class="form-group row">
+                            <label>Telefone: <input type="text" class="master-input nav-enter" name="telefone" id="in-telefone" placeholder="(00) 00000-0000" maxlength="15"></label>
+                            <label>Data Exame: <input type="date" class="master-input nav-enter" name="data"></label>
                         </div>
                     </fieldset>
 
                     <fieldset>
                         <legend>Tipo de Exame</legend>
                         <div class="tipo-exame-grid">
-                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="ADMISSIONAL"> ADMISSIONAL</label>
-                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="PERIODICO"> PERIÓDICO</label>
-                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="DEMISSIONAL"> DEMISSIONAL</label>
-                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="MUDANÇA DE FUNÇÃO"> MUDANÇA DE FUNÇÃO</label>
-                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="MUDANÇA DE RISCO"> MUDANÇA DE RISCO</label>
-                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="COMPLEMENTAR"> COMPLEMENTAR</label>
-                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="PARTICULAR"> PARTICULAR</label>
-                            <label><input type="checkbox" class="master-tipo" name="tipoExame" value="ENCAMINHAMENTO"> ENCAMINHAMENTO</label>
+                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="ADMISSIONAL"> ADMISSIONAL</label>
+                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="PERIODICO"> PERIÓDICO</label>
+                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="DEMISSIONAL"> DEMISSIONAL</label>
+                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="MUDANÇA DE FUNÇÃO"> MUDANÇA DE FUNÇÃO</label>
+                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="MUDANÇA DE RISCO"> MUDANÇA DE RISCO</label>
+                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="COMPLEMENTAR"> COMPLEMENTAR</label>
+                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="PARTICULAR"> PARTICULAR</label>
+                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="ENCAMINHAMENTO"> ENCAMINHAMENTO</label>
                         </div>
                     </fieldset>
 
@@ -84,13 +85,13 @@
                         <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
                             <div style="padding: 12px; background: var(--accent-soft, #e0f2fe); border: 1px solid var(--accent, #bae6fd); border-radius: 6px;">
                                 <label style="font-weight: bold; color: var(--accent); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 15px;">
-                                    <input type="checkbox" id="check-audiometria" checked style="transform: scale(1.5);"> 
+                                    <input type="checkbox" id="check-audiometria" class="nav-enter" checked style="transform: scale(1.5);"> 
                                     INCLUIR FICHA DE FONOAUDIOLOGIA
                                 </label>
                             </div>
                             <div style="padding: 12px; background: var(--warning-soft, #fef3c7); border: 1px solid var(--warning, #fde68a); border-radius: 6px;">
                                 <label style="font-weight: bold; color: var(--warning); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 15px;">
-                                    <input type="checkbox" id="check-consulta" checked style="transform: scale(1.5);"> 
+                                    <input type="checkbox" id="check-consulta" class="nav-enter" checked style="transform: scale(1.5);"> 
                                     ENCAMINHAR PARA CONSULTA CLÍNICA
                                 </label>
                             </div>
@@ -99,26 +100,26 @@
                         <div class="exames-grid-master">
                             <div>
                                 <h4>Clínicos</h4>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Eletrocardiograma"> Eletrocardiograma</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Espirometria"> Espirometria</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Eletroencefalograma"> Eletroencefalograma</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Acuidade visual"> Acuidade visual</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Campimetria"> Campimetria</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="clinico" data-nome="Avaliação oftalmológica"> Avaliação oftalmológica</label>
+                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="clinico" data-nome="Eletrocardiograma"> Eletrocardiograma</label><br>
+                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="clinico" data-nome="Espirometria"> Espirometria</label><br>
+                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="clinico" data-nome="Eletroencefalograma"> Eletroencefalograma</label><br>
+                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="clinico" data-nome="Acuidade visual"> Acuidade visual</label><br>
+                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="clinico" data-nome="Campimetria"> Campimetria</label><br>
+                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="clinico" data-nome="Avaliação oftalmológica"> Avaliação oftalmológica</label>
                             </div>
                             
                             <div>
                                 <h4>Raio-X</h4>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Tórax PA"> Raio-x torax PA</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Tórax OIT"> Raio-x tórax OIT</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Total"> Raio-x Coluna Total</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombar"> Raio-x coluna lombar</label><br>
-                                <label><input type="checkbox" class="master-checkbox" data-setor="raiox" data-nome="Raio-X Coluna Lombo-Sacra"> Raio-x Coluna Lombo-Sacra</label>
+                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="raiox" data-nome="Raio-X Tórax PA"> Raio-x torax PA</label><br>
+                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="raiox" data-nome="Raio-X Tórax OIT"> Raio-x tórax OIT</label><br>
+                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="raiox" data-nome="Raio-X Coluna Total"> Raio-x Coluna Total</label><br>
+                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="raiox" data-nome="Raio-X Coluna Lombar"> Raio-x coluna lombar</label><br>
+                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="raiox" data-nome="Raio-X Coluna Lombo-Sacra"> Raio-x Coluna Lombo-Sacra</label>
                                 
                                 <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
                                     <label style="font-size: 12px; color: var(--text-muted);">Adicionar Raio-X Extra:</label>
                                     <div style="display: flex; gap: 5px; margin-top: 5px;">
-                                        <input type="text" id="input-exame-extra-raiox" placeholder="Nome do Raio-X..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
+                                        <input type="text" id="input-exame-extra-raiox" class="nav-enter" placeholder="Nome do Raio-X..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
                                         <button type="button" id="btn-add-exame-raiox" class="btn-inserir-seguro">Inserir</button>
                                     </div>
                                     <div id="lista-extras-painel-raiox" style="margin-top: 10px;"></div>
@@ -128,29 +129,29 @@
                             <div>
                                 <h4>Laboratoriais</h4>
                                 <div class="scroll-box">
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="HEMOGRAMA"> HEMOGRAMA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="GLICEMIA"> GLICEMIA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TGO/TGP"> TGO/TGP</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="GAMAGT"> GAMA GT</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ABELHA/MARIMBONDO"> ABELHA/MARIMBONDO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="GOTA-ESPESSA"> GOTA ESPESSA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="CROPOCULTURA"> COPROCULTURA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TIPAGEM"> TIPAGEM</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EAS"> EAS</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="EPF"> EPF</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TOXICOLÓGICO"> TOXICOLÓGICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="HEMOG.-GLICADA"> HEMOG. GLICADA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="MICOLOGICO"> MICOLOGICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-HIPURICO"> ACIDO HIPÚRICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-METIL-HIPURICO"> ÁCIDO METIL HIPÚRICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="PSA"> PSA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="ACIDO-DELTA-AMINOLEVULINICO"> ACIDO DELTA AMINOLEVULINICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox" data-setor="lab" data-nome="TRICLOROCOMPOSTOS-TOTAIS"> TRICOLOROCOMPOSTOS TOTAIS</label>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="HEMOGRAMA"> HEMOGRAMA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="GLICEMIA"> GLICEMIA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="TGO/TGP"> TGO/TGP</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="GAMAGT"> GAMA GT</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="ABELHA/MARIMBONDO"> ABELHA/MARIMBONDO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="GOTA-ESPESSA"> GOTA ESPESSA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="CROPOCULTURA"> COPROCULTURA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="TIPAGEM"> TIPAGEM</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="EAS"> EAS</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="EPF"> EPF</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="TOXICOLÓGICO"> TOXICOLÓGICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="HEMOG.-GLICADA"> HEMOG. GLICADA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="MICOLOGICO"> MICOLOGICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="ACIDO-HIPURICO"> ACIDO HIPÚRICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="ACIDO-METIL-HIPURICO"> ÁCIDO METIL HIPÚRICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="PSA"> PSA</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="ACIDO-DELTA-AMINOLEVULINICO"> ACIDO DELTA AMINOLEVULINICO</label><br>
+                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="TRICLOROCOMPOSTOS-TOTAIS"> TRICOLOROCOMPOSTOS TOTAIS</label>
                                     
                                     <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
                                         <label style="font-size: 12px; color: var(--text-muted);">Adicionar Exame Extra:</label>
                                         <div style="display: flex; gap: 5px; margin-top: 5px;">
-                                            <input type="text" id="input-exame-extra" placeholder="Nome do exame..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
+                                            <input type="text" id="input-exame-extra" class="nav-enter" placeholder="Nome do exame..." style="padding: 6px; font-size: 13px; border: 1px solid var(--border-strong); background-color: var(--surface); color: var(--text-strong); border-radius: 4px; flex: 1;">
                                             <button type="button" id="btn-add-exame" class="btn-inserir-seguro">Inserir</button>
                                         </div>
                                         <div id="lista-extras-painel" style="margin-top: 10px;"></div>
@@ -270,41 +271,101 @@
                 });
             }
 
-            // AUTO-ATUALIZAR DATA DE EXAME E ESPELHAR IMEDIATAMENTE NAS FICHAS
-            const campoDataExame = document.getElementById('input-data-exame');
-            
-            function espelharDataImpressao() {
-                if (!campoDataExame || !campoDataExame.value) return;
-                const partes = campoDataExame.value.split('-');
-                if(partes.length === 3) {
-                    const dataBR = `${partes[2]}/${partes[1]}/${partes[0]}`;
-                    document.querySelectorAll('.out-data').forEach(el => {
-                        el.textContent = dataBR;
-                    });
+            // ==========================================
+            // NAVEGAÇÃO RÁPIDA COM A TECLA ENTER
+            // ==========================================
+            const camposNav = document.querySelectorAll('.nav-enter');
+            camposNav.forEach((campo, index) => {
+                campo.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); 
+                        const proximoCampo = camposNav[index + 1];
+                        if (proximoCampo) {
+                            proximoCampo.focus();
+                        } else {
+                            document.getElementById('btn-salvar-imprimir').focus();
+                        }
+                    }
+                });
+            });
+
+            // ==========================================
+            // MÁSCARA E AUTOCOMPLETAR DE CPF
+            // ==========================================
+            const cpfInput = document.getElementById('in-cpf');
+            const msgFeedback = document.getElementById('msg-cpf-feedback');
+
+            cpfInput.addEventListener('input', async (e) => {
+                let val = e.target.value.replace(/\D/g, ''); 
+                
+                val = val.replace(/(\d{3})(\d)/, '$1.$2');
+                val = val.replace(/(\d{3})(\d)/, '$1.$2');
+                val = val.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                e.target.value = val;
+
+                if (e.target.value.length === 14) {
+                    buscarDadosAnteriores(e.target.value);
+                } else {
+                    msgFeedback.textContent = ''; 
+                }
+            });
+
+            async function buscarDadosAnteriores(cpfFormatado) {
+                msgFeedback.textContent = '⏳ Buscando histórico...';
+                msgFeedback.style.color = 'var(--text-muted)';
+                
+                try {
+                    const { data, error } = await supabase
+                        .from('atendimentos')
+                        .select('nome, rg, data_nascimento, telefone')
+                        .eq('cpf', cpfFormatado)
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+                        
+                    if (error) throw error;
+                    
+                    if (data && data.length > 0) {
+                        const pac = data[0];
+                        
+                        // Função rápida para converter DD/MM/YYYY para YYYY-MM-DD
+                        function formatarDataParaInput(dataBanco) {
+                            if (!dataBanco) return '';
+                            if (dataBanco.includes('/')) {
+                                const [dia, mes, ano] = dataBanco.split('/');
+                                return `${ano}-${mes}-${dia}`;
+                            }
+                            return dataBanco; 
+                        }
+                        
+                        if(pac.nome) document.getElementById('in-nome').value = pac.nome;
+                        if(pac.rg) document.getElementById('in-rg').value = pac.rg;
+                        if(pac.data_nascimento) document.getElementById('in-dn').value = formatarDataParaInput(pac.data_nascimento);
+                        if(pac.telefone) document.getElementById('in-telefone').value = pac.telefone;
+                        
+                        msgFeedback.textContent = '✅ Dados carregados do último cadastro.';
+                        msgFeedback.style.color = '#10b981'; 
+                        
+                        document.getElementById('in-nome').focus();
+                    } else {
+                        msgFeedback.textContent = 'ℹ️ Novo colaborador. Nenhum registro anterior encontrado.';
+                        msgFeedback.style.color = '#3b82f6'; 
+                    }
+                } catch (err) {
+                    console.error('Erro na consulta do CPF:', err);
+                    msgFeedback.textContent = '❌ Erro ao consultar o banco de dados.';
+                    msgFeedback.style.color = '#ef4444'; 
                 }
             }
 
-            if (campoDataExame) {
-                const hoje = new Date();
-                const ano = hoje.getFullYear();
-                const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-                const dia = String(hoje.getDate()).padStart(2, '0');
-                campoDataExame.value = `${ano}-${mes}-${dia}`;
-                
-                // Força o preenchimento inicial na área de impressão
-                espelharDataImpressao();
-
-                // Se a pessoa mudar a data no calendário, atualiza a impressão também
-                campoDataExame.addEventListener('change', espelharDataImpressao);
-            }
-
-            // Evento extra no botão de imprimir para garantir que a data não se perca
-            const btnImprimir = document.getElementById('btn-salvar-imprimir');
-            if(btnImprimir) {
-                btnImprimir.addEventListener('click', () => {
-                    setTimeout(espelharDataImpressao, 100); 
-                });
-            }
+            // ==========================================
+            // MÁSCARA DE TELEFONE
+            // ==========================================
+            document.getElementById('in-telefone').addEventListener('input', (e) => {
+                let val = e.target.value.replace(/\D/g, '');
+                val = val.replace(/^(\d{2})(\d)/g, '($1) $2');
+                val = val.replace(/(\d)(\d{4})$/, '$1-$2');
+                e.target.value = val;
+            });
         });
     </script>
 </body>
