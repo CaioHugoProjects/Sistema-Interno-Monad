@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Documentos - Clínica Monad</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/checkin.css">
+    <script>
+        if (localStorage.getItem('monad_theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        
+        const tokenAtivo = localStorage.getItem('monad_token');
+        const sec_setor = localStorage.getItem('monad_setor');
+        
+        if (!tokenAtivo || !sec_setor || (sec_setor !== "admin" && sec_setor !== "todos")) {
+            window.location.href = "login.html"; 
+        }
+    </script>
+    <style>
+        @media print {
+            body { font-family: 'Calibri', Arial, sans-serif; background: white; color: black; margin: 0; padding: 0; }
+            .no-print { display: none !important; }
+            .area-documentos { display: block !important; width: 100%; }
+            .pagina-a4 { width: 210mm; min-height: 297mm; padding: 10mm 15mm; margin: 0 auto; box-sizing: border-box; page-break-after: always; background: white; position: relative; }
+            .pagina-a4:last-child { page-break-after: auto; }
+            p, td, th, span, div { font-size: 11pt; line-height: 1.2; }
+            h2, h3, h4 { margin: 3px 0; text-align: center; }
+            .tabela-word { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
+            .tabela-word td, .tabela-word th { border: 1px solid black; padding: 2px 4px; vertical-align: middle; }
+            .tabela-sem-borda { width: 100%; border-collapse: collapse; }
+            .tabela-sem-borda td { border: none; padding: 2px; }
+            .titulo-secao { background-color: #f0f0f0 !important; font-weight: bold; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .linha-ass { border-top: 1px solid black; width: 100%; text-align: center; padding-top: 3px; font-size: 11pt; }
+            .tabela-exames-interna { width: 100%; border-collapse: collapse; }
+            .tabela-exames-interna td { border: none; border-bottom: 1px dashed #ccc; border-right: 1px solid #ccc; padding: 2px 4px; font-size: 11pt; }
+            .tabela-exames-interna td:last-child { border-right: none; }
+            .tabela-exames-interna tr:last-child td { border-bottom: none; }
+            .header-bg { background-color: #e6e6e6 !important; font-weight: bold; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .cb-padrao { display: inline-block; width: 12px; height: 12px; border: 1px solid #000; margin-right: 4px; vertical-align: middle; }
+            .tabela-psico-compacta td, .tabela-psico-compacta th { padding: 1px 3px !important; font-size: 9.5pt !important; }
+            .quebra-pagina-medico { page-break-before: always; margin-top: 0; }
+            .secao-medica { font-size: 13pt !important; line-height: 1.4; border: 2px solid #000; padding: 15px; margin-top: 10px; }
+            .secao-medica table { font-size: 13pt !important; margin-bottom: 12px; }
+            .secao-medica th, .secao-medica td { padding: 8px !important; }
+            .cb-medico { display: inline-block; width: 16px; height: 16px; border: 2px solid #000; margin-right: 6px; vertical-align: middle; }
+            .parecer-box { margin-top: 12px; margin-bottom: 12px; font-size: 12pt; }
+        }
+
+        .area-documentos { display: none; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .modal-box { background: var(--surface); padding: 25px; border-radius: 8px; width: 95%; max-width: 800px; max-height: 95vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 2px solid var(--accent); }
+        .modal-box h3 { color: var(--accent); margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid var(--border-strong); padding-bottom: 10px; }
+        .grid-docs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .grid-docs label { font-size: 13px; font-weight: bold; color: var(--text-strong); display: flex; flex-direction: column; gap: 5px; }
+        .grid-docs input, .grid-docs select { padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; font-size: 14px; background: var(--surface-muted); color: var(--text-strong); }
+        .secao-modal { background: var(--surface-muted); padding: 15px; border-radius: 6px; border: 1px solid var(--border-strong); margin-bottom: 15px; }
+        .secao-titulo { font-size: 14px; font-weight: bold; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase; }
+        .nr-linha-modal { display: flex; gap: 10px; align-items: center; background: var(--surface); padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <datalist id="lista-empresas-sugestoes"></datalist>
+
+    <header class="no-print">
+        <h1 style="color: var(--text-strong);">Sistema Interno</h1>
+        <h2>Gerador de Documentos Oficiais</h2>
+        <div class="header-controls">
+            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
+            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
+        </div>
+        <nav style="margin-top: 15px;">
+            <ul>
+                <li><a href="index.html">Recepção</a></li>
+                <li><a href="checkin.html">Visão Geral</a></li>
+                <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
+                <li><a href="documentos.html" style="background-color: var(--accent) !important; color: white !important;">Gerar ASO</a></li>
+                <li id="menu-cadastros" style="display: none;"><a href="cadastros.html">Base Dados</a></li>
+                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
+            </ul>
+        </nav>
+        <script>
+            const setorNav = localStorage.getItem('monad_setor');
+            if (setorNav === 'admin' || setorNav === 'todos') {
+                const elCad = document.getElementById('menu-cadastros');
+                if (elCad) elCad.style.display = 'inline-block';
+            }
+            if (setorNav === 'admin') {
+                const elAdmin = document.getElementById('menu-admin');
+                if (elAdmin) elAdmin.style.display = 'inline-block';
+            }
+        </script>
+    </header>
+    
+    <main class="no-print">
+        <div class="painel-recepcao">
+            <h2 style="margin: 0 0 15px 0; color: var(--text-strong);">Buscar Colaborador para Gerar ASO</h2>
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-end; background: var(--surface); padding: 15px; border-radius: 8px; border: 1px solid var(--border-strong);">
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label for="filtro-data" style="font-size: 12px; font-weight: bold; color: var(--text-muted);">📅 Ver por Data:</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="date" id="filtro-data" style="padding: 8px; border-radius: 5px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong);">
+                        <button onclick="executarBusca('data')" style="background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Carregar</button>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
+                    <label for="pesquisa-paciente" style="font-size: 12px; font-weight: bold; color: var(--text-muted);">🌍 Buscar em TODO o Histórico (Qualquer Data):</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="pesquisa-paciente" placeholder="Digite Nome ou CPF e aperte Enter..." style="padding: 8px; border-radius: 5px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong); flex: 1;">
+                        <button onclick="executarBusca('texto')" style="background: var(--warning); color: #0f172a; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">🔎 Buscar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ A consultar banco de dados...</div>
+
+            <div class="table-responsive">
+                <table class="tabela-liberacao">
+                    <thead><tr><th>Data/Empresa</th><th>Colaborador</th><th>CPF</th><th>Função</th><th style="text-align: center;">Ação</th></tr></thead>
+                    <tbody id="lista-pacientes"></tbody>
+                </table>
+            </div>
+             <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-top: 10px;">
+                <strong>Nenhum paciente encontrado.</strong>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL DE PREENCHIMENTO RÁPIDO -->
+    <div id="modal-docs" class="modal-overlay no-print" style="display:none;">
+        <div class="modal-box">
+            <h3>📝 Completar Dados do ASO</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: -15px; margin-bottom: 15px;">Dados consultados diretamente da base de dados. Altere o que precisar.</p>
+            
+            <div class="secao-modal">
+                <div class="secao-titulo">1. Dados da Empresa e Paciente</div>
+                <div class="grid-docs">
+                    <label for="in-empresa">Razão Social da Empresa: <input type="text" id="in-empresa" list="lista-empresas-sugestoes" placeholder="Razão Social da Empresa"></label>
+                    <label for="in-cnpj">CNPJ da Empresa: <input type="text" id="in-cnpj" placeholder="00.000.000/0000-00"></label>
+                    
+                    <label for="in-funcao" style="grid-column: span 2;">Função do Colaborador: <input type="text" id="in-funcao" placeholder="Ex: MOTORISTA"></label>
+                    
+                    <label for="in-setor" style="grid-column: span 2;">Setor de Trabalho: <input type="text" id="in-setor" placeholder="Ex: Manutenção"></label>
+                    <label for="in-medico-pcmso" style="grid-column: span 2;">Médico(a) Coordenador(a) PCMSO: <input type="text" id="in-medico-pcmso" value="Dra. Morganna Bárbara Lopes Dantas CRM -16.560/PA"></label>
+                    <div style="display: flex; gap: 15px; grid-column: span 2;">
+                        <label for="in-sexo" style="flex: 1;">Sexo: 
+                            <select id="in-sexo">
+                                <option value="☑ Masc. ☐ Fem.">Masculino</option>
+                                <option value="☐ Masc. ☑ Fem.">Feminino</option>
+                            </select>
+                        </label>
+                        <label for="in-est-civil" style="flex: 1;">Estado Civil: <input type="text" id="in-est-civil" placeholder="Ex: Solteiro"></label>
+                        <label for="in-filhos" style="flex: 1;">Nº Filhos: <input type="number" id="in-filhos"></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="secao-modal">
+                <div class="secao-titulo">2. Mapeamento de Riscos (PGR)</div>
+                <div class="grid-docs" style="grid-template-columns: 1fr;">
+                    <label for="in-r-fisico">Risco Físico: <input type="text" id="in-r-fisico" value="Ausência de fatores de risco"></label>
+                    <label for="in-r-quimico">Risco Químico: <input type="text" id="in-r-quimico" value="Ausência de fatores de risco"></label>
+                    <label for="in-r-biologico">Risco Biológico: <input type="text" id="in-r-biologico" value="Ausência de fatores de risco"></label>
+                    <label for="in-r-ergonomico">Risco Ergonômico: <input type="text" id="in-r-ergonomico" value="Ausência de fatores de risco"></label>
+                    <label for="in-r-acidente">Risco Acidente: <input type="text" id="in-r-acidente" value="Ausência de fatores de risco"></label>
+                    <label for="in-r-psicossocial">Risco Psicossocial: <input type="text" id="in-r-psicossocial" value="Ausência de fatores de risco"></label>
+                </div>
+            </div>
+
+            <div class="secao-modal">
+                <div class="secao-titulo">3. Conclusão e Cadastro de NRs</div>
+                <div class="grid-docs" style="grid-template-columns: 1fr;">
+                    <label for="in-conclusao">Conclusão do ASO Geral:
+                        <select id="in-conclusao" style="max-width: 300px;">
+                            <option value="apto">APTO</option>
+                            <option value="inapto">INAPTO</option>
+                        </select>
+                    </label>
+                    <div style="font-size: 13px; font-weight: bold; color: var(--text-strong); display: flex; flex-direction: column; gap: 5px;">
+                        Adicionar Normas Regulamentadoras (NRs):
+                        <div id="container-nrs-modal" style="margin-top: 5px;"></div>
+                        <button type="button" onclick="adicionarLinhaNrModal()" style="margin-top: 5px; background: #003366; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: fit-content;">+ Adicionar outra NR</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="secao-modal">
+                <div class="secao-titulo">4. Validação de Exames (e-Social)</div>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: -5px; margin-bottom: 10px;">O sistema listou os exames feitos na Receção e tentou identificar o código. Pode alterar se necessário.</p>
+                <div id="container-esocial-modal" style="display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Linhas geradas dinamicamente aqui via JavaScript -->
+                </div>
+            </div>
+
+            <div class="secao-modal">
+                <div class="secao-titulo">5. Opções de Impressão</div>
+                <div style="background: var(--surface); padding: 10px 15px; border: 1px solid var(--border-strong); border-radius: 4px;">
+                    <label for="chk-imprimir-psico" style="display: flex; flex-direction: row; align-items: center; gap: 10px; cursor: pointer; margin: 0;">
+                        <input type="checkbox" id="chk-imprimir-psico" checked style="width: 18px; height: 18px; cursor: pointer;">
+                        <span style="font-size: 14px; color: var(--text-strong);">Imprimir formulário de Avaliação Psicossocial (Página do Paciente e Parecer Médico)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">
+                <button onclick="fecharModalDocs()" style="padding:10px 15px; border-radius:5px; border:1px solid var(--border-strong); background:var(--surface-muted); color: var(--text-strong); cursor:pointer; font-weight:bold;">Cancelar</button>
+                <button id="btn-confirmar-impressao" style="padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size: 15px;">🖨️ Imprimir Documentos</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÁREA DE IMPRESSÃO (Páginas A4) -->
+    <div class="area-documentos">
+        
+        <!-- PÁGINA 1: ASO (1ª VIA) -->
+        <div class="pagina-a4" id="doc-aso-via1">
+            <table class="tabela-sem-borda" style="width: 100%; margin-bottom: 5px;">
+                <tr>
+                    <td style="width: 25%; text-align: center; border: 1px solid #fff; height: 70px;"><img src="logo monad.png" alt="Logo Monad" style="max-width: 100%; max-height: 100%;"></td>
+                    <td style="width: 50%; text-align: center; font-size: 11pt; font-weight: bold; line-height: 1.1;">
+                        CLINICA MONAD – CNPJ: 53.678.700/0001-04<br>
+                        Tel.: (93)99196-2206 / (92) 99265-9610<br>
+                        E-mail: clinicamonadorixi@outlook.com
+                    </td>
+                    <td style="width: 25%; text-align: center; border: 1px solid #fff; height: 70px;"></td>
+                </tr>
+            </table>
+
+            <table class="tabela-word" style="font-size: 11pt;">
+                <tr><td colspan="6" class="titulo-secao">Identificação da empresa:</td></tr>
+                <tr><td colspan="6">Razão social: &nbsp; <strong class="out-empresa"></strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CNPJ: <span class="out-cnpj"></span></td></tr>
+                
+                <tr><td colspan="6" class="titulo-secao">Identificação do colaborador</td></tr>
+                <tr><td colspan="6">NOME: <strong class="out-nome"></strong></td></tr>
+                <tr>
+                    <td colspan="2" style="width: 33%;">DN: <strong class="out-dn"></strong></td>
+                    <td colspan="2" style="width: 33%;">RG: <strong class="out-rg"></strong></td>
+                    <td colspan="2" style="width: 34%;">CPF: <strong class="out-cpf"></strong></td>
+                </tr>
+                <tr><td colspan="6">Função: <strong class="out-funcao"></strong></td></tr>
+                
+                <tr><td colspan="6" class="titulo-secao">Tipo de exame</td></tr>
+                <tr><td colspan="6" style="height: 20px; text-align: center; font-weight: bold;" class="out-tipo"></td></tr>
+
+                <tr><td colspan="6" class="titulo-secao">Riscos existentes na função</td></tr>
+                <tr><td colspan="6">Físico: &nbsp; <span class="out-r-fisico"></span></td></tr>
+                <tr><td colspan="6">Químico: &nbsp; <span class="out-r-quimico"></span></td></tr>
+                <tr><td colspan="6">Biológico: &nbsp; <span class="out-r-biologico"></span></td></tr>
+                <tr><td colspan="6">Ergonômico: &nbsp; <span class="out-r-ergonomico"></span></td></tr>
+                <tr><td colspan="6">Acidente: &nbsp; <span class="out-r-acidente"></span></td></tr>
+                <tr><td colspan="6">Psicossocial: &nbsp; <span class="out-r-psicossocial"></span></td></tr>
+                
+                <tr><td colspan="6" class="titulo-secao">Exames</td></tr>
+                <tr>
+                    <td colspan="6" style="vertical-align: top; padding: 0;">
+                        <table class="tabela-exames-interna tabela-exames-aso"></table>
+                    </td>
+                </tr>
+            </table>
+
+            <p style="text-align: justify; font-size: 11pt; margin: 5px 0; line-height: 1.1;">Recebi a segunda via do presente atestado e declaro conhecer os riscos ocupacionais , inerentes ao exercício da função , relacionados nesse documento e ter sido esclarecido sobre os procedimentos para atenuá-los e/ou neutralizá-los.</p>
+
+            <table class="tabela-word" style="font-size: 11pt;">
+                <tr><td colspan="2" class="titulo-secao">Conclusão sobre a capacidade laborativa</td></tr>
+                <tr>
+                    <td colspan="2" style="padding: 5px 10px; vertical-align: top;">
+                        <div class="box-conclusao-geral" style="margin-bottom: 10px; font-size: 11pt;"></div>
+                        <div class="out-nrs-container"></div>
+                    </td>
+                </tr>
+                <tr><td colspan="2" class="titulo-secao" style="text-align: left; padding: 3px 10px;">Data da realização do ASO: <span class="out-data"></span></td></tr>
+                <tr><td colspan="2" style="text-align: center; font-weight: bold; padding: 4px;">Médica coordenadora do PCMSO: <span class="out-medico-pcmso"></span></td></tr>
+                <tr>
+                    <td style="width: 50%; height: 65px; vertical-align: top; padding-left: 10px; padding-top: 5px;">Assinatura do Funcionário:</td>
+                    <td style="width: 50%; height: 65px; vertical-align: top; text-align: center; padding-top: 5px;">Médico examinador:</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- PÁGINA 2: ASO (2ª VIA) -->
+        <div class="pagina-a4" id="doc-aso-via2">
+            <table class="tabela-sem-borda" style="width: 100%; margin-bottom: 5px;">
+                <tr>
+                    <td style="width: 25%; text-align: center; border: 1px solid #fff; height: 70px;"><img src="logo monad.png" alt="Logo Monad" style="max-width: 100%; max-height: 100%;"></td>
+                    <td style="width: 50%; text-align: center; font-size: 11pt; font-weight: bold; line-height: 1.1;">
+                        CLINICA MONAD – CNPJ: 53.678.700/0001-04<br>
+                        Tel.: (93)99196-2206 / (92) 99265-9610<br>
+                        E-mail: clinicamonadorixi@outlook.com
+                    </td>
+                    <td style="width: 25%; text-align: center; border: 1px solid #fff; height: 70px;"></td>
+                </tr>
+            </table>
+
+            <table class="tabela-word" style="font-size: 11pt;">
+                <tr><td colspan="6" class="titulo-secao">Identificação da empresa:</td></tr>
+                <tr><td colspan="6">Razão social: &nbsp; <strong class="out-empresa"></strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CNPJ: <span class="out-cnpj"></span></td></tr>
+                <tr><td colspan="6" class="titulo-secao">Identificação do colaborador</td></tr>
+                <tr><td colspan="6">NOME: <strong class="out-nome"></strong></td></tr>
+                <tr>
+                    <td colspan="2" style="width: 33%;">DN: <strong class="out-dn"></strong></td>
+                    <td colspan="2" style="width: 33%;">RG: <strong class="out-rg"></strong></td>
+                    <td colspan="2" style="width: 34%;">CPF: <strong class="out-cpf"></strong></td>
+                </tr>
+                <tr><td colspan="6">Função: <strong class="out-funcao"></strong></td></tr>
+                <tr><td colspan="6" class="titulo-secao">Tipo de exame</td></tr>
+                <tr><td colspan="6" style="height: 20px; text-align: center; font-weight: bold;" class="out-tipo"></td></tr>
+                <tr><td colspan="6" class="titulo-secao">Riscos existentes na função</td></tr>
+                <tr><td colspan="6">Físico: &nbsp; <span class="out-r-fisico"></span></td></tr>
+                <tr><td colspan="6">Químico: &nbsp; <span class="out-r-quimico"></span></td></tr>
+                <tr><td colspan="6">Biológico: &nbsp; <span class="out-r-biologico"></span></td></tr>
+                <tr><td colspan="6">Ergonômico: &nbsp; <span class="out-r-ergonomico"></span></td></tr>
+                <tr><td colspan="6">Acidente: &nbsp; <span class="out-r-acidente"></span></td></tr>
+                <tr><td colspan="6">Psicossocial: &nbsp; <span class="out-r-psicossocial"></span></td></tr>
+                <tr><td colspan="6" class="titulo-secao">Exames</td></tr>
+                <tr>
+                    <td colspan="6" style="vertical-align: top; padding: 0;">
+                        <table class="tabela-exames-interna tabela-exames-aso"></table>
+                    </td>
+                </tr>
+            </table>
+
+            <p style="text-align: justify; font-size: 11pt; margin: 5px 0; line-height: 1.1;">Recebi a segunda via do presente atestado e declaro conhecer os riscos ocupacionais , inerentes ao exercício da função , relacionados nesse documento e ter sido esclarecido sobre os procedimentos para atenuá-los e/ou neutralizá-los.</p>
+
+            <table class="tabela-word" style="font-size: 11pt;">
+                <tr><td colspan="2" class="titulo-secao">Conclusão sobre a capacidade laborativa</td></tr>
+                <tr>
+                    <td colspan="2" style="padding: 5px 10px; vertical-align: top;">
+                        <div class="box-conclusao-geral" style="margin-bottom: 10px; font-size: 11pt;"></div>
+                        <div class="out-nrs-container"></div>
+                    </td>
+                </tr>
+                <tr><td colspan="2" class="titulo-secao" style="text-align: left; padding: 3px 10px;">Data da realização do ASO: <span class="out-data"></span></td></tr>
+                <tr><td colspan="2" style="text-align: center; font-weight: bold; padding: 4px;">Médica coordenadora do PCMSO: <span class="out-medico-pcmso"></span></td></tr>
+                <tr>
+                    <td style="width: 50%; height: 65px; vertical-align: top; padding-left: 10px; padding-top: 5px;">Assinatura do Funcionário:</td>
+                    <td style="width: 50%; height: 65px; vertical-align: top; text-align: center; padding-top: 5px;">Médico examinador:</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- PÁGINA 3: PRONTUÁRIO MÉDICO -->
+        <div class="pagina-a4" id="doc-prontuario">
+            <h2 style="font-size: 14pt; margin-bottom: 20px;">PRONTUARIO MÉDICO PARA ASO</h2>
+            <p>Razão social: <strong><span class="out-empresa"></span></strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CNPJ: <span class="out-cnpj"></span></p>
+            <table class="tabela-word" style="font-size: 11pt;">
+                <tr><td colspan="4" class="titulo-secao" style="background-color: #f0f0f0 !important;">Identificação do colaborador</td></tr>
+                <tr><td colspan="4">Nome: <strong><span class="out-nome"></span></strong></td></tr>
+                <tr>
+                    <td style="width: 30%;">DN: <strong><span class="out-dn"></span></strong></td>
+                    <td colspan="3">CPF: <strong><span class="out-cpf"></span></strong></td>
+                </tr>
+                <tr><td colspan="4">Função: <strong><span class="out-funcao"></span></strong></td></tr>
+                <tr><td>Peso:</td><td>Altura:</td><td>PA:</td><td>FC:</td></tr>
+            </table>
+            <p><strong>2 – ANAMNESE – sofreu ou sofre das doenças abaixo relacionada? (marque Sim ou Não)</strong></p>
+            <table class="tabela-word" style="font-size: 11pt;">
+                <tr><th style="width: 35%;">Doença</th><th style="width: 5%;">Sim</th><th style="width: 5%;">Não</th><th style="width: 35%;">Doença</th><th style="width: 5%;">Sim</th><th style="width: 5%;">Não</th></tr>
+                <tr><td colspan="3" class="titulo-secao" style="background-color: #f0f0f0 !important;">Doenças do Coração</td><td colspan="3" class="titulo-secao" style="background-color: #f0f0f0 !important;">Doença dos Nervos</td></tr>
+                <tr><td>Hipertensão Arterial (pressão alta)</td><td></td><td></td><td>Doença dos Rins (nefrite, cálculo)</td><td></td><td></td></tr>
+                <tr><td>Dispnéia (falta de ar)</td><td></td><td></td><td>Dores (região)</td><td></td><td></td></tr>
+                <tr><td colspan="3" class="titulo-secao" style="background-color: #f0f0f0 !important;">Doenças do Pulmão</td><td>Cefaleias (dores de cabeça)</td><td></td><td></td></tr>
+                <tr><td>Bronquite (tosse crônica)</td><td></td><td></td><td>Alergia</td><td></td><td></td></tr>
+                <tr><td>Doença do Estômago (úlcera, gastrite)</td><td></td><td></td><td>Tireóide</td><td></td><td></td></tr>
+                <tr><td>Doença do Fígado (hepatite)</td><td></td><td></td><td>Varizes</td><td></td><td></td></tr>
+                <tr><td>Hérnia</td><td></td><td></td><td>Hemorroidas</td><td></td><td></td></tr>
+                <tr><td>Doença do Nariz, Garganta, Ouvido</td><td></td><td></td><td>Consome bebidas alcoólicas?</td><td></td><td></td></tr>
+                <tr><td>Problemas de visão</td><td></td><td></td><td>Fumante</td><td></td><td></td></tr>
+                <tr><td>Doença do Pâncreas (Pancreatite)</td><td></td><td></td><td>Obesidade</td><td></td><td></td></tr>
+                <tr><td>Diabetes</td><td></td><td></td><td>Fraturas</td><td></td><td></td></tr>
+                <tr><td>Câncer, tumores</td><td></td><td></td><td>Reumatismo</td><td></td><td></td></tr>
+                <tr><td>Doença da Pele</td><td></td><td></td><td>Foi submetido a alguma cirurgia? Qual?</td><td colspan="2"></td></tr>
+                <tr><td colspan="3">Covid-19 ☐ 1ª dose ☐ 2ª dose ☐ 3ª dose ☐ 4ª dose</td><td>Toma algum medicamento? Qual?</td><td colspan="2"></td></tr>
+            </table>
+            <p><strong>3 – ANTECEDENTES FAMILIARES - Seus familiares diretos (pai, mãe, irmãos e avós), mesmo os já falecidos, têm ou tiveram alguma das doenças abaixo?</strong></p>
+            <table class="tabela-word" style="font-size: 11pt;">
+                <tr><th style="width: 40%;">Doença</th><th style="width: 10%;">Sim</th><th style="width: 10%;">Não</th><th style="width: 10%;">Não sei</th><th>Parentesco</th></tr>
+                <tr><td>Diabetes</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Doenças do Coração</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Pressão Alta</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Câncer</td><td></td><td></td><td></td><td></td></tr>
+            </table>
+            <p><strong>4 - ANTECEDENTES OCUPACIONAIS (marque Sim ou Não)</strong></p>
+            <table class="tabela-word" style="font-size: 11pt;">
+                <tr><th style="width: 80%;"></th><th style="width: 10%;">Sim</th><th style="width: 10%;">Não</th></tr>
+                <tr><td>Já sofreu algum acidente de trabalho</td><td></td><td></td></tr>
+                <tr><td>Já sofreu de doença do trabalho ou profissional</td><td></td><td></td></tr>
+            </table>
+            <p style="text-align: justify; font-size: 11pt; margin-top: 15px;">Declaro que as informações por mim prestadas são verdadeiras e completas.</p>
+            <table class="tabela-sem-borda" style="width: 100%; margin-top: 40px; font-size: 11pt;">
+                <tr><td style="width: 40%;">Data ______ / ______ / ______</td><td style="width: 60%;"><div class="linha-ass">Assinatura do funcionário</div></td></tr>
+            </table>
+        </div>
+
+        <!-- PÁGINA 4: AVALIAÇÃO PSICOSSOCIAL (PARTE DO PACIENTE) -->
+        <div class="pagina-a4" id="doc-psicossocial">
+            <h2 style="font-size: 13pt; margin-bottom: 8px;">AVALIAÇÃO PSICOSSOCIAL</h2>
+            <p style="text-align: justify; font-size: 9.5pt; margin-bottom: 8px; line-height: 1.15;">Este protocolo de avaliação psicossocial tem por objetivo auxiliar o médico na investigação de riscos psicossociais conforme definido no item 33.3.4.1 da NR-33 e 35.4.1.2 da NR-35, devendo ser utilizado como instrumento de triagem para avaliação mais detalhada. O formulário deverá ser preenchido e assinado pelo trabalhador e avaliado pelo médico que concluirá quanto à necessidade ou não de avaliações específicas.</p>
+            
+            <table class="tabela-word tabela-psico-compacta" style="margin-bottom: 4px;">
+                <tr><td colspan="4" class="titulo-secao" style="background-color: #f0f0f0 !important; padding: 2px !important;">INFORMAÇÕES OBRIGATÓRIAS</td></tr>
+                <tr><td colspan="4">NOME: <strong><span class="out-nome"></span></strong></td></tr>
+                <tr><td>RG: <strong><span class="out-rg"></span></strong></td><td colspan="3">DN: <strong><span class="out-dn"></span></strong></td></tr>
+                <tr><td>Est. Civil: <span class="out-est-civil"></span></td><td colspan="2">Sexo: <span class="out-box-sexo"></span></td><td>Nº Filhos: <span class="out-filhos"></span></td></tr>
+                <tr><td colspan="4">EMPRESA: <strong><span class="out-empresa"></span></strong></td></tr>
+                <tr><td colspan="2">Função: <strong><span class="out-funcao"></span></strong></td><td colspan="2">Setor: <span class="out-setor"></span></td></tr>
+            </table>
+
+            <div class="titulo-secao" style="padding: 2px !important; font-size: 9.5pt; margin-top: 4px; margin-bottom: 2px;">RESPONDA AS QUESTÕES ABAIXO</div>
+            <table class="tabela-word tabela-psico-compacta" style="margin-bottom: 4px;">
+                <tr><td colspan="2" class="titulo-secao" style="background-color: #f0f0f0 !important; padding: 1px !important;">OBSERVAÇÕES</td></tr>
+                <tr><td style="width: 70%;">Possui algum antecedente psiquiátrico?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
+                <tr><td>Possui familiares com antecedentes psiquiátricos?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
+                <tr><td>Você faz uso de alguma droga?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
+                <tr><td colspan="2" class="titulo-secao" style="background-color: #f0f0f0 !important; padding: 1px !important;">PERCEPÇÕES</td></tr>
+                <tr><td>Costuma ouvir vozes de pessoas que não estão próximas?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
+                <tr><td>Enxerga vultos ou tem visões?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
+                <tr><td>Sente-se perseguido?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
+                <tr><td>Sente-se obrigado a agir contrário à sua vontade?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
+                <tr><td colspan="2" class="titulo-secao" style="background-color: #f0f0f0 !important; padding: 1px !important;">RELACIONAMENTO INTERPESSOAL</td></tr>
+                <tr><td>Costuma ter brigas ou entrar em conflito?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
+                <tr><td>Participa de reuniões familiares?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
+                <tr><td>Gosta de sair com a família ou amigos?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
+            </table>
+
+            <table class="tabela-word tabela-psico-compacta" style="margin-bottom: 6px;">
+                <tr><td colspan="5" class="titulo-secao" style="background-color: #f0f0f0 !important; padding: 1px !important;">Anamnese Psicossocial</td></tr>
+                <tr><th style="width: 60%; text-align: left;">Costuma Ter ou Sentir...</th><th style="width: 10%;">NUNCA</th><th style="width: 10%;">RARAMENTE</th><th style="width: 10%;">COM FREQUÊNCIA</th><th style="width: 10%;">SEMPRE</th></tr>
+                <tr><td>Dores de cabeça?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Falta de apetite?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Insônia, sono interrompido ou acorda cansado?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Assusta-se com facilidade?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Tremor nas mãos?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Nervoso, tensão e/ou preocupação?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Má digestão?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Dificuldade de pensar com clareza?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Tristeza?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Chorado mais que o costume?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Dificuldade para realizar com satisfação tarefas diárias?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Dificuldade para tomar decisões?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Dificuldades no serviço / trabalho causa sofrimento?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Incapacidade em desempenhar papel útil na sua vida?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Desinteresse pelas coisas?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Inútil, sem valor?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Ideias de acabar com a vida?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Cansado o tempo todo?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Sensações desagradáveis no estômago?</td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>Cansaço com facilidade?</td><td></td><td></td><td></td><td></td></tr>
+            </table>
+
+            <table class="tabela-sem-borda" style="width: 100%; margin-top: 15px; font-size: 10pt;">
+                <tr><td style="width: 50%;"><div class="linha-ass">Assinatura Funcionário</div></td><td style="width: 50%; text-align: right;">Data: ______ / ______ / ______</td></tr>
+            </table>
+
+            <!-- PÁGINA 5: AVALIAÇÃO PSICOSSOCIAL (SEÇÃO DO MÉDICO) -->
+            <div class="quebra-pagina-medico">
+                <div class="secao-medica">
+                    <div class="header-bg" style="font-size: 14pt; padding: 6px; margin-bottom: 12px; border: 1px solid black;">
+                        MÉDICO(A) RESPONDE ⇣
+                    </div>
+                    <table class="tabela-word">
+                        <tr class="header-bg"><th style="width: 75%; text-align: left;">CRITÉRIOS DE AVALIAÇÃO</th><th style="width: 25%;">RESPOSTA</th></tr>
+                        <tr><td><strong>ORIENTAÇÃO NO ESPAÇO TEMPORAL</strong><br>O paciente consegue localizar-se no tempo e no espaço? Sabe onde está? Dia da semana? Data, etc.?</td><td style="text-align: center;"><span class="cb-medico"></span> Sim &nbsp; <span class="cb-medico"></span> Não</td></tr>
+                        <tr><td><strong>ASPECTO GERAL</strong><br>O paciente está vestido de maneira adequada? Sua aparência é de asseio? Postura adequada durante a consulta?</td><td style="text-align: center;"><span class="cb-medico"></span> Sim &nbsp; <span class="cb-medico"></span> Não</td></tr>
+                        <tr><td><strong>COMPORTAMENTO</strong><br>O paciente apresenta gesticulação normal (sem exageros ou excessividade imóvel)? Sem alteração em sua mímica facial?</td><td style="text-align: center;"><span class="cb-medico"></span> Sim &nbsp; <span class="cb-medico"></span> Não</td></tr>
+                        <tr><td><strong>FALA</strong><br>Percebe-se alteração na fala (aceleração ou lentidão)?</td><td style="text-align: center;"><span class="cb-medico"></span> Sim &nbsp; <span class="cb-medico"></span> Não</td></tr>
+                    </table>
+                    <div style="margin-top: 15px;">
+                        <strong>PARECER</strong>
+                        <div class="parecer-box"><span class="cb-medico" style="float: left;"></span><div style="margin-left: 25px;">Existe a necessidade de encaminhamento do paciente para avaliação psicológica / psiquiátrica para a definição de sua aptidão para trabalhos em espaço confinado e em altura. (&gt;7 afirmativos no psicossocial)</div></div>
+                        <div class="parecer-box"><span class="cb-medico" style="float: left;"></span><div style="margin-left: 25px;">Não existem objeções no momento que exijam algum encaminhamento para avaliação especializada, não havendo contra indicação para trabalhos em espaço confinado e em altura.</div></div>
+                    </div>
+                    <table class="tabela-sem-borda" style="width: 100%; margin-top: 40px;">
+                        <tr>
+                            <td style="width: 60%;"><div class="linha-ass" style="width: 90%;">Carimbo e assinatura do médico<br>responsável pelo atendimento</div></td>
+                            <td style="width: 40%; vertical-align: top; text-align: right;">Data: ______ / ______ / ______</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+
+    <script>
+        function adicionarLinhaNrModal(nome = "", status = "") {
+            const container = document.getElementById('container-nrs-modal');
+            const novaLinha = document.createElement('div');
+            novaLinha.className = 'nr-linha-modal';
+            novaLinha.innerHTML = `
+                <input type="text" class="modal-nr-nome" placeholder="Ex: NR10 - Eletricidade" style="flex: 2;" value="${nome}">
+                <select class="modal-nr-status" style="flex: 1;">
+                    <option value="" ${status === '' ? 'selected' : ''}>Não se aplica</option>
+                    <option value="aplica" ${status === 'aplica' ? 'selected' : ''}>Se aplica (Sem marcar)</option>
+                    <option value="apto" ${status === 'apto' ? 'selected' : ''}>Apto</option>
+                    <option value="inapto" ${status === 'inapto' ? 'selected' : ''}>Inapto</option>
+                </select>
+                <button type="button" onclick="this.parentElement.remove()" style="background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer;">✕</button>
+            `;
+            container.appendChild(novaLinha);
+        }
+
+        const normalizarTexto = (texto) => {
+            if (!texto) return '';
+            return String(texto).trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const btnTheme = document.getElementById('btn-theme-toggle');
+            if (btnTheme) {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                btnTheme.textContent = isDark ? '☀️' : '🌙';
+                btnTheme.addEventListener('click', () => {
+                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                        document.documentElement.removeAttribute('data-theme');
+                        localStorage.setItem('monad_theme', 'light');
+                        btnTheme.textContent = '🌙';
+                    } else {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        localStorage.setItem('monad_theme', 'dark');
+                        btnTheme.textContent = '☀️';
+                    }
+                });
+            }
+
+            try {
+                const { data: empData } = await supabase.from('empresas_base').select('nome_fantasia, razao_social');
+                if (empData) {
+                    let datalist = document.getElementById('lista-empresas-sugestoes');
+                    if (!datalist) {
+                        datalist = document.createElement('datalist');
+                        datalist.id = 'lista-empresas-sugestoes';
+                        document.body.appendChild(datalist);
+                    }
+                    datalist.innerHTML = empData.map(e => `<option value="${e.razao_social || e.nome_fantasia}">${e.nome_fantasia}</option>`).join('');
+                }
+            } catch (err) { console.error("Erro ao carregar datalist:", err); }
+
+            const tabela = document.getElementById('lista-pacientes');
+            const inputData = document.getElementById('filtro-data');
+            const inputPesq = document.getElementById('pesquisa-paciente');
+            let databasePacientes = [];
+            let pacienteSelecionadoParaImpressao = null;
+
+            function formatarDataBR(data) {
+                if (!data) return '-';
+                if (data.includes('/')) return data; 
+                const partes = data.split('T')[0].split('-'); 
+                if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+                return data;
+            }
+
+            inputData.value = new Date().toISOString().split('T')[0];
+
+            window.executarBusca = async function(tipo) {
+                document.getElementById('msg-carregando').style.display = "block";
+                tabela.innerHTML = "";
+                document.getElementById('msg-vazio').style.display = "none";
+
+                try {
+                    let query = supabase.from('atendimentos').select('*').order('created_at', { ascending: false });
+
+                    if (tipo === 'data') {
+                        query = query.eq('data_exame', inputData.value);
+                    } else if (tipo === 'texto') {
+                        const termo = inputPesq.value.trim();
+                        if (!termo) { alert("Digite um nome ou CPF."); document.getElementById('msg-carregando').style.display = "none"; return; }
+                        query = query.or(`nome.ilike.%${termo}%,cpf.ilike.%${termo}%`).limit(1000);
+                    } 
+
+                    const { data, error } = await query;
+                    document.getElementById('msg-carregando').style.display = "none";
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        databasePacientes = data;
+                        renderizarTabela(data);
+                    } else {
+                        document.getElementById('msg-vazio').style.display = "block";
+                    }
+                } catch (err) {
+                    console.error("Erro:", err);
+                    document.getElementById('msg-carregando').style.display = "none";
+                }
+            };
+
+            inputPesq.addEventListener('keypress', function(e) { if (e.key === 'Enter') executarBusca('texto'); });
+
+            function renderizarTabela(pacientes) {
+                tabela.innerHTML = "";
+                pacientes.forEach((pac) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><div style="font-size: 11px; font-weight:bold; color:var(--accent); margin-bottom:4px;">📅 ${formatarDataBR(pac.data_exame)}</div><span style="font-size: 13px;">${pac.empresa}</span></td>
+                        <td><strong>${pac.nome}</strong></td>
+                        <td>${pac.cpf || '-'}</td>
+                        <td>${pac.funcao || '-'}</td>
+                        <td style="text-align: center;"><button class="btn-gerar-docs" data-id="${pac.id}" style="background-color: #003366; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold;">📄 Gerar Documentos</button></td>
+                    `;
+                    tabela.appendChild(tr);
+                });
+            }
+
+            executarBusca('data'); 
+
+            document.getElementById('in-funcao').addEventListener('input', (e) => {
+                const nomeFuncaoBusca = normalizarTexto(e.target.value);
+                const funcMatch = window.dbFuncoes ? window.dbFuncoes.find(f => normalizarTexto(f.nome_funcao) === nomeFuncaoBusca) : null;
+                
+                document.getElementById('container-nrs-modal').innerHTML = ''; 
+                if (funcMatch) {
+                    document.getElementById('in-r-fisico').value = funcMatch.risco_fisico || 'Ausência de fatores de risco';
+                    document.getElementById('in-r-quimico').value = funcMatch.risco_quimico || 'Ausência de fatores de risco';
+                    document.getElementById('in-r-biologico').value = funcMatch.risco_biologico || 'Ausência de fatores de risco';
+                    document.getElementById('in-r-ergonomico').value = funcMatch.risco_ergonomico || 'Ausência de fatores de risco';
+                    document.getElementById('in-r-acidente').value = funcMatch.risco_acidente || 'Ausência de fatores de risco';
+                    document.getElementById('in-r-psicossocial').value = funcMatch.risco_psicossocial || 'Ausência de fatores de risco';
+                    try {
+                        let nrsArray = typeof funcMatch.nrs_aplicaveis === 'string' ? JSON.parse(funcMatch.nrs_aplicaveis) : funcMatch.nrs_aplicaveis;
+                        if (nrsArray && nrsArray.length > 0) nrsArray.forEach(nr => adicionarLinhaNrModal(nr.nome, nr.status));
+                    } catch(err) {}
+                } else {
+                    document.getElementById('in-r-fisico').value = 'Ausência de fatores de risco';
+                    document.getElementById('in-r-quimico').value = 'Ausência de fatores de risco';
+                    document.getElementById('in-r-biologico').value = 'Ausência de fatores de risco';
+                    document.getElementById('in-r-ergonomico').value = 'Ausência de fatores de risco';
+                    document.getElementById('in-r-acidente').value = 'Ausência de fatores de risco';
+                    document.getElementById('in-r-psicossocial').value = 'Ausência de fatores de risco';
+                }
+            });
+
+            document.getElementById('chk-imprimir-psico').addEventListener('change', function(e) {
+                const containerEso = document.getElementById('container-esocial-modal');
+                const nomeExame = "Avaliação Psicossocial";
+                if (this.checked) {
+                    let exists = false;
+                    containerEso.querySelectorAll('.eso-nome-print').forEach(inp => {
+                        if(inp.value === nomeExame) exists = true;
+                    });
+                    if(!exists) {
+                        const normalizedBusca = normalizarTexto(nomeExame);
+                        let selectOptions = '<option value="">-- Selecione o código correspondente --</option>';
+                        if(window.dbEsocial) {
+                            window.dbEsocial.forEach(eso => {
+                                const isMatch = normalizarTexto(eso.exame_nome) === normalizedBusca;
+                                selectOptions += `<option value="${eso.codigo}" ${isMatch ? 'selected' : ''}>${eso.exame_nome} (Cód: ${eso.codigo})</option>`;
+                            });
+                        }
+                        const p = containerEso.querySelector('p');
+                        if(p) p.remove();
+                        
+                        containerEso.insertAdjacentHTML('beforeend', `
+                            <div class="esocial-linha" style="display: flex; gap: 10px; align-items: center; background: var(--surface); padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px;">
+                                <input type="text" class="eso-nome-print" value="${nomeExame}" style="flex: 1; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface-muted); color: var(--text-strong);" readonly>
+                                <select class="eso-codigo-print" style="flex: 2; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); color: var(--text-strong);">
+                                    ${selectOptions}
+                                </select>
+                            </div>
+                        `);
+                    }
+                } else {
+                    containerEso.querySelectorAll('.eso-nome-print').forEach(inp => {
+                        if(inp.value === nomeExame) {
+                            inp.closest('.esocial-linha').remove();
+                        }
+                    });
+                    if(containerEso.children.length === 0) {
+                        containerEso.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">Nenhum exame adicional registado no check-in.</p>';
+                    }
+                }
+            });
+
+            document.getElementById('in-empresa').addEventListener('change', async (e) => {
+                const nomeSelecionado = normalizarTexto(e.target.value);
+                if (!nomeSelecionado) return;
+                document.getElementById('in-cnpj').placeholder = "Buscando...";
+                try {
+                    const { data } = await supabase.from('empresas_base').select('*');
+                    if (data) {
+                        const empMatch = data.find(emp => normalizarTexto(emp.nome_fantasia) === nomeSelecionado || normalizarTexto(emp.razao_social) === nomeSelecionado);
+                        if (empMatch) {
+                            document.getElementById('in-cnpj').value = empMatch.cnpj || '';
+                            if (empMatch.medico_coordenador) document.getElementById('in-medico-pcmso').value = empMatch.medico_coordenador;
+                        } else {
+                            document.getElementById('in-cnpj').value = '';
+                            document.getElementById('in-cnpj').placeholder = "00.000.000/0000-00";
+                        }
+                    }
+                } catch (err) { console.error("Erro ao buscar detalhes da empresa", err); }
+            });
+
+            tabela.addEventListener('click', async (e) => {
+                const btn = e.target.closest('.btn-gerar-docs');
+                if (btn) {
+                    const id = btn.dataset.id;
+                    pacienteSelecionadoParaImpressao = databasePacientes.find(p => String(p.id) === String(id));
+                    
+                    if (pacienteSelecionadoParaImpressao) {
+                        const pac = pacienteSelecionadoParaImpressao;
+                        document.getElementById('msg-carregando').style.display = "block";
+                        
+                        try {
+                            const [resEmp, resFunc, resEso] = await Promise.all([
+                                supabase.from('empresas_base').select('*'),
+                                supabase.from('funcoes_base').select('*'),
+                                supabase.from('esocial_exames').select('*')
+                            ]);
+                            
+                            const empresasDB = resEmp.data || [];
+                            const funcoesDB = resFunc.data || [];
+                            const esocialDB = resEso.data || [];
+                            
+                            window.dbFuncoes = funcoesDB;
+                            window.dbEsocial = esocialDB;
+                            
+                            const nomeEmpresaBusca = normalizarTexto(pac.empresa);
+                            const empMatch = empresasDB.find(e => normalizarTexto(e.nome_fantasia) === nomeEmpresaBusca || normalizarTexto(e.razao_social) === nomeEmpresaBusca);
+                            
+                            if (empMatch) {
+                                document.getElementById('in-empresa').value = empMatch.razao_social || empMatch.nome_fantasia;
+                                document.getElementById('in-cnpj').value = empMatch.cnpj || '';
+                                if (empMatch.medico_coordenador) document.getElementById('in-medico-pcmso').value = empMatch.medico_coordenador;
+                            } else {
+                                document.getElementById('in-empresa').value = pac.empresa || '';
+                                document.getElementById('in-cnpj').value = '';
+                            }
+
+                            document.getElementById('in-funcao').value = pac.funcao || '';
+
+                            const nomeFuncaoBusca = normalizarTexto(pac.funcao);
+                            const funcMatch = funcoesDB.find(f => normalizarTexto(f.nome_funcao) === nomeFuncaoBusca);
+                            
+                            document.getElementById('container-nrs-modal').innerHTML = ''; 
+                            if (funcMatch) {
+                                document.getElementById('in-r-fisico').value = funcMatch.risco_fisico || 'Ausência de fatores de risco';
+                                document.getElementById('in-r-quimico').value = funcMatch.risco_quimico || 'Ausência de fatores de risco';
+                                document.getElementById('in-r-biologico').value = funcMatch.risco_biologico || 'Ausência de fatores de risco';
+                                document.getElementById('in-r-ergonomico').value = funcMatch.risco_ergonomico || 'Ausência de fatores de risco';
+                                document.getElementById('in-r-acidente').value = funcMatch.risco_acidente || 'Ausência de fatores de risco';
+                                document.getElementById('in-r-psicossocial').value = funcMatch.risco_psicossocial || 'Ausência de fatores de risco';
+                                try {
+                                    let nrsArray = typeof funcMatch.nrs_aplicaveis === 'string' ? JSON.parse(funcMatch.nrs_aplicaveis) : funcMatch.nrs_aplicaveis;
+                                    if (nrsArray && nrsArray.length > 0) nrsArray.forEach(nr => adicionarLinhaNrModal(nr.nome, nr.status));
+                                } catch(err) {}
+                            } else {
+                                document.getElementById('in-r-fisico').value = 'Ausência de fatores de risco';
+                                document.getElementById('in-r-quimico').value = 'Ausência de fatores de risco';
+                                document.getElementById('in-r-biologico').value = 'Ausência de fatores de risco';
+                                document.getElementById('in-r-ergonomico').value = 'Ausência de fatores de risco';
+                                document.getElementById('in-r-acidente').value = 'Ausência de fatores de risco';
+                                document.getElementById('in-r-psicossocial').value = 'Ausência de fatores de risco';
+                            }
+
+                            let examesStr = [pac.exames_clinicos, pac.exames_raiox, pac.exames_lab].filter(ex => ex && ex !== 'Nenhum' && ex.trim() !== '').join(',');
+                            let arrayExames = examesStr ? examesStr.split(',').map(ex => ex.trim()).filter(ex => ex !== '') : [];
+                            if(pac.audiometria) arrayExames.push("Audiometria");
+                            if(pac.consulta_clinica) arrayExames.push("Av. clínica");
+                            
+                            // Adiciona apenas se o checkbox estiver marcado ao abrir
+                            if(document.getElementById('chk-imprimir-psico').checked) {
+                                arrayExames.push("Avaliação Psicossocial");
+                            }
+
+                            arrayExames = arrayExames.map(exame => {
+                                let nome = exame.trim();
+                                let nomeLower = nome.toLowerCase();
+                                if (nomeLower === 'consulta médica' || nomeLower === 'consulta medica') return 'Av. clínica';
+                                if (nomeLower.includes('raio') || nomeLower.includes('rx')) return nome;
+                                if (nome.length > 0) return nome.charAt(0).toUpperCase() + nome.slice(1).toLowerCase();
+                                return '';
+                            }).filter(ex => ex !== '');
+
+                            const containerEso = document.getElementById('container-esocial-modal');
+                            containerEso.innerHTML = '';
+
+                            if(arrayExames.length === 0) {
+                                containerEso.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">Nenhum exame adicional registado no check-in.</p>';
+                            } else {
+                                arrayExames.forEach((exameNome) => {
+                                    const normalizedBusca = normalizarTexto(exameNome);
+                                    
+                                    let selectOptions = '<option value="">-- Selecione o código correspondente --</option>';
+                                    esocialDB.forEach(eso => {
+                                        const isMatch = normalizarTexto(eso.exame_nome) === normalizedBusca;
+                                        selectOptions += `<option value="${eso.codigo}" ${isMatch ? 'selected' : ''}>${eso.exame_nome} (Cód: ${eso.codigo})</option>`;
+                                    });
+
+                                    containerEso.innerHTML += `
+                                        <div class="esocial-linha" style="display: flex; gap: 10px; align-items: center; background: var(--surface); padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px;">
+                                            <input type="text" class="eso-nome-print" value="${exameNome}" style="flex: 1; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface-muted); color: var(--text-strong);" readonly>
+                                            <select class="eso-codigo-print" style="flex: 2; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); color: var(--text-strong);">
+                                                ${selectOptions}
+                                            </select>
+                                        </div>
+                                    `;
+                                });
+                            }
+
+                        } catch (error) {
+                            console.error("Falha na consulta direta:", error);
+                        } finally {
+                            document.getElementById('msg-carregando').style.display = "none";
+                            document.getElementById('modal-docs').style.display = 'flex';
+                        }
+                    }
+                }
+            });
+
+            window.fecharModalDocs = function() {
+                document.getElementById('modal-docs').style.display = 'none';
+                pacienteSelecionadoParaImpressao = null;
+            };
+
+            document.getElementById('btn-confirmar-impressao').addEventListener('click', () => {
+                if(!pacienteSelecionadoParaImpressao) return;
+                const pac = pacienteSelecionadoParaImpressao;
+                const dataExameBR = formatarDataBR(pac.data_exame);
+
+                const docPsico = document.getElementById('doc-psicossocial');
+                const imprimirPsico = document.getElementById('chk-imprimir-psico').checked;
+                
+                if (imprimirPsico) {
+                    docPsico.classList.remove('no-print');
+                    docPsico.style.display = 'block';
+                } else {
+                    docPsico.classList.add('no-print');
+                    docPsico.style.display = 'none';
+                }
+
+                const empresaVal = document.getElementById('in-empresa').value || pac.empresa || '---';
+                document.querySelectorAll('.out-empresa').forEach(el => el.textContent = empresaVal);
+                document.querySelectorAll('.out-nome').forEach(el => el.textContent = pac.nome);
+                document.querySelectorAll('.out-dn').forEach(el => el.textContent = formatarDataBR(pac.data_nascimento));
+                document.querySelectorAll('.out-rg').forEach(el => el.textContent = pac.rg || '');
+                document.querySelectorAll('.out-cpf').forEach(el => el.textContent = pac.cpf || '');
+                
+                const funcaoVal = document.getElementById('in-funcao').value || pac.funcao || '---';
+                document.querySelectorAll('.out-funcao').forEach(el => el.textContent = funcaoVal);
+                
+                let tipoExameLimpo = pac.tipo_exame || '';
+                tipoExameLimpo = tipoExameLimpo.replace(/[\(\)]/g, '').trim();
+                if (tipoExameLimpo.length > 0) tipoExameLimpo = tipoExameLimpo.charAt(0).toUpperCase() + tipoExameLimpo.slice(1).toLowerCase();
+                document.querySelectorAll('.out-tipo').forEach(el => el.textContent = tipoExameLimpo);
+
+                document.querySelectorAll('.out-data').forEach(el => el.textContent = dataExameBR);
+
+                const linhasEsocial = document.querySelectorAll('#container-esocial-modal .esocial-linha');
+                let examesFinais = [];
+                linhasEsocial.forEach(linha => {
+                    const nomeStr = linha.querySelector('.eso-nome-print').value;
+                    const codigoStr = linha.querySelector('.eso-codigo-print').value || '______';
+                    examesFinais.push({ nome: nomeStr, codigo: codigoStr });
+                });
+
+                const temPsico = examesFinais.some(ex => normalizarTexto(ex.nome).includes('psicossocial'));
+                
+                if (imprimirPsico && !temPsico) {
+                    let codPsico = '______';
+                    if (window.dbEsocial) {
+                        const match = window.dbEsocial.find(e => normalizarTexto(e.exame_nome) === normalizarTexto('Avaliação Psicossocial'));
+                        if (match) codPsico = match.codigo;
+                    }
+                    examesFinais.push({ nome: 'Avaliação Psicossocial', codigo: codPsico });
+                } else if (!imprimirPsico && temPsico) {
+                    examesFinais = examesFinais.filter(ex => !normalizarTexto(ex.nome).includes('psicossocial'));
+                }
+
+                let totalLinhas = Math.max(8, Math.ceil(examesFinais.length / 2));
+                let htmlExamesGrade = '';
+
+                for(let r = 0; r < totalLinhas; r++) {
+                    let ex1 = examesFinais[r * 2] || { nome: '', codigo: '' };
+                    let ex2 = examesFinais[r * 2 + 1] || { nome: '', codigo: '' };
+                    
+                    htmlExamesGrade += `
+                        <tr>
+                            <td style="width: 25%; padding: 2px 4px; border:none; border-bottom: 1px dashed #e5e5e5; font-size: 11pt;">${ex1.nome || '&nbsp;'}</td>
+                            <td style="width: 15%; padding: 2px 4px; border:none; border-bottom: 1px dashed #e5e5e5; font-size: 11pt;">${ex1.nome ? dataExameBR : '&nbsp;'}</td>
+                            <td style="width: 10%; padding: 2px 4px; border:none; border-bottom: 1px dashed #e5e5e5; border-right: 1px dashed #ccc; font-size: 11pt;">${ex1.nome ? (ex1.codigo !== '______' ? 'Cód. ' + ex1.codigo : 'Cód. ______') : '&nbsp;'}</td>
+                            
+                            <td style="width: 25%; padding: 2px 4px 2px 10px; border:none; border-bottom: 1px dashed #e5e5e5; font-size: 11pt;">${ex2.nome || '&nbsp;'}</td>
+                            <td style="width: 15%; padding: 2px 4px; border:none; border-bottom: 1px dashed #e5e5e5; font-size: 11pt;">${ex2.nome ? dataExameBR : '&nbsp;'}</td>
+                            <td style="width: 10%; padding: 2px 4px; border:none; border-bottom: 1px dashed #e5e5e5; font-size: 11pt;">${ex2.nome ? (ex2.codigo !== '______' ? 'Cód. ' + ex2.codigo : 'Cód. ______') : '&nbsp;'}</td>
+                        </tr>
+                    `;
+                }
+                document.querySelectorAll('.tabela-exames-aso').forEach(el => el.innerHTML = htmlExamesGrade);
+
+                document.querySelectorAll('.out-cnpj').forEach(el => el.textContent = document.getElementById('in-cnpj').value || '---');
+                document.querySelectorAll('.out-setor').forEach(el => el.textContent = document.getElementById('in-setor').value || '---');
+                document.querySelectorAll('.out-medico-pcmso').forEach(el => el.textContent = document.getElementById('in-medico-pcmso').value || '---');
+                
+                const valorSexoSelect = document.getElementById('in-sexo').value;
+                document.querySelectorAll('.out-sexo').forEach(el => el.textContent = valorSexoSelect);
+                const eMasculino = valorSexoSelect.includes('Masc');
+                document.querySelectorAll('.out-box-sexo').forEach(el => {
+                    el.innerHTML = eMasculino 
+                        ? '<span class="cb-padrao" style="background-color: black;"></span> Masc. &nbsp; <span class="cb-padrao"></span> Fem.' 
+                        : '<span class="cb-padrao"></span> Masc. &nbsp; <span class="cb-padrao" style="background-color: black;"></span> Fem.';
+                });
+
+                document.querySelectorAll('.out-est-civil').forEach(el => el.textContent = document.getElementById('in-est-civil').value || '');
+                document.querySelectorAll('.out-filhos').forEach(el => el.textContent = document.getElementById('in-filhos').value || '');
+                document.querySelectorAll('.out-r-fisico').forEach(el => el.textContent = document.getElementById('in-r-fisico').value);
+                document.querySelectorAll('.out-r-quimico').forEach(el => el.textContent = document.getElementById('in-r-quimico').value);
+                document.querySelectorAll('.out-r-biologico').forEach(el => el.textContent = document.getElementById('in-r-biologico').value);
+                document.querySelectorAll('.out-r-ergonomico').forEach(el => el.textContent = document.getElementById('in-r-ergonomico').value);
+                document.querySelectorAll('.out-r-acidente').forEach(el => el.textContent = document.getElementById('in-r-acidente').value);
+                document.querySelectorAll('.out-r-psicossocial').forEach(el => el.textContent = document.getElementById('in-r-psicossocial').value);
+
+                const valConclusao = document.getElementById('in-conclusao').value;
+                const txtConclusao = valConclusao === 'apto' 
+                    ? '☑ Apto para função &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ☐ Inapto' 
+                    : '☐ Apto para função &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ☑ Inapto';
+                document.querySelectorAll('.box-conclusao-geral').forEach(el => el.innerHTML = txtConclusao);
+                
+                const linhasNrModal = document.querySelectorAll('.nr-linha-modal');
+                let listaNrsHtml = [];
+                linhasNrModal.forEach(linha => {
+                    const nomeNr = linha.querySelector('.modal-nr-nome').value.trim();
+                    const statusNr = linha.querySelector('.modal-nr-status').value;
+                    if (nomeNr && statusNr) {
+                        let chkApto = statusNr === 'apto' ? '☑' : '☐';
+                        let chkInapto = statusNr === 'inapto' ? '☑' : '☐';
+                        listaNrsHtml.push(`<div style="text-align: left;"><div style="font-weight: bold; margin-bottom: 4px;">${nomeNr}</div><div>${chkApto} Apto &nbsp;&nbsp;&nbsp;&nbsp; ${chkInapto} Inapto</div></div>`);
+                    }
+                });
+
+                if (listaNrsHtml.length > 0) {
+                    let colWidth = Math.floor(100 / listaNrsHtml.length);
+                    let tdsNrs = listaNrsHtml.map(html => `<td style="text-align: left; border: none; width: ${colWidth}%; vertical-align: top; padding: 0;">${html}</td>`).join('');
+                    document.querySelectorAll('.out-nrs-container').forEach(el => {
+                        el.innerHTML = `<style>@media print { .out-nrs-container table td { border: none !important; } }</style><table style="width: 100%; border: none; font-size: 11pt;"><tr>${tdsNrs}</tr></table>`;
+                    });
+                } else {
+                    document.querySelectorAll('.out-nrs-container').forEach(el => el.innerHTML = '');
+                }
+
+                fecharModalDocs();
+                setTimeout(() => window.print(), 300);
+            });
+        });
+    </script>
+</body>
+</html>

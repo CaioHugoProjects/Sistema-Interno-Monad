@@ -9,8 +9,13 @@
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
+        
+        // Verifica se há login e permite acesso
+        const tokenAtivo = localStorage.getItem('monad_token');
         const s = localStorage.getItem('monad_setor');
-        if (!s || (s !== 'recepcao' && s !== 'todos' && s !== 'admin')) { window.location.href = "login.html"; }
+        if (!tokenAtivo || !s || (s !== 'recepcao' && s !== 'todos' && s !== 'admin')) { 
+            window.location.href = "login.html"; 
+        }
     </script>
     <style>
         /* Ajustes Estruturais para Mobile First */
@@ -50,12 +55,24 @@
                 <li><a href="index.html" style="background-color: var(--accent) !important; color: white !important;">Recepção</a></li>
                 <li><a href="checkin.html">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
+                <!-- Apenas Admin vê a Base de Dados e o Painel de Controle -->
+                <li id="menu-documentos" style="display: none;"><a href="documentos.html">Gerar ASO</a></li>
+                <li id="menu-cadastros" style="display: none;"><a href="cadastros.html">Base Dados</a></li>
                 <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
             </ul>   
         </nav>
         <script>
-            if (localStorage.getItem('monad_setor') === 'admin') {
-                document.getElementById('menu-admin').style.display = 'block';
+            // Adicionado suporte para mostrar o menu de ASO e Base de dados ao Admin e Todos
+            const setorNav = localStorage.getItem('monad_setor');
+            if (setorNav === 'admin' || setorNav === 'todos') {
+                const elDoc = document.getElementById('menu-documentos');
+                const elCad = document.getElementById('menu-cadastros');
+                if (elDoc) elDoc.style.display = 'inline-block';
+                if (elCad) elCad.style.display = 'inline-block';
+            }
+            if (setorNav === 'admin') {
+                const elAdmin = document.getElementById('menu-admin');
+                if (elAdmin) elAdmin.style.display = 'inline-block';
             }
         </script>
     </header>
@@ -300,6 +317,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // ==============================================================
+            // PREENCHIMENTO AUTOMÁTICO DA DATA ATUAL NO EXAME
+            // ==============================================================
+            const inputDataExame = document.getElementById('in-data');
+            if (inputDataExame) {
+                const hoje = new Date();
+                // O input type="date" exige o formato YYYY-MM-DD
+                inputDataExame.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+                
+                // Força o espelhamento inicial para as fichas de impressão já nascerem com a data de hoje
+                setTimeout(atualizarEspelhamento, 100); 
+            }
             const btnTheme = document.getElementById('btn-theme-toggle');
             if (btnTheme) {
                 const isDark = document.documentElement.getAttribute('data-theme') === 'dark';

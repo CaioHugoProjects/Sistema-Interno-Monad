@@ -11,6 +11,8 @@
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
+        
+        // Verifica se há login e permite acesso
         const tokenAtivo = localStorage.getItem('monad_token');
         const setorLogado = localStorage.getItem('monad_setor');
         if (!tokenAtivo || !setorLogado || (setorLogado !== "todos" && setorLogado !== "recepcao" && setorLogado !== "admin")) {
@@ -50,12 +52,24 @@
                 <li><a href="index.html">Recepção</a></li>
                 <li><a href="checkin.html" style="background-color: var(--accent) !important; color: white !important;">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
+                <!-- Apenas Admin vê a Base de Dados e o Painel de Controle -->
+                <li id="menu-documentos" style="display: none;"><a href="documentos.html">Gerar ASO</a></li>
+                <li id="menu-cadastros" style="display: none;"><a href="cadastros.html">Base Dados</a></li>
                 <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
             </ul>
         </nav>
         <script>
-            if (localStorage.getItem('monad_setor') === 'admin') {
-                document.getElementById('menu-admin').style.display = 'block';
+            // Adicionado suporte para mostrar o menu de ASO e Base de dados ao Admin e Todos
+            const setorNav = localStorage.getItem('monad_setor');
+            if (setorNav === 'admin' || setorNav === 'todos') {
+                const elDoc = document.getElementById('menu-documentos');
+                const elCad = document.getElementById('menu-cadastros');
+                if (elDoc) elDoc.style.display = 'inline-block';
+                if (elCad) elCad.style.display = 'inline-block';
+            }
+            if (setorNav === 'admin') {
+                const elAdmin = document.getElementById('menu-admin');
+                if (elAdmin) elAdmin.style.display = 'inline-block';
             }
         </script>
     </header>
