@@ -758,17 +758,17 @@
                             let examesStr = [pac.exames_clinicos, pac.exames_raiox, pac.exames_lab].filter(ex => ex && ex !== 'Nenhum' && ex.trim() !== '').join(',');
                             let arrayExames = examesStr ? examesStr.split(',').map(ex => ex.trim()).filter(ex => ex !== '') : [];
                             if(pac.audiometria) arrayExames.push("Audiometria");
-                            if(pac.consulta_clinica) arrayExames.push("Av. clínica");
+                            if(pac.consulta_clinica) arrayExames.push("Av. Clínica Ocupacional");
                             
                             // Adiciona apenas se o checkbox estiver marcado ao abrir
                             if(document.getElementById('chk-imprimir-psico').checked) {
-                                arrayExames.push("Avaliação Psicossocial");
+                                arrayExames.push("Av. Psicossocial");
                             }
 
                             arrayExames = arrayExames.map(exame => {
                                 let nome = exame.trim();
                                 let nomeLower = nome.toLowerCase();
-                                if (nomeLower === 'consulta médica' || nomeLower === 'consulta medica') return 'Av. clínica';
+                                if (nomeLower === 'consulta médica' || nomeLower === 'consulta medica') return 'Av. Clínica Ocupacional';
                                 if (nomeLower.includes('raio') || nomeLower.includes('rx')) return nome;
                                 if (nome.length > 0) return nome.charAt(0).toUpperCase() + nome.slice(1).toLowerCase();
                                 return '';
