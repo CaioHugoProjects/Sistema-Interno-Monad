@@ -131,6 +131,14 @@
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
+            function formatarDataBR(data) {
+                if (!data) return '-';
+                if (data.includes('/')) return data;
+                const partes = String(data).split('T')[0].split('-');
+                if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+                return data;
+            }
+
             async function buscarDados() {
                 if(!inputData.value || !myConfig.flag) return;
                 document.getElementById('msg-carregando').style.display = "block";
@@ -213,10 +221,10 @@
                     const examesListados = myConfig.exames ? pac[myConfig.exames] : myConfig.texto;
                     const concluido = pac[myConfig.lib];
                     const tipoStr = pac.tipo_exame ? `<span style="color:var(--accent); font-weight:600;">${pac.tipo_exame}</span>` : '';
+                    const dataNascFormatada = formatarDataBR(pac.data_nascimento);
                     
                     let btnChamar = "";
                     if (setor === 'consulta') {
-                        // O botão recebe o CPF (para o painel de TV antigo) mas injeta o ID para mapeamento no frontend
                         btnChamar = `
                             <button class="btn-chamar no-print" onclick="chamarPaciente('${pac.nome}', '${pac.cpf}', '${pac.id}')" title="Toca o aviso na Receção">
                                 📢 Chamar Paciente
@@ -235,13 +243,16 @@
 
                     const card = document.createElement('div');
                     card.className = `card-paciente ${concluido ? 'concluido' : ''}`;
-                    card.dataset.id = pac.id; // Alterado para ID
+                    card.dataset.id = pac.id;
                     
                     card.innerHTML = `
                         <div class="info-paciente">
                             <div style="font-size: 18px; font-weight: bold; color: var(--text-strong);">${pac.nome}</div>
-                            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">CPF: ${pac.cpf} • Nasc: ${pac.data_nascimento || '-'}</div>
-                            <div style="font-size: 13px; color: var(--text-main);"><strong>Empresa:</strong> ${pac.empresa} ${tipoStr}</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+                                CPF: ${pac.cpf || '-'} • RG: ${pac.rg || '-'} • Nasc: ${dataNascFormatada}
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-main);"><strong>Empresa:</strong> ${pac.empresa || '-'} ${tipoStr}</div>
+                            <div style="font-size: 13px; color: var(--text-main); margin-top: 3px;"><strong>Função:</strong> ${pac.funcao || '-'}</div>
                             <div style="font-size: 13px; color: var(--text-main); margin-top: 5px;">
                                 <strong>Procedimento(s):</strong> <span style="color: var(--accent); font-weight: 500;">${examesListados}</span>
                             </div>
@@ -290,7 +301,7 @@
             listaDiv.addEventListener('change', async function(e) {
                 if (e.target.classList.contains('cb-liberar-setor')) {
                     const cb = e.target;
-                    const idUnico = cb.dataset.id; // Extração do ID
+                    const idUnico = cb.dataset.id;
                     const liberado = cb.checked;
                     const card = cb.closest('.card-paciente');
                     
@@ -301,7 +312,6 @@
                         const updateObj = {};
                         updateObj[myConfig.lib] = liberado;
 
-                        // UPDATE ESTRITO POR ID
                         const { error } = await supabase.from('atendimentos').update(updateObj).eq('id', idUnico);
                         if (error) throw error;
 
@@ -320,12 +330,11 @@
 
                 if (e.target.classList.contains('obs-setor')) {
                     const obsInput = e.target;
-                    const idUnico = obsInput.dataset.id; // Extração do ID
+                    const idUnico = obsInput.dataset.id;
                     obsInput.disabled = true;
                     obsInput.style.opacity = "0.5";
                     
                     try {
-                        // UPDATE ESTRITO POR ID
                         const { error } = await supabase.from('atendimentos').update({ observacao: obsInput.value }).eq('id', idUnico);
                         if (error) throw error;
 
