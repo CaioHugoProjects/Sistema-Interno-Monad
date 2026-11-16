@@ -174,7 +174,6 @@
 
             setInterval(atualizacaoSilenciosa, 15000);
 
-            // POLLING: Agora mapeia as atualizações de tela puramente pelo ID da chave primária (pac.id)
             async function atualizacaoSilenciosa() {
                 if (document.hidden || !inputData.value) return; 
                 
@@ -191,6 +190,7 @@
                             (p.exames_clinicos && p.exames_clinicos !== 'Nenhum') || 
                             (p.exames_raiox && p.exames_raiox !== 'Nenhum') || 
                             (p.exames_lab && p.exames_lab !== 'Nenhum') || 
+                            (p.exames_extras && p.exames_extras !== 'Nenhum') ||
                             p.audiometria === true || 
                             p.consulta_clinica === true || 
                             p.avaliacao_psicossocial === true
@@ -202,7 +202,6 @@
                         }
                         
                         data.forEach(pac => {
-                            // Encontra a linha exata pela Chave Primária (data-id)
                             const linha = document.querySelector(`tr[data-id="${pac.id}"]`);
                             if (linha) {
                                 const updateCheck = (cls, val) => {
@@ -218,6 +217,16 @@
                                 
                                 const obs = linha.querySelector('.obs-read'); 
                                 if(obs && obs.textContent !== (pac.observacao || '')) obs.textContent = pac.observacao;
+
+                                const extrasBox = linha.querySelector('.extras-read');
+                                const temExtras = pac.exames_extras && pac.exames_extras !== 'Nenhum';
+                                const novoTextoExtras = temExtras
+                                    ? '➕ Extras: ' + pac.exames_extras.split(',').map(i => i.trim()).filter(Boolean).join(', ')
+                                    : '';
+                                if (extrasBox && extrasBox.textContent !== novoTextoExtras) {
+                                    extrasBox.textContent = novoTextoExtras;
+                                    extrasBox.style.display = temExtras ? 'block' : 'none';
+                                }
                                 
                                 verificarStatusFilaLocal(linha);
                             }
@@ -232,17 +241,22 @@
                     const temClinico = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
                     const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
                     const temLab = pac.exames_lab && pac.exames_lab !== 'Nenhum';
+                    const temExtras = pac.exames_extras && pac.exames_extras !== 'Nenhum';
                     const temFono = pac.audiometria === true;
                     const temConsultaMedica = pac.consulta_clinica === true;
                     const temPsicossocial = pac.avaliacao_psicossocial === true;
                     const temConsulta = temConsultaMedica || temPsicossocial;
 
-                    if (!temClinico && !temRaiox && !temLab && !temFono && !temConsulta) return;
+                    if (!temClinico && !temRaiox && !temLab && !temFono && !temConsulta && !temExtras) return;
 
                     let itensConsulta = [];
                     if (temConsultaMedica) itensConsulta.push("Médico do Trabalho");
                     if (temPsicossocial) itensConsulta.push("Avaliação Psicossocial");
                     const textoConsulta = itensConsulta.join(", ");
+
+                    const listaExtrasFormatada = temExtras
+                        ? pac.exames_extras.split(',').map(item => item.trim()).filter(Boolean).join(', ')
+                        : '';
 
                     const cell = (exame, checked, classe) => `
                         <div class="celula-exame">
@@ -268,7 +282,7 @@
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
-                    tr.dataset.id = pac.id; // Alterado de cpf para ID Único
+                    tr.dataset.id = pac.id;
                     tr.dataset.clinico = temClinico;
                     tr.dataset.raiox = temRaiox;
                     tr.dataset.fono = temFono;
@@ -283,6 +297,7 @@
                                 <div style="display: flex; flex-direction: column;">
                                     <span class="col-nome">${pac.nome}</span>
                                     <span style="font-size: 11px; color: var(--text-muted);">CPF: ${pac.cpf || '-'}</span>
+                                    <span class="extras-read" style="font-size: 11px; color: var(--warning); font-weight: 600; display: ${temExtras ? 'block' : 'none'};">${temExtras ? '➕ Extras: ' + listaExtrasFormatada : ''}</span>
                                 </div>
                             </div>
                         </td>

@@ -130,6 +130,7 @@
                 <label class="edit-full">Exames Clínicos: <input type="text" id="edit-ex-clinico"></label>
                 <label class="edit-full">Exames Raio-X: <input type="text" id="edit-ex-raiox"></label>
                 <label class="edit-full">Exames Lab: <input type="text" id="edit-ex-lab"></label>
+                <label class="edit-full">Exames Extras (separados por vírgula): <input type="text" id="edit-ex-extras" placeholder="Ex: Exame 1, Exame 2"></label>
                 
                 <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-fono" style="transform: scale(1.3);"> Tem Fonoaudiologia?</label>
                 <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-consulta" style="transform: scale(1.3);"> Tem Consulta Médica?</label>
@@ -223,7 +224,6 @@
                 document.getElementById('msg-vazio').style.display = "none";
 
                 try {
-                    // Ordenação determinística dupla (created_at + id) evita troca de ordem após edição
                     let query = supabase
                         .from('atendimentos')
                         .select('*')
@@ -280,7 +280,6 @@
                 }
             }
 
-            // Polling sincronizado por ID Único e ordenação fixa
             setInterval(async () => {
                 if (document.hidden || modoBuscaPersonalizada) return;
                 if (document.getElementById('modal-editar').style.display !== 'none') return;
@@ -300,6 +299,7 @@
                             (p.exames_clinicos && p.exames_clinicos !== 'Nenhum') || 
                             (p.exames_raiox && p.exames_raiox !== 'Nenhum') || 
                             (p.exames_lab && p.exames_lab !== 'Nenhum') || 
+                            (p.exames_extras && p.exames_extras !== 'Nenhum') ||
                             p.audiometria || p.consulta_clinica || p.avaliacao_psicossocial
                         );
                         
@@ -345,11 +345,12 @@
                     const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
                     const temFono = pac.audiometria === true;
                     const temLab = pac.exames_lab && pac.exames_lab !== 'Nenhum';
+                    const temExtras = pac.exames_extras && pac.exames_extras !== 'Nenhum';
                     const temConsultaMedica = pac.consulta_clinica === true;
                     const temPsicossocial = pac.avaliacao_psicossocial === true;
                     const temConsulta = temConsultaMedica || temPsicossocial;
 
-                    if (!temClinico && !temRaiox && !temLab && !temFono && !temConsulta) return;
+                    if (!temClinico && !temRaiox && !temLab && !temFono && !temConsulta && !temExtras) return;
 
                     let itensConsulta = [];
                     if (temConsultaMedica) itensConsulta.push("Médico do Trabalho");
@@ -381,6 +382,13 @@
                     const tipoStr = pac.tipo_exame ? (pac.tipo_exame.includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
                     const dataCadastroBR = formatarDataBR(pac.created_at);
                     const dataExameBR = formatarDataBR(pac.data_exame);
+                    
+                    const listaExtrasFormatada = temExtras
+                        ? pac.exames_extras.split(',').map(item => item.trim()).filter(Boolean).join(', ')
+                        : '';
+                    const htmlExtrasColuna = temExtras
+                        ? `<div style="font-size:11px; color:var(--warning); font-weight: 600; margin-top: 3px;">➕ Extras: ${listaExtrasFormatada}</div>`
+                        : '';
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
@@ -392,6 +400,7 @@
                             <div style="font-size:12px; color:var(--accent); font-weight: 600;">📅 Atendimento: ${dataExameBR} | Cadastro: ${dataCadastroBR}</div>
                             <div style="font-size:11px; color:var(--text-muted);">Empresa: ${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></div>
                             <div style="font-size:11px; color:var(--text-muted);">CPF: ${pac.cpf}</div>
+                            ${htmlExtrasColuna}
                         </td>
                         <td style="text-align: center; background:var(--surface-muted);">${tdC}</td>
                         <td style="text-align: center;">${tdR}</td>
@@ -522,6 +531,7 @@
                 document.getElementById('edit-ex-clinico').value = (!pac.exames_clinicos || pac.exames_clinicos === "Nenhum") ? "" : pac.exames_clinicos;
                 document.getElementById('edit-ex-raiox').value = (!pac.exames_raiox || pac.exames_raiox === "Nenhum") ? "" : pac.exames_raiox;
                 document.getElementById('edit-ex-lab').value = (!pac.exames_lab || pac.exames_lab === "Nenhum") ? "" : pac.exames_lab;
+                document.getElementById('edit-ex-extras').value = (!pac.exames_extras || pac.exames_extras === "Nenhum") ? "" : pac.exames_extras;
                 
                 document.getElementById('edit-tem-fono').checked = pac.audiometria;
                 document.getElementById('edit-tem-consulta').checked = pac.consulta_clinica;
@@ -544,6 +554,10 @@
                 }
 
                 const idUnico = document.getElementById('edit-id-unico').value;
+                const extrasRaw = document.getElementById('edit-ex-extras').value;
+                const extrasFormatado = extrasRaw
+                    ? extrasRaw.split(',').map(item => item.trim()).filter(Boolean).join(', ')
+                    : "";
                 
                 const dadosEdicao = {
                     nome: document.getElementById('edit-nome').value,
@@ -557,6 +571,7 @@
                     exames_clinicos: document.getElementById('edit-ex-clinico').value || "Nenhum",
                     exames_raiox: document.getElementById('edit-ex-raiox').value || "Nenhum",
                     exames_lab: document.getElementById('edit-ex-lab').value || "Nenhum",
+                    exames_extras: extrasFormatado || "Nenhum",
                     audiometria: document.getElementById('edit-tem-fono').checked,
                     consulta_clinica: document.getElementById('edit-tem-consulta').checked,
                     avaliacao_psicossocial: document.getElementById('edit-tem-psico').checked

@@ -193,8 +193,14 @@
             </div>
 
             <div class="secao-modal">
-                <div class="secao-titulo">4. Validação de Exames e Datas (e-Social)</div>
-                <p style="font-size: 12px; color: var(--text-muted); margin-top: -5px; margin-bottom: 10px;">Você pode ajustar a data de realização individual e o código e-Social de cada exame.</p>
+                <div class="secao-titulo">4. Validação de Exames, Exames Extras e Datas (e-Social)</div>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: -5px; margin-bottom: 10px;">Você pode ajustar a data de realização individual, o código e-Social ou incluir exames extras (salvos no cadastro do atendimento).</p>
+                
+                <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                    <input type="text" id="in-novo-exame-extra" placeholder="Digite o nome do exame extra para incluir no ASO..." style="flex: 1; min-width: 220px; padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); color: var(--text-strong); font-size: 13px;">
+                    <button type="button" id="btn-add-exame-extra-modal" style="background: var(--accent); color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">+ Incluir Exame Extra</button>
+                </div>
+
                 <div id="container-esocial-modal" style="display: flex; flex-direction: column; gap: 8px;">
                     <!-- Linhas geradas dinamicamente aqui via JavaScript -->
                 </div>
@@ -212,7 +218,7 @@
 
             <div style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">
                 <button onclick="fecharModalDocs()" style="padding:10px 15px; border-radius:5px; border:1px solid var(--border-strong); background:var(--surface-muted); color: var(--text-strong); cursor:pointer; font-weight:bold;">Cancelar</button>
-                <button id="btn-confirmar-impressao" style="padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size: 15px;">🖨️ Imprimir Documentos</button>
+                <button id="btn-confirmar-impressao" style="padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size: 15px;">🖨️ Salvar e Imprimir Documentos</button>
             </div>
         </div>
     </div>
@@ -603,17 +609,67 @@
                 return data.split('T')[0];
             }
 
-            function criarHtmlLinhaExame(exameNome, selectOptions, dataISO) {
+            function gerarOpcoesEsocial(exameNome) {
+                const normalizedBusca = normalizarTexto(exameNome);
+                const isPsico = normalizedBusca.includes('psicossocial');
+                let selectOptions = '<option value="">-- Selecione o código correspondente --</option>';
+                if (window.dbEsocial) {
+                    window.dbEsocial.forEach(eso => {
+                        const normalizedEso = normalizarTexto(eso.exame_nome);
+                        let isMatch = false;
+                        if (isPsico && normalizedEso.includes('psicossocial')) {
+                            isMatch = true;
+                        } else if (normalizedEso === normalizedBusca) {
+                            isMatch = true;
+                        }
+                        selectOptions += `<option value="${eso.codigo}" ${isMatch ? 'selected' : ''}>${eso.exame_nome} (Cód: ${eso.codigo})</option>`;
+                    });
+                }
+                return selectOptions;
+            }
+
+            function criarHtmlLinhaExame(exameNome, selectOptions, dataISO, isExtra = false) {
+                const badgeExtra = isExtra ? `<span style="background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; white-space: nowrap;">EXTRA</span>` : '';
+                const btnRemover = isExtra ? `<button type="button" onclick="this.closest('.esocial-linha').remove()" title="Remover exame extra" style="background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>` : '';
+
                 return `
-                    <div class="esocial-linha" style="display: flex; gap: 8px; align-items: center; background: var(--surface); padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; flex-wrap: wrap;">
-                        <input type="text" class="eso-nome-print" value="${exameNome}" style="flex: 2; min-width: 160px; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface-muted); color: var(--text-strong);" readonly>
+                    <div class="esocial-linha" data-extra="${isExtra}" style="display: flex; gap: 8px; align-items: center; background: var(--surface); padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; flex-wrap: wrap;">
+                        ${badgeExtra}
+                        <input type="text" class="eso-nome-print" value="${exameNome}" style="flex: 2; min-width: 150px; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: ${isExtra ? 'var(--surface)' : 'var(--surface-muted)'}; color: var(--text-strong);" ${isExtra ? '' : 'readonly'}>
                         <input type="date" class="eso-data-print" value="${dataISO}" title="Data de realização deste exame" style="flex: 1; min-width: 130px; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); color: var(--text-strong);">
                         <select class="eso-codigo-print" style="flex: 2; min-width: 180px; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); color: var(--text-strong);">
                             ${selectOptions}
                         </select>
+                        ${btnRemover}
                     </div>
                 `;
             }
+
+            // Adicionar exame extra individualmente no modal
+            function incluirExameExtraNoModal() {
+                const inputExtra = document.getElementById('in-novo-exame-extra');
+                const nomeBruto = inputExtra.value.trim();
+                if (!nomeBruto) return;
+
+                const containerEso = document.getElementById('container-esocial-modal');
+                const pVazio = containerEso.querySelector('p');
+                if (pVazio) pVazio.remove();
+
+                const dataBaseISO = document.getElementById('in-data-aso').value || new Date().toISOString().split('T')[0];
+                const opcoes = gerarOpcoesEsocial(nomeBruto);
+                containerEso.insertAdjacentHTML('beforeend', criarHtmlLinhaExame(nomeBruto, opcoes, dataBaseISO, true));
+
+                inputExtra.value = '';
+                inputExtra.focus();
+            }
+
+            document.getElementById('btn-add-exame-extra-modal').addEventListener('click', incluirExameExtraNoModal);
+            document.getElementById('in-novo-exame-extra').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    incluirExameExtraNoModal();
+                }
+            });
 
             inputData.value = new Date().toISOString().split('T')[0];
 
@@ -683,17 +739,11 @@
                     });
                     if(!exists) {
                         const nomeExame = "Avaliação Psicossocial";
-                        let selectOptions = '<option value="">-- Selecione o código correspondente --</option>';
-                        if(window.dbEsocial) {
-                            window.dbEsocial.forEach(eso => {
-                                const isMatch = normalizarTexto(eso.exame_nome).includes('psicossocial');
-                                selectOptions += `<option value="${eso.codigo}" ${isMatch ? 'selected' : ''}>${eso.exame_nome} (Cód: ${eso.codigo})</option>`;
-                            });
-                        }
+                        const selectOptions = gerarOpcoesEsocial(nomeExame);
                         const p = containerEso.querySelector('p');
                         if(p) p.remove();
                         
-                        containerEso.insertAdjacentHTML('beforeend', criarHtmlLinhaExame(nomeExame, selectOptions, dataBaseISO));
+                        containerEso.insertAdjacentHTML('beforeend', criarHtmlLinhaExame(nomeExame, selectOptions, dataBaseISO, false));
                     }
                 } else {
                     containerEso.querySelectorAll('.eso-nome-print').forEach(inp => {
@@ -778,6 +828,7 @@
 
                             document.getElementById('in-funcao').value = pac.funcao || '';
                             document.getElementById('in-data-aso').value = dataExameISO;
+                            document.getElementById('in-novo-exame-extra').value = '';
 
                             // Carrega riscos e NRs estritamente da empresa identificada
                             aplicarDadosFuncaoPorEmpresa(pac.funcao, window.empresaIdAtualModal);
@@ -807,29 +858,22 @@
                                 return '';
                             }).filter(ex => ex !== '');
 
+                            // Lê os exames extras já salvos no banco (separados por vírgula)
+                            let arrayExtras = (pac.exames_extras && pac.exames_extras !== 'Nenhum' && pac.exames_extras.trim() !== '')
+                                ? pac.exames_extras.split(',').map(ex => ex.trim()).filter(ex => ex !== '')
+                                : [];
+
                             const containerEso = document.getElementById('container-esocial-modal');
                             containerEso.innerHTML = '';
 
-                            if(arrayExames.length === 0) {
+                            if(arrayExames.length === 0 && arrayExtras.length === 0) {
                                 containerEso.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">Nenhum exame adicional registado no check-in.</p>';
                             } else {
                                 arrayExames.forEach((exameNome) => {
-                                    const normalizedBusca = normalizarTexto(exameNome);
-                                    const isPsico = normalizedBusca.includes('psicossocial');
-                                    
-                                    let selectOptions = '<option value="">-- Selecione o código correspondente --</option>';
-                                    esocialDB.forEach(eso => {
-                                        const normalizedEso = normalizarTexto(eso.exame_nome);
-                                        let isMatch = false;
-                                        if (isPsico && normalizedEso.includes('psicossocial')) {
-                                            isMatch = true;
-                                        } else if (normalizedEso === normalizedBusca) {
-                                            isMatch = true;
-                                        }
-                                        selectOptions += `<option value="${eso.codigo}" ${isMatch ? 'selected' : ''}>${eso.exame_nome} (Cód: ${eso.codigo})</option>`;
-                                    });
-
-                                    containerEso.innerHTML += criarHtmlLinhaExame(exameNome, selectOptions, dataExameISO);
+                                    containerEso.innerHTML += criarHtmlLinhaExame(exameNome, gerarOpcoesEsocial(exameNome), dataExameISO, false);
+                                });
+                                arrayExtras.forEach((exameExtraNome) => {
+                                    containerEso.innerHTML += criarHtmlLinhaExame(exameExtraNome, gerarOpcoesEsocial(exameExtraNome), dataExameISO, true);
                                 });
                             }
 
@@ -849,9 +893,10 @@
                 window.empresaIdAtualModal = null;
             };
 
-            document.getElementById('btn-confirmar-impressao').addEventListener('click', () => {
+            document.getElementById('btn-confirmar-impressao').addEventListener('click', async () => {
                 if(!pacienteSelecionadoParaImpressao) return;
                 const pac = pacienteSelecionadoParaImpressao;
+                const btnImprimir = document.getElementById('btn-confirmar-impressao');
                 
                 const dataAsoInputVal = document.getElementById('in-data-aso').value;
                 const dataAsoBR = dataAsoInputVal ? formatarDataBR(dataAsoInputVal) : formatarDataBR(pac.data_exame);
@@ -886,13 +931,43 @@
 
                 const linhasEsocial = document.querySelectorAll('#container-esocial-modal .esocial-linha');
                 let examesFinais = [];
+                let listaNomesExtrasParaBanco = [];
+
                 linhasEsocial.forEach(linha => {
-                    const nomeStr = linha.querySelector('.eso-nome-print').value;
+                    const nomeStr = linha.querySelector('.eso-nome-print').value.trim();
+                    if (!nomeStr) return;
+
+                    const isExtra = linha.dataset.extra === 'true';
+                    if (isExtra) {
+                        listaNomesExtrasParaBanco.push(nomeStr);
+                    }
+
                     const dataIndivVal = linha.querySelector('.eso-data-print')?.value;
                     const dataIndivBR = dataIndivVal ? formatarDataBR(dataIndivVal) : dataAsoBR;
                     const codigoStr = linha.querySelector('.eso-codigo-print').value || '______';
                     examesFinais.push({ nome: nomeStr, data: dataIndivBR, codigo: codigoStr });
                 });
+
+                const textoExtrasBanco = listaNomesExtrasParaBanco.length > 0 ? listaNomesExtrasParaBanco.join(', ') : 'Nenhum';
+
+                btnImprimir.textContent = "⏳ A gravar exames extras...";
+                btnImprimir.disabled = true;
+
+                try {
+                    const { error } = await supabase
+                        .from('atendimentos')
+                        .update({ exames_extras: textoExtrasBanco })
+                        .eq('id', pac.id);
+
+                    if (error) throw error;
+                    pac.exames_extras = textoExtrasBanco;
+                } catch (err) {
+                    console.error("Erro ao salvar exames extras:", err);
+                    alert("⚠️ Não foi possível salvar os exames extras no banco de dados (" + err.message + "), mas o documento será gerado.");
+                } finally {
+                    btnImprimir.textContent = "🖨️ Salvar e Imprimir Documentos";
+                    btnImprimir.disabled = false;
+                }
 
                 const temPsico = examesFinais.some(ex => normalizarTexto(ex.nome).includes('psicossocial'));
                 
