@@ -487,7 +487,7 @@
     <script src="js/supabase.js"></script>
 
     <script>
-        function adicionarLinhaNrModal(nome = "", status = "") {
+        function adicionarLinhaNrModal(nome = "", status = "aplica") {
             const container = document.getElementById('container-nrs-modal');
             const novaLinha = document.createElement('div');
             novaLinha.className = 'nr-linha-modal';
@@ -530,7 +530,7 @@
                 document.getElementById('in-r-psicossocial').value = funcMatch.risco_psicossocial || 'Ausência de fatores de risco';
                 try {
                     let nrsArray = typeof funcMatch.nrs_aplicaveis === 'string' ? JSON.parse(funcMatch.nrs_aplicaveis) : funcMatch.nrs_aplicaveis;
-                    if (nrsArray && nrsArray.length > 0) nrsArray.forEach(nr => adicionarLinhaNrModal(nr.nome, nr.status));
+                    if (nrsArray && nrsArray.length > 0) nrsArray.forEach(nr => adicionarLinhaNrModal(nr.nome, nr.status || 'aplica'));
                 } catch(err) {}
             } else {
                 document.getElementById('in-r-fisico').value = 'Ausência de fatores de risco';
