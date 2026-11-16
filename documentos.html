@@ -50,7 +50,7 @@
 
         .area-documentos { display: none; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .modal-box { background: var(--surface); padding: 25px; border-radius: 8px; width: 95%; max-width: 800px; max-height: 95vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 2px solid var(--accent); }
+        .modal-box { background: var(--surface); padding: 25px; border-radius: 8px; width: 95%; max-width: 850px; max-height: 95vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 2px solid var(--accent); }
         .modal-box h3 { color: var(--accent); margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid var(--border-strong); padding-bottom: 10px; }
         .grid-docs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .grid-docs label { font-size: 13px; font-weight: bold; color: var(--text-strong); display: flex; flex-direction: column; gap: 5px; }
@@ -58,6 +58,10 @@
         .secao-modal { background: var(--surface-muted); padding: 15px; border-radius: 6px; border: 1px solid var(--border-strong); margin-bottom: 15px; }
         .secao-titulo { font-size: 14px; font-weight: bold; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase; }
         .nr-linha-modal { display: flex; gap: 10px; align-items: center; background: var(--surface); padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; margin-bottom: 8px; }
+        
+        @media (max-width: 650px) {
+            .esocial-linha { flex-direction: column; align-items: stretch !important; }
+        }
     </style>
 </head>
 <body>
@@ -143,7 +147,8 @@
                     
                     <label for="in-funcao" style="grid-column: span 2;">Função do Colaborador: <input type="text" id="in-funcao" placeholder="Ex: MOTORISTA"></label>
                     
-                    <label for="in-setor" style="grid-column: span 2;">Setor de Trabalho: <input type="text" id="in-setor" placeholder="Ex: Manutenção"></label>
+                    <label for="in-setor">Setor de Trabalho: <input type="text" id="in-setor" placeholder="Ex: Manutenção"></label>
+                    <label for="in-data-aso">Data de Realização do ASO: <input type="date" id="in-data-aso"></label>
                     <label for="in-medico-pcmso" style="grid-column: span 2;">Médico(a) Coordenador(a) PCMSO: <input type="text" id="in-medico-pcmso" value="Dra. Morganna Bárbara Lopes Dantas CRM -16.560/PA"></label>
                     <div style="display: flex; gap: 15px; grid-column: span 2;">
                         <label for="in-sexo" style="flex: 1;">Sexo: 
@@ -188,8 +193,8 @@
             </div>
 
             <div class="secao-modal">
-                <div class="secao-titulo">4. Validação de Exames (e-Social)</div>
-                <p style="font-size: 12px; color: var(--text-muted); margin-top: -5px; margin-bottom: 10px;">O sistema listou os exames feitos na Receção e tentou identificar o código. Pode alterar se necessário.</p>
+                <div class="secao-titulo">4. Validação de Exames e Datas (e-Social)</div>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: -5px; margin-bottom: 10px;">Você pode ajustar a data de realização individual e o código e-Social de cada exame.</p>
                 <div id="container-esocial-modal" style="display: flex; flex-direction: column; gap: 8px;">
                     <!-- Linhas geradas dinamicamente aqui via JavaScript -->
                 </div>
@@ -589,6 +594,27 @@
                 return data;
             }
 
+            function formatarDataParaInput(data) {
+                if (!data) return new Date().toISOString().split('T')[0];
+                if (data.includes('/')) {
+                    const partes = data.split('/');
+                    if (partes.length === 3) return `${partes[2]}-${partes[1]}-${partes[0]}`;
+                }
+                return data.split('T')[0];
+            }
+
+            function criarHtmlLinhaExame(exameNome, selectOptions, dataISO) {
+                return `
+                    <div class="esocial-linha" style="display: flex; gap: 8px; align-items: center; background: var(--surface); padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; flex-wrap: wrap;">
+                        <input type="text" class="eso-nome-print" value="${exameNome}" style="flex: 2; min-width: 160px; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface-muted); color: var(--text-strong);" readonly>
+                        <input type="date" class="eso-data-print" value="${dataISO}" title="Data de realização deste exame" style="flex: 1; min-width: 130px; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); color: var(--text-strong);">
+                        <select class="eso-codigo-print" style="flex: 2; min-width: 180px; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); color: var(--text-strong);">
+                            ${selectOptions}
+                        </select>
+                    </div>
+                `;
+            }
+
             inputData.value = new Date().toISOString().split('T')[0];
 
             window.executarBusca = async function(tipo) {
@@ -648,6 +674,7 @@
 
             document.getElementById('chk-imprimir-psico').addEventListener('change', function(e) {
                 const containerEso = document.getElementById('container-esocial-modal');
+                const dataBaseISO = document.getElementById('in-data-aso').value || new Date().toISOString().split('T')[0];
                 
                 if (this.checked) {
                     let exists = false;
@@ -666,14 +693,7 @@
                         const p = containerEso.querySelector('p');
                         if(p) p.remove();
                         
-                        containerEso.insertAdjacentHTML('beforeend', `
-                            <div class="esocial-linha" style="display: flex; gap: 10px; align-items: center; background: var(--surface); padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px;">
-                                <input type="text" class="eso-nome-print" value="${nomeExame}" style="flex: 1; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface-muted); color: var(--text-strong);" readonly>
-                                <select class="eso-codigo-print" style="flex: 2; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); color: var(--text-strong);">
-                                    ${selectOptions}
-                                </select>
-                            </div>
-                        `);
+                        containerEso.insertAdjacentHTML('beforeend', criarHtmlLinhaExame(nomeExame, selectOptions, dataBaseISO));
                     }
                 } else {
                     containerEso.querySelectorAll('.eso-nome-print').forEach(inp => {
@@ -725,6 +745,7 @@
                     
                     if (pacienteSelecionadoParaImpressao) {
                         const pac = pacienteSelecionadoParaImpressao;
+                        const dataExameISO = formatarDataParaInput(pac.data_exame);
                         document.getElementById('msg-carregando').style.display = "block";
                         window.empresaIdAtualModal = null;
                         
@@ -756,6 +777,7 @@
                             }
 
                             document.getElementById('in-funcao').value = pac.funcao || '';
+                            document.getElementById('in-data-aso').value = dataExameISO;
 
                             // Carrega riscos e NRs estritamente da empresa identificada
                             aplicarDadosFuncaoPorEmpresa(pac.funcao, window.empresaIdAtualModal);
@@ -807,14 +829,7 @@
                                         selectOptions += `<option value="${eso.codigo}" ${isMatch ? 'selected' : ''}>${eso.exame_nome} (Cód: ${eso.codigo})</option>`;
                                     });
 
-                                    containerEso.innerHTML += `
-                                        <div class="esocial-linha" style="display: flex; gap: 10px; align-items: center; background: var(--surface); padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px;">
-                                            <input type="text" class="eso-nome-print" value="${exameNome}" style="flex: 1; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface-muted); color: var(--text-strong);" readonly>
-                                            <select class="eso-codigo-print" style="flex: 2; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); color: var(--text-strong);">
-                                                ${selectOptions}
-                                            </select>
-                                        </div>
-                                    `;
+                                    containerEso.innerHTML += criarHtmlLinhaExame(exameNome, selectOptions, dataExameISO);
                                 });
                             }
 
@@ -837,7 +852,9 @@
             document.getElementById('btn-confirmar-impressao').addEventListener('click', () => {
                 if(!pacienteSelecionadoParaImpressao) return;
                 const pac = pacienteSelecionadoParaImpressao;
-                const dataExameBR = formatarDataBR(pac.data_exame);
+                
+                const dataAsoInputVal = document.getElementById('in-data-aso').value;
+                const dataAsoBR = dataAsoInputVal ? formatarDataBR(dataAsoInputVal) : formatarDataBR(pac.data_exame);
 
                 const docPsico = document.getElementById('doc-psicossocial');
                 const imprimirPsico = document.getElementById('chk-imprimir-psico').checked;
@@ -865,14 +882,16 @@
                 if (tipoExameLimpo.length > 0) tipoExameLimpo = tipoExameLimpo.charAt(0).toUpperCase() + tipoExameLimpo.slice(1).toLowerCase();
                 document.querySelectorAll('.out-tipo').forEach(el => el.textContent = tipoExameLimpo);
 
-                document.querySelectorAll('.out-data').forEach(el => el.textContent = dataExameBR);
+                document.querySelectorAll('.out-data').forEach(el => el.textContent = dataAsoBR);
 
                 const linhasEsocial = document.querySelectorAll('#container-esocial-modal .esocial-linha');
                 let examesFinais = [];
                 linhasEsocial.forEach(linha => {
                     const nomeStr = linha.querySelector('.eso-nome-print').value;
+                    const dataIndivVal = linha.querySelector('.eso-data-print')?.value;
+                    const dataIndivBR = dataIndivVal ? formatarDataBR(dataIndivVal) : dataAsoBR;
                     const codigoStr = linha.querySelector('.eso-codigo-print').value || '______';
-                    examesFinais.push({ nome: nomeStr, codigo: codigoStr });
+                    examesFinais.push({ nome: nomeStr, data: dataIndivBR, codigo: codigoStr });
                 });
 
                 const temPsico = examesFinais.some(ex => normalizarTexto(ex.nome).includes('psicossocial'));
@@ -883,7 +902,7 @@
                         const match = window.dbEsocial.find(e => normalizarTexto(e.exame_nome).includes('psicossocial'));
                         if (match) codPsico = match.codigo;
                     }
-                    examesFinais.push({ nome: 'Avaliação Psicossocial', codigo: codPsico });
+                    examesFinais.push({ nome: 'Avaliação Psicossocial', data: dataAsoBR, codigo: codPsico });
                 } else if (!imprimirPsico && temPsico) {
                     examesFinais = examesFinais.filter(ex => !normalizarTexto(ex.nome).includes('psicossocial'));
                 }
@@ -892,17 +911,17 @@
                 let htmlExamesGrade = '';
 
                 for(let r = 0; r < totalLinhas; r++) {
-                    let ex1 = examesFinais[r * 2] || { nome: '', codigo: '' };
-                    let ex2 = examesFinais[r * 2 + 1] || { nome: '', codigo: '' };
+                    let ex1 = examesFinais[r * 2] || { nome: '', data: '', codigo: '' };
+                    let ex2 = examesFinais[r * 2 + 1] || { nome: '', data: '', codigo: '' };
                     
                     htmlExamesGrade += `
                         <tr>
                             <td style="width: 25%; padding: 2px 4px; border:none; border-bottom: 1px dashed #e5e5e5; font-size: 11pt;">${ex1.nome || '&nbsp;'}</td>
-                            <td style="width: 15%; padding: 2px 4px; border:none; border-bottom: 1px dashed #e5e5e5; font-size: 11pt;">${ex1.nome ? dataExameBR : '&nbsp;'}</td>
+                            <td style="width: 15%; padding: 2px 4px; border:none; border-bottom: 1px dashed #e5e5e5; font-size: 11pt;">${ex1.nome ? ex1.data : '&nbsp;'}</td>
                             <td style="width: 10%; padding: 2px 4px; border:none; border-bottom: 1px dashed #e5e5e5; border-right: 1px dashed #ccc; font-size: 11pt;">${ex1.nome ? (ex1.codigo !== '______' ? 'Cód. ' + ex1.codigo : 'Cód. ______') : '&nbsp;'}</td>
                             
                             <td style="width: 25%; padding: 2px 4px 2px 10px; border:none; border-bottom: 1px dashed #e5e5e5; font-size: 11pt;">${ex2.nome || '&nbsp;'}</td>
-                            <td style="width: 15%; padding: 2px 4px; border:none; border-bottom: 1px dashed #e5e5e5; font-size: 11pt;">${ex2.nome ? dataExameBR : '&nbsp;'}</td>
+                            <td style="width: 15%; padding: 2px 4px; border:none; border-bottom: 1px dashed #e5e5e5; font-size: 11pt;">${ex2.nome ? ex2.data : '&nbsp;'}</td>
                             <td style="width: 10%; padding: 2px 4px; border:none; border-bottom: 1px dashed #e5e5e5; font-size: 11pt;">${ex2.nome ? (ex2.codigo !== '______' ? 'Cód. ' + ex2.codigo : 'Cód. ______') : '&nbsp;'}</td>
                         </tr>
                     `;
