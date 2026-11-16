@@ -110,7 +110,7 @@
             </div>
         </div>
 
-        <!-- ÁREA DE IMPRESSÃO (Mantida Intacta para o script.js agir) -->
+        <!-- ÁREA DE IMPRESSÃO -->
         <div class="area-impressao">
             <div class="ficha-setor" id="setor-clinico">
                 <div class="cabecalho-setor">
@@ -203,6 +203,14 @@
             
             let databasePacientes = []; 
 
+            function formatarDataBR(data) {
+                if (!data) return '-';
+                if (data.includes('/')) return data;
+                const partes = String(data).split('T')[0].split('-');
+                if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+                return data;
+            }
+
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
@@ -258,17 +266,17 @@
                     const resumoSetores = setores.length > 0 ? setores.join(", ") : "Nenhum exame marcado";
 
                     const tipoStr = pac.tipo_exame ? (pac.tipo_exame.includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
-                    const dataNascimento = pac.data_nascimento || '-';
+                    const dataNascimentoBR = formatarDataBR(pac.data_nascimento);
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
-                    tr.dataset.id = pac.id; // Chave primária atrelada à linha
+                    tr.dataset.id = pac.id;
                     
                     tr.innerHTML = `
                         <td><span class="tag-empresa">${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></span></td>
                         <td>
                             <div style="font-weight: bold; font-size: 15px; color:var(--text-strong);">${pac.nome}</div>
-                            <div style="font-size: 12px; color:var(--text-muted);">${pac.funcao || '-'} • Nasc: ${dataNascimento}</div>
+                            <div style="font-size: 12px; color:var(--text-muted);">${pac.funcao || '-'} • Nasc: ${dataNascimentoBR}</div>
                         </td>
                         <td>
                             <div style="font-size: 13px; color:var(--text-main);"><strong>CPF:</strong> ${pac.cpf}</div>
@@ -299,7 +307,6 @@
             document.getElementById('btn-buscar-data').addEventListener('click', buscarPacientesDoBanco);
             buscarPacientesDoBanco();
 
-            // NOVA FUNÇÃO DE IMPRESSÃO: Usa o ID Único para encontrar os dados
             window.imprimirFichaPeloId = function(idUnico) {
                 const pac = databasePacientes.find(p => p.id == idUnico);
                 if(!pac) {
@@ -307,11 +314,8 @@
                     return;
                 }
 
-                let dataParaImpressao = pac.data_exame;
-                if (dataParaImpressao && dataParaImpressao.includes('-')) {
-                    const p = dataParaImpressao.split('-');
-                    if (p.length === 3) dataParaImpressao = `${p[2]}/${p[1]}/${p[0]}`;
-                }
+                const dataParaImpressao = formatarDataBR(pac.data_exame);
+                const dataNascimentoImpressao = formatarDataBR(pac.data_nascimento);
 
                 const tipoFormatado = pac.tipo_exame ? (pac.tipo_exame.includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
                 const empresaFormatada = pac.empresa + (tipoFormatado ? ` ${tipoFormatado}` : '');
@@ -319,11 +323,11 @@
                 document.querySelectorAll('.out-empresa').forEach(el => el.textContent = empresaFormatada);
                 document.querySelectorAll('.out-nome').forEach(el => el.textContent = pac.nome);
                 document.querySelectorAll('.out-funcao').forEach(el => el.textContent = pac.funcao || '');
-                document.querySelectorAll('.out-dn').forEach(el => el.textContent = pac.data_nascimento || '-');
+                document.querySelectorAll('.out-dn').forEach(el => el.textContent = dataNascimentoImpressao);
                 document.querySelectorAll('.out-cpf').forEach(el => el.textContent = pac.cpf);
                 document.querySelectorAll('.out-rg').forEach(el => el.textContent = pac.rg || '');
                 document.querySelectorAll('.out-telefone').forEach(el => el.textContent = pac.telefone || '');
-                document.querySelectorAll('.out-data').forEach(el => el.textContent = dataParaImpressao || '-');
+                document.querySelectorAll('.out-data').forEach(el => el.textContent = dataParaImpressao);
 
                 function renderizarLista(idElemento, stringExames) {
                     const ul = document.getElementById(idElemento);

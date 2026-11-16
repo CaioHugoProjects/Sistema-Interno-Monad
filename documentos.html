@@ -199,7 +199,7 @@
                 <div class="secao-titulo">5. Opções de Impressão</div>
                 <div style="background: var(--surface); padding: 10px 15px; border: 1px solid var(--border-strong); border-radius: 4px;">
                     <label for="chk-imprimir-psico" style="display: flex; flex-direction: row; align-items: center; gap: 10px; cursor: pointer; margin: 0;">
-                        <input type="checkbox" id="chk-imprimir-psico" checked style="width: 18px; height: 18px; cursor: pointer;">
+                        <input type="checkbox" id="chk-imprimir-psico" style="width: 18px; height: 18px; cursor: pointer;">
                         <span style="font-size: 14px; color: var(--text-strong);">Imprimir formulário de Avaliação Psicossocial (Página do Paciente e Parecer Médico)</span>
                     </label>
                 </div>
@@ -509,7 +509,42 @@
             return String(texto).trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         };
 
+        // Busca estrita: só aplica riscos e NRs se a função pertencer exatamente à empresa vinculada
+        function aplicarDadosFuncaoPorEmpresa(nomeFuncao, empresaId) {
+            const nomeFuncaoBusca = normalizarTexto(nomeFuncao);
+            const funcMatch = (window.dbFuncoes && empresaId && nomeFuncaoBusca)
+                ? window.dbFuncoes.find(f =>
+                    String(f.empresa_id) === String(empresaId) &&
+                    normalizarTexto(f.nome_funcao) === nomeFuncaoBusca
+                )
+                : null;
+
+            document.getElementById('container-nrs-modal').innerHTML = '';
+
+            if (funcMatch) {
+                document.getElementById('in-r-fisico').value = funcMatch.risco_fisico || 'Ausência de fatores de risco';
+                document.getElementById('in-r-quimico').value = funcMatch.risco_quimico || 'Ausência de fatores de risco';
+                document.getElementById('in-r-biologico').value = funcMatch.risco_biologico || 'Ausência de fatores de risco';
+                document.getElementById('in-r-ergonomico').value = funcMatch.risco_ergonomico || 'Ausência de fatores de risco';
+                document.getElementById('in-r-acidente').value = funcMatch.risco_acidente || 'Ausência de fatores de risco';
+                document.getElementById('in-r-psicossocial').value = funcMatch.risco_psicossocial || 'Ausência de fatores de risco';
+                try {
+                    let nrsArray = typeof funcMatch.nrs_aplicaveis === 'string' ? JSON.parse(funcMatch.nrs_aplicaveis) : funcMatch.nrs_aplicaveis;
+                    if (nrsArray && nrsArray.length > 0) nrsArray.forEach(nr => adicionarLinhaNrModal(nr.nome, nr.status));
+                } catch(err) {}
+            } else {
+                document.getElementById('in-r-fisico').value = 'Ausência de fatores de risco';
+                document.getElementById('in-r-quimico').value = 'Ausência de fatores de risco';
+                document.getElementById('in-r-biologico').value = 'Ausência de fatores de risco';
+                document.getElementById('in-r-ergonomico').value = 'Ausência de fatores de risco';
+                document.getElementById('in-r-acidente').value = 'Ausência de fatores de risco';
+                document.getElementById('in-r-psicossocial').value = 'Ausência de fatores de risco';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
+            window.empresaIdAtualModal = null;
+
             const btnTheme = document.getElementById('btn-theme-toggle');
             if (btnTheme) {
                 const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -608,45 +643,23 @@
             executarBusca('data'); 
 
             document.getElementById('in-funcao').addEventListener('input', (e) => {
-                const nomeFuncaoBusca = normalizarTexto(e.target.value);
-                const funcMatch = window.dbFuncoes ? window.dbFuncoes.find(f => normalizarTexto(f.nome_funcao) === nomeFuncaoBusca) : null;
-                
-                document.getElementById('container-nrs-modal').innerHTML = ''; 
-                if (funcMatch) {
-                    document.getElementById('in-r-fisico').value = funcMatch.risco_fisico || 'Ausência de fatores de risco';
-                    document.getElementById('in-r-quimico').value = funcMatch.risco_quimico || 'Ausência de fatores de risco';
-                    document.getElementById('in-r-biologico').value = funcMatch.risco_biologico || 'Ausência de fatores de risco';
-                    document.getElementById('in-r-ergonomico').value = funcMatch.risco_ergonomico || 'Ausência de fatores de risco';
-                    document.getElementById('in-r-acidente').value = funcMatch.risco_acidente || 'Ausência de fatores de risco';
-                    document.getElementById('in-r-psicossocial').value = funcMatch.risco_psicossocial || 'Ausência de fatores de risco';
-                    try {
-                        let nrsArray = typeof funcMatch.nrs_aplicaveis === 'string' ? JSON.parse(funcMatch.nrs_aplicaveis) : funcMatch.nrs_aplicaveis;
-                        if (nrsArray && nrsArray.length > 0) nrsArray.forEach(nr => adicionarLinhaNrModal(nr.nome, nr.status));
-                    } catch(err) {}
-                } else {
-                    document.getElementById('in-r-fisico').value = 'Ausência de fatores de risco';
-                    document.getElementById('in-r-quimico').value = 'Ausência de fatores de risco';
-                    document.getElementById('in-r-biologico').value = 'Ausência de fatores de risco';
-                    document.getElementById('in-r-ergonomico').value = 'Ausência de fatores de risco';
-                    document.getElementById('in-r-acidente').value = 'Ausência de fatores de risco';
-                    document.getElementById('in-r-psicossocial').value = 'Ausência de fatores de risco';
-                }
+                aplicarDadosFuncaoPorEmpresa(e.target.value, window.empresaIdAtualModal);
             });
 
             document.getElementById('chk-imprimir-psico').addEventListener('change', function(e) {
                 const containerEso = document.getElementById('container-esocial-modal');
-                const nomeExame = "Avaliação Psicossocial";
+                
                 if (this.checked) {
                     let exists = false;
                     containerEso.querySelectorAll('.eso-nome-print').forEach(inp => {
-                        if(inp.value === nomeExame) exists = true;
+                        if(normalizarTexto(inp.value).includes('psicossocial')) exists = true;
                     });
                     if(!exists) {
-                        const normalizedBusca = normalizarTexto(nomeExame);
+                        const nomeExame = "Avaliação Psicossocial";
                         let selectOptions = '<option value="">-- Selecione o código correspondente --</option>';
                         if(window.dbEsocial) {
                             window.dbEsocial.forEach(eso => {
-                                const isMatch = normalizarTexto(eso.exame_nome) === normalizedBusca;
+                                const isMatch = normalizarTexto(eso.exame_nome).includes('psicossocial');
                                 selectOptions += `<option value="${eso.codigo}" ${isMatch ? 'selected' : ''}>${eso.exame_nome} (Cód: ${eso.codigo})</option>`;
                             });
                         }
@@ -664,7 +677,7 @@
                     }
                 } else {
                     containerEso.querySelectorAll('.eso-nome-print').forEach(inp => {
-                        if(inp.value === nomeExame) {
+                        if(normalizarTexto(inp.value).includes('psicossocial')) {
                             inp.closest('.esocial-linha').remove();
                         }
                     });
@@ -676,13 +689,20 @@
 
             document.getElementById('in-empresa').addEventListener('change', async (e) => {
                 const nomeSelecionado = normalizarTexto(e.target.value);
-                if (!nomeSelecionado) return;
+                window.empresaIdAtualModal = null;
+
+                if (!nomeSelecionado) {
+                    aplicarDadosFuncaoPorEmpresa(document.getElementById('in-funcao').value, null);
+                    return;
+                }
+
                 document.getElementById('in-cnpj').placeholder = "Buscando...";
                 try {
                     const { data } = await supabase.from('empresas_base').select('*');
                     if (data) {
                         const empMatch = data.find(emp => normalizarTexto(emp.nome_fantasia) === nomeSelecionado || normalizarTexto(emp.razao_social) === nomeSelecionado);
                         if (empMatch) {
+                            window.empresaIdAtualModal = empMatch.id;
                             document.getElementById('in-cnpj').value = empMatch.cnpj || '';
                             if (empMatch.medico_coordenador) document.getElementById('in-medico-pcmso').value = empMatch.medico_coordenador;
                         } else {
@@ -690,7 +710,11 @@
                             document.getElementById('in-cnpj').placeholder = "00.000.000/0000-00";
                         }
                     }
-                } catch (err) { console.error("Erro ao buscar detalhes da empresa", err); }
+                } catch (err) {
+                    console.error("Erro ao buscar detalhes da empresa", err);
+                }
+
+                aplicarDadosFuncaoPorEmpresa(document.getElementById('in-funcao').value, window.empresaIdAtualModal);
             });
 
             tabela.addEventListener('click', async (e) => {
@@ -702,6 +726,7 @@
                     if (pacienteSelecionadoParaImpressao) {
                         const pac = pacienteSelecionadoParaImpressao;
                         document.getElementById('msg-carregando').style.display = "block";
+                        window.empresaIdAtualModal = null;
                         
                         try {
                             const [resEmp, resFunc, resEso] = await Promise.all([
@@ -721,6 +746,7 @@
                             const empMatch = empresasDB.find(e => normalizarTexto(e.nome_fantasia) === nomeEmpresaBusca || normalizarTexto(e.razao_social) === nomeEmpresaBusca);
                             
                             if (empMatch) {
+                                window.empresaIdAtualModal = empMatch.id;
                                 document.getElementById('in-empresa').value = empMatch.razao_social || empMatch.nome_fantasia;
                                 document.getElementById('in-cnpj').value = empMatch.cnpj || '';
                                 if (empMatch.medico_coordenador) document.getElementById('in-medico-pcmso').value = empMatch.medico_coordenador;
@@ -731,38 +757,23 @@
 
                             document.getElementById('in-funcao').value = pac.funcao || '';
 
-                            const nomeFuncaoBusca = normalizarTexto(pac.funcao);
-                            const funcMatch = funcoesDB.find(f => normalizarTexto(f.nome_funcao) === nomeFuncaoBusca);
-                            
-                            document.getElementById('container-nrs-modal').innerHTML = ''; 
-                            if (funcMatch) {
-                                document.getElementById('in-r-fisico').value = funcMatch.risco_fisico || 'Ausência de fatores de risco';
-                                document.getElementById('in-r-quimico').value = funcMatch.risco_quimico || 'Ausência de fatores de risco';
-                                document.getElementById('in-r-biologico').value = funcMatch.risco_biologico || 'Ausência de fatores de risco';
-                                document.getElementById('in-r-ergonomico').value = funcMatch.risco_ergonomico || 'Ausência de fatores de risco';
-                                document.getElementById('in-r-acidente').value = funcMatch.risco_acidente || 'Ausência de fatores de risco';
-                                document.getElementById('in-r-psicossocial').value = funcMatch.risco_psicossocial || 'Ausência de fatores de risco';
-                                try {
-                                    let nrsArray = typeof funcMatch.nrs_aplicaveis === 'string' ? JSON.parse(funcMatch.nrs_aplicaveis) : funcMatch.nrs_aplicaveis;
-                                    if (nrsArray && nrsArray.length > 0) nrsArray.forEach(nr => adicionarLinhaNrModal(nr.nome, nr.status));
-                                } catch(err) {}
-                            } else {
-                                document.getElementById('in-r-fisico').value = 'Ausência de fatores de risco';
-                                document.getElementById('in-r-quimico').value = 'Ausência de fatores de risco';
-                                document.getElementById('in-r-biologico').value = 'Ausência de fatores de risco';
-                                document.getElementById('in-r-ergonomico').value = 'Ausência de fatores de risco';
-                                document.getElementById('in-r-acidente').value = 'Ausência de fatores de risco';
-                                document.getElementById('in-r-psicossocial').value = 'Ausência de fatores de risco';
-                            }
+                            // Carrega riscos e NRs estritamente da empresa identificada
+                            aplicarDadosFuncaoPorEmpresa(pac.funcao, window.empresaIdAtualModal);
+
+                            // Sincroniza o checkbox de Avaliação Psicossocial com o que foi solicitado na recepção
+                            const temPsicossocialSolicitado = Boolean(pac.avaliacao_psicossocial);
+                            const chkPsico = document.getElementById('chk-imprimir-psico');
+                            chkPsico.checked = temPsicossocialSolicitado;
 
                             let examesStr = [pac.exames_clinicos, pac.exames_raiox, pac.exames_lab].filter(ex => ex && ex !== 'Nenhum' && ex.trim() !== '').join(',');
                             let arrayExames = examesStr ? examesStr.split(',').map(ex => ex.trim()).filter(ex => ex !== '') : [];
                             if(pac.audiometria) arrayExames.push("Audiometria");
-                            if(pac.consulta_clinica) arrayExames.push("Av. Clínica Ocupacional");
+                            if(pac.consulta_clinica) arrayExames.push("Av. Clínica Ocupacional ");
                             
-                            // Adiciona apenas se o checkbox estiver marcado ao abrir
-                            if(document.getElementById('chk-imprimir-psico').checked) {
-                                arrayExames.push("Av. Psicossocial");
+                            arrayExames = arrayExames.filter(ex => !normalizarTexto(ex).includes('psicossocial'));
+
+                            if(chkPsico.checked) {
+                                arrayExames.push("Avaliação Psicossocial");
                             }
 
                             arrayExames = arrayExames.map(exame => {
@@ -782,10 +793,17 @@
                             } else {
                                 arrayExames.forEach((exameNome) => {
                                     const normalizedBusca = normalizarTexto(exameNome);
+                                    const isPsico = normalizedBusca.includes('psicossocial');
                                     
                                     let selectOptions = '<option value="">-- Selecione o código correspondente --</option>';
                                     esocialDB.forEach(eso => {
-                                        const isMatch = normalizarTexto(eso.exame_nome) === normalizedBusca;
+                                        const normalizedEso = normalizarTexto(eso.exame_nome);
+                                        let isMatch = false;
+                                        if (isPsico && normalizedEso.includes('psicossocial')) {
+                                            isMatch = true;
+                                        } else if (normalizedEso === normalizedBusca) {
+                                            isMatch = true;
+                                        }
                                         selectOptions += `<option value="${eso.codigo}" ${isMatch ? 'selected' : ''}>${eso.exame_nome} (Cód: ${eso.codigo})</option>`;
                                     });
 
@@ -813,6 +831,7 @@
             window.fecharModalDocs = function() {
                 document.getElementById('modal-docs').style.display = 'none';
                 pacienteSelecionadoParaImpressao = null;
+                window.empresaIdAtualModal = null;
             };
 
             document.getElementById('btn-confirmar-impressao').addEventListener('click', () => {
@@ -861,7 +880,7 @@
                 if (imprimirPsico && !temPsico) {
                     let codPsico = '______';
                     if (window.dbEsocial) {
-                        const match = window.dbEsocial.find(e => normalizarTexto(e.exame_nome) === normalizarTexto('Avaliação Psicossocial'));
+                        const match = window.dbEsocial.find(e => normalizarTexto(e.exame_nome).includes('psicossocial'));
                         if (match) codPsico = match.codigo;
                     }
                     examesFinais.push({ nome: 'Avaliação Psicossocial', codigo: codPsico });

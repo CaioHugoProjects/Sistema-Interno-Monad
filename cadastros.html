@@ -159,10 +159,10 @@
             <h3 id="titulo-modal-funcao">👷 Adicionar Função</h3>
             <input type="hidden" id="func-id">
             <div class="form-grid">
-                <!-- Select dinâmico para pegar o ID da Empresa -->
-                <label class="full-width">Empresa Vinculada: 
-                    <select id="func-empresa">
-                        <option value="">Geral (Aplicável a qualquer empresa)</option>
+                <!-- Select obrigatório para vínculo exclusivo com uma empresa -->
+                <label class="full-width">Empresa Vinculada (Obrigatório): 
+                    <select id="func-empresa" required>
+                        <option value="">-- Selecione uma empresa --</option>
                     </select>
                 </label>
                 
@@ -261,6 +261,7 @@
             document.getElementById('func-re').value = 'Ausência de fatores de risco';
             document.getElementById('func-ra').value = 'Ausência de fatores de risco';
             document.getElementById('func-rp').value = 'Ausência de fatores de risco';
+            document.getElementById('titulo-modal-funcao').textContent = "👷 Adicionar Função";
             
             resetarCamposNomesFuncao();
         }
@@ -277,7 +278,7 @@
                 if (resEmp.data) {
                     renderEmpresas(resEmp.data);
                     const selectEmp = document.getElementById('func-empresa');
-                    selectEmp.innerHTML = '<option value="">Geral (Aplicável a qualquer empresa)</option>' + 
+                    selectEmp.innerHTML = '<option value="">-- Selecione uma empresa --</option>' + 
                         resEmp.data.map(e => `<option value="${e.id}">${e.razao_social || e.nome_fantasia}</option>`).join('');
                 }
                 
@@ -315,8 +316,12 @@
             window.dbFuncoes = dados;
             
             const funcoesCompletas = dados.map(f => {
-                const empInfo = window.dbEmpresas.find(e => e.id == f.empresa_id); 
-                return { ...f, nome_empresa_visual: empInfo ? (empInfo.razao_social || empInfo.nome_fantasia) : 'Geral' };
+                const empInfo = (window.dbEmpresas || []).find(e => String(e.id) === String(f.empresa_id)); 
+                return { 
+                    ...f, 
+                    sem_vinculo: !empInfo,
+                    nome_empresa_visual: empInfo ? (empInfo.razao_social || empInfo.nome_fantasia) : 'Sem empresa vinculada' 
+                };
             });
 
             const empresasUnicas = [...new Set(funcoesCompletas.map(f => f.nome_empresa_visual))].sort();
@@ -337,10 +342,12 @@
                     let nrsObj = typeof f.nrs_aplicaveis === 'string' ? JSON.parse(f.nrs_aplicaveis) : f.nrs_aplicaveis;
                     if(nrsObj && nrsObj.length > 0) nrsStr = nrsObj.map(n => n.nome).join(', ');
                 } catch(e) {}
+
+                const estiloEmpresa = f.sem_vinculo ? 'color: var(--danger); font-weight: bold;' : 'color: var(--text-muted); font-weight: bold;';
                 
                 return `
                 <tr>
-                    <td style="font-size:11px; color:var(--text-muted); font-weight:bold;">${f.nome_empresa_visual}</td>
+                    <td style="font-size:11px; ${estiloEmpresa}">${f.nome_empresa_visual}</td>
                     <td><strong>${f.nome_funcao}</strong></td>
                     <td style="font-size:11px;">F: ${f.risco_fisico}<br>Q: ${f.risco_quimico}<br>B: ${f.risco_biologico}</td>
                     <td style="font-size:11px;">E: ${f.risco_ergonomico}<br>A: ${f.risco_acidente}<br>P: ${f.risco_psicossocial || '-'}</td>
@@ -381,6 +388,13 @@
 
         async function salvarFuncao() {
             const id = document.getElementById('func-id').value;
+            const valorSelectEmpresa = document.getElementById('func-empresa').value;
+
+            if (!valorSelectEmpresa || valorSelectEmpresa.trim() === "") {
+                alert("AÇÃO BLOQUEADA: Selecione obrigatoriamente uma Empresa vinculada antes de salvar a função.");
+                return;
+            }
+
             const nrsRaw = document.getElementById('func-nrs').value;
             let jsonNrs = [];
             
@@ -388,15 +402,13 @@
                 jsonNrs = nrsRaw.split(',').map(n => ({ nome: n.trim(), status: "" }));
             }
             
-            const valorSelectEmpresa = document.getElementById('func-empresa').value;
-            
             const inputsNomes = document.querySelectorAll('.input-nome-funcao');
             const nomesValidos = Array.from(inputsNomes).map(inp => inp.value.trim()).filter(val => val !== "");
 
             if(nomesValidos.length === 0) return alert("Adicione pelo menos um Nome de Função.");
 
             const baseDados = {
-                empresa_id: valorSelectEmpresa === "" ? null : valorSelectEmpresa, 
+                empresa_id: valorSelectEmpresa, 
                 risco_fisico: document.getElementById('func-rf').value,
                 risco_quimico: document.getElementById('func-rq').value,
                 risco_biologico: document.getElementById('func-rb').value,
@@ -441,7 +453,7 @@
 
         window.editarRegistro = function(id, tipo) {
             if (tipo === 'empresas') {
-                const reg = window.dbEmpresas.find(e => e.id === id);
+                const reg = window.dbEmpresas.find(e => String(e.id) === String(id));
                 document.getElementById('emp-id').value = reg.id;
                 document.getElementById('emp-fantasia').value = reg.nome_fantasia;
                 document.getElementById('emp-razao').value = reg.razao_social;
@@ -450,7 +462,7 @@
                 document.getElementById('titulo-modal-empresa').textContent = "✏️ Editar Empresa";
                 abrirModal('modal-empresa');
             } else if (tipo === 'funcoes') {
-                const reg = window.dbFuncoes.find(f => f.id === id);
+                const reg = window.dbFuncoes.find(f => String(f.id) === String(id));
                 document.getElementById('func-id').value = reg.id;
                 document.getElementById('func-empresa').value = reg.empresa_id || ''; 
                 
@@ -479,7 +491,7 @@
                 document.getElementById('titulo-modal-funcao').textContent = "✏️ Editar Função";
                 abrirModal('modal-funcao');
             } else if (tipo === 'esocial') {
-                const reg = window.dbEsocial.find(e => e.id === id);
+                const reg = window.dbEsocial.find(e => String(e.id) === String(id));
                 document.getElementById('eso-id').value = reg.id;
                 document.getElementById('eso-nome').value = reg.exame_nome;
                 document.getElementById('eso-codigo').value = reg.codigo;

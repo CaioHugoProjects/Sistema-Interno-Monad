@@ -19,29 +19,27 @@
     <style>
         /* Classes de Toolbar para Responsividade */
         .toolbar-geral { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-        .toolbar-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; justify-content: flex-end;}
+        .toolbar-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; justify-content: flex-end; }
         
-        /* NO COMPUTADOR: Ocupa apenas o espaço necessário para caber a pesquisa do lado */
-        .botoes-filtro { display: flex; align-items: center; gap: 10px; } 
+        .botoes-filtro { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         
-        .input-moderno { padding: 9px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong); font-family: inherit; font-size: 13px;}
-        .btn-acao { color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); font-family: inherit; font-size: 13px; transition: opacity 0.2s; }
+        .input-moderno { padding: 9px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong); font-family: inherit; font-size: 13px; }
+        .btn-acao { color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); font-family: inherit; font-size: 13px; transition: opacity 0.2s; white-space: nowrap; }
         .btn-acao:hover { opacity: 0.9; }
-        .input-pesquisa { width: 220px; }
+        .input-pesquisa { width: 230px; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; justify-content: center; align-items: center; }
         .modal-box { background: var(--surface); padding: 25px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-box h3 { color: var(--danger); margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid var(--border-strong); padding-bottom: 10px; }
         .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .edit-grid label { font-size: 13px; font-weight: bold; color: var(--text-muted); display: flex; flex-direction: column; gap: 5px; }
-        .edit-grid input[type="text"] { padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; font-size: 14px; background: var(--surface-muted); color: var(--text-strong);}
+        .edit-grid input[type="text"] { padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; font-size: 14px; background: var(--surface-muted); color: var(--text-strong); }
         .edit-full { grid-column: span 2; }
 
         /* REGRAS EXCLUSIVAS PARA CELULAR */
         @media (max-width: 768px) {
             .toolbar-geral { flex-direction: column; align-items: stretch; }
             .toolbar-group { flex-direction: column; align-items: stretch; width: 100%; justify-content: center; }
-            /* NO CELULAR: Força os botões a empilharem e ocuparem 100% */
             .botoes-filtro { flex-direction: column; align-items: stretch; width: 100%; } 
             .input-moderno, .btn-acao, .input-pesquisa { width: 100%; }
             .edit-grid { grid-template-columns: 1fr; }
@@ -74,11 +72,16 @@
                 
                 <div class="toolbar-group">
                     <div class="botoes-filtro">
-                        <input type="date" id="filtro-data" class="input-moderno">
-                        <button id="btn-buscar-data" class="btn-acao" style="background-color: var(--danger);">Atualizar Dia</button>
-                        <button id="btn-busca-global" class="btn-acao" style="background-color: var(--warning); color: #0f172a;">🌍 Busca Global</button>
+                        <select id="tipo-busca-admin" class="input-moderno" title="Selecione o campo de busca">
+                            <option value="nome">Buscar por: Nome</option>
+                            <option value="cpf">Buscar por: CPF</option>
+                            <option value="empresa">Buscar por: Empresa</option>
+                            <option value="data_cadastro">Buscar por: Data de Cadastro</option>
+                        </select>
+                        <input type="text" id="pesquisa-paciente" placeholder="Digite o Nome do colaborador..." class="input-moderno input-pesquisa">
+                        <button id="btn-executar-busca" class="btn-acao" style="background-color: var(--warning); color: #0f172a;">🔎 Buscar</button>
+                        <button id="btn-hoje" class="btn-acao" style="background-color: var(--danger);">📅 Fila de Hoje</button>
                     </div>
-                    <input type="text" id="pesquisa-paciente" placeholder="Pesquisar Nome, Empresa ou CPF..." class="input-moderno input-pesquisa">
                 </div>
             </div>
 
@@ -111,7 +114,6 @@
         <div class="modal-box">
             <h3>✏️ Editar Dados do Paciente</h3>
             <div class="edit-grid">
-                <!-- Chave Primária Oculta para garantir update seguro -->
                 <input type="hidden" id="edit-id-unico">
                 
                 <label>Nome: <input type="text" id="edit-nome"></label>
@@ -131,6 +133,7 @@
                 
                 <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-fono" style="transform: scale(1.3);"> Tem Fonoaudiologia?</label>
                 <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-consulta" style="transform: scale(1.3);"> Tem Consulta Médica?</label>
+                <label class="edit-full" style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-psico" style="transform: scale(1.3);"> Tem Avaliação Psicossocial?</label>
             </div>
             <div style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">
                 <button onclick="fecharModal()" style="padding:10px 15px; border-radius:5px; border:1px solid var(--border-strong); background:var(--surface-muted); color: var(--text-strong); cursor:pointer; font-weight:bold;">Cancelar</button>
@@ -139,20 +142,53 @@
         </div>
     </div>
 
-    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const tabela = document.getElementById('lista-liberacao');
-            const inputData = document.getElementById('filtro-data');
+            const selectTipoBusca = document.getElementById('tipo-busca-admin');
             const inputPesq = document.getElementById('pesquisa-paciente');
             let databaseAdmin = [];
-            let modoBuscaGlobal = false;
+            let modoBuscaPersonalizada = false;
 
-            const hoje = new Date();
-            inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+            function getDataHojeISO() {
+                const hoje = new Date();
+                return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+            }
+
+            function formatarDataBR(data) {
+                if (!data) return '-';
+                if (data.includes('/')) return data;
+                const partes = String(data).split('T')[0].split('-');
+                if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+                return data;
+            }
+
+            function converterDataParaISO(valor) {
+                const limpo = valor.trim();
+                if (/^\d{4}-\d{2}-\d{2}$/.test(limpo)) return limpo;
+                if (/^\d{2}\/\d{2}\/\d{4}$/.test(limpo)) {
+                    const [dia, mes, ano] = limpo.split('/');
+                    return `${ano}-${mes}-${dia}`;
+                }
+                return null;
+            }
+
+            selectTipoBusca.addEventListener('change', function() {
+                const tipo = this.value;
+                inputPesq.value = '';
+                if (tipo === 'data_cadastro') {
+                    inputPesq.type = 'date';
+                    inputPesq.value = getDataHojeISO();
+                } else {
+                    inputPesq.type = 'text';
+                    if (tipo === 'nome') inputPesq.placeholder = 'Digite o Nome do colaborador...';
+                    if (tipo === 'cpf') inputPesq.placeholder = 'Digite o CPF do colaborador...';
+                    if (tipo === 'empresa') inputPesq.placeholder = 'Digite o nome da Empresa...';
+                }
+            });
 
             function validarCPF(cpf) {
                 cpf = cpf.replace(/[^\d]+/g,'');
@@ -179,30 +215,49 @@
                 'consulta': 'liberado_consulta'
             };
 
-            async function buscarDados(isGlobal = false) {
-                modoBuscaGlobal = isGlobal; 
-                
-                if(!isGlobal && !inputData.value) return;
+            async function buscarDados(usarFiltroBarra = false) {
+                modoBuscaPersonalizada = usarFiltroBarra;
                 
                 document.getElementById('msg-carregando').style.display = "block";
                 tabela.innerHTML = "";
                 document.getElementById('msg-vazio').style.display = "none";
 
                 try {
-                    let query = supabase.from('atendimentos').select('*').order('created_at', { ascending: false });
+                    // Ordenação determinística dupla (created_at + id) evita troca de ordem após edição
+                    let query = supabase
+                        .from('atendimentos')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                        .order('id', { ascending: false });
                     
-                    if (!isGlobal) {
-                        // Busca Diária Normal
-                        query = query.eq('data_exame', inputData.value);
+                    if (!usarFiltroBarra) {
+                        query = query.eq('data_exame', getDataHojeISO());
                     } else {
-                        // BUSCA GLOBAL INTELIGENTE NO BANCO DE DADOS
+                        const tipo = selectTipoBusca.value;
                         const termo = inputPesq.value.trim();
-                        if (termo) {
-                            // Se algo foi digitado, procura em toda a história do banco por aquele Nome ou CPF
-                            query = query.or(`nome.ilike.%${termo}%,cpf.ilike.%${termo}%`);
-                        } else {
-                            // Se a pesquisa estiver vazia, carrega um lote grande e seguro dos mais recentes
-                            query = query.limit(1000); 
+
+                        if (!termo) {
+                            alert("Digite ou selecione um valor para pesquisar.");
+                            document.getElementById('msg-carregando').style.display = "none";
+                            return;
+                        }
+
+                        if (tipo === 'data_cadastro') {
+                            const dataISO = converterDataParaISO(termo);
+                            if (!dataISO) {
+                                alert("Formato de data inválido. Use DD/MM/AAAA ou selecione no calendário.");
+                                document.getElementById('msg-carregando').style.display = "none";
+                                return;
+                            }
+                            const inicioDia = `${dataISO}T00:00:00`;
+                            const fimDia = `${dataISO}T23:59:59.999`;
+                            query = query.gte('created_at', inicioDia).lte('created_at', fimDia);
+                        } else if (tipo === 'nome') {
+                            query = query.ilike('nome', `%${termo}%`).limit(500);
+                        } else if (tipo === 'cpf') {
+                            query = query.ilike('cpf', `%${termo}%`).limit(500);
+                        } else if (tipo === 'empresa') {
+                            query = query.ilike('empresa', `%${termo}%`).limit(500);
                         }
                     }
 
@@ -215,6 +270,7 @@
                         databaseAdmin = data;
                         renderizarTabela(databaseAdmin);
                     } else { 
+                        databaseAdmin = [];
                         tabela.innerHTML = ""; 
                         document.getElementById('msg-vazio').style.display = "block"; 
                     }
@@ -224,20 +280,27 @@
                 }
             }
 
-            // Polling via ID Único
+            // Polling sincronizado por ID Único e ordenação fixa
             setInterval(async () => {
-                if (document.hidden || modoBuscaGlobal || !inputData.value) return; 
+                if (document.hidden || modoBuscaPersonalizada) return;
+                if (document.getElementById('modal-editar').style.display !== 'none') return;
                 
                 try {
-                    const { data, error } = await supabase.from('atendimentos').select('*').eq('data_exame', inputData.value);
+                    const { data, error } = await supabase
+                        .from('atendimentos')
+                        .select('*')
+                        .eq('data_exame', getDataHojeISO())
+                        .order('created_at', { ascending: false })
+                        .order('id', { ascending: false });
+
                     if (error) throw error;
 
-                    if (data && data.length > 0) {
+                    if (data) {
                         const pacValidos = data.filter(p => 
                             (p.exames_clinicos && p.exames_clinicos !== 'Nenhum') || 
                             (p.exames_raiox && p.exames_raiox !== 'Nenhum') || 
                             (p.exames_lab && p.exames_lab !== 'Nenhum') || 
-                            p.audiometria || p.consulta_clinica
+                            p.audiometria || p.consulta_clinica || p.avaliacao_psicossocial
                         );
                         
                         if (pacValidos.length !== document.querySelectorAll('.linha-paciente').length) {
@@ -247,8 +310,11 @@
                         }
                         
                         data.forEach(pac => {
+                            const idx = databaseAdmin.findIndex(item => String(item.id) === String(pac.id));
+                            if (idx !== -1) databaseAdmin[idx] = pac;
+
                             const l = document.querySelector(`tr[data-id="${pac.id}"]`);
-                            if (l && document.getElementById('modal-editar').style.display === 'none') {
+                            if (l) {
                                 const updateCheck = (setor, valor) => {
                                     const cb = l.querySelector(`.check-setor-admin[data-setor="${setor}"]`);
                                     if(cb && cb.checked !== valor && !cb.disabled) cb.checked = valor;
@@ -266,21 +332,31 @@
                                 }
                             }
                         });
-                        databaseAdmin = data; 
                     }
                 } catch (err) { console.error("Erro no polling Admin:", err); }
             }, 15000);
 
             function renderizarTabela(pacientes) {
                 tabela.innerHTML = "";
-                pacientes.forEach((pac, index) => {
+                let exibidos = 0;
+
+                pacientes.forEach((pac) => {
                     const temClinico = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
                     const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
                     const temFono = pac.audiometria === true;
                     const temLab = pac.exames_lab && pac.exames_lab !== 'Nenhum';
-                    const temConsulta = pac.consulta_clinica === true;
+                    const temConsultaMedica = pac.consulta_clinica === true;
+                    const temPsicossocial = pac.avaliacao_psicossocial === true;
+                    const temConsulta = temConsultaMedica || temPsicossocial;
 
                     if (!temClinico && !temRaiox && !temLab && !temFono && !temConsulta) return;
+
+                    let itensConsulta = [];
+                    if (temConsultaMedica) itensConsulta.push("Médico do Trabalho");
+                    if (temPsicossocial) itensConsulta.push("Avaliação Psicossocial");
+                    const textoConsulta = itensConsulta.join(", ");
+
+                    exibidos++;
 
                     const cell = (exame, checked, setor) => `
                         <div class="celula-exame">
@@ -300,18 +376,20 @@
                     const tdR = temRaiox ? cell(pac.exames_raiox, pac.liberado_raiox, 'raiox') : `<span class="text-na">—</span>`;
                     const tdF = temFono ? cell("Audiometria", pac.liberado_fono, 'fono') : `<span class="text-na">—</span>`;
                     const tdL = temLab ? cellLab(pac.exames_lab, pac.liberado_lab, pac.observacao) : `<span class="text-na">—</span>`;
-                    const tdM = temConsulta ? cell("Médico do Trabalho", pac.liberado_consulta, 'consulta') : `<span class="text-na">—</span>`;
+                    const tdM = temConsulta ? cell(textoConsulta, pac.liberado_consulta, 'consulta') : `<span class="text-na">—</span>`;
 
                     const tipoStr = pac.tipo_exame ? (pac.tipo_exame.includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
+                    const dataCadastroBR = formatarDataBR(pac.created_at);
+                    const dataExameBR = formatarDataBR(pac.data_exame);
 
                     const tr = document.createElement('tr');
                     tr.className = 'linha-paciente';
-                    tr.dataset.id = pac.id; // Vinculando Chave Primária
+                    tr.dataset.id = pac.id;
 
                     tr.innerHTML = `
                         <td>
                             <div style="font-weight:bold; color:var(--text-strong);" class="col-nome">${pac.nome}</div>
-                            <div style="font-size:12px; color:var(--accent); font-weight: 600;">📅 Data: ${pac.data_exame || '-'}</div>
+                            <div style="font-size:12px; color:var(--accent); font-weight: 600;">📅 Atendimento: ${dataExameBR} | Cadastro: ${dataCadastroBR}</div>
                             <div style="font-size:11px; color:var(--text-muted);">Empresa: ${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></div>
                             <div style="font-size:11px; color:var(--text-muted);">CPF: ${pac.cpf}</div>
                         </td>
@@ -322,32 +400,22 @@
                         <td style="text-align: center; background:var(--surface-muted);">${tdM}</td>
                         <td style="text-align: center;">
                             <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <button class="btn-editar" data-index="${index}" style="background:var(--accent); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">✏️ Editar Dados</button>
-                                <button class="btn-apagar" style="background:var(--danger); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">🗑️ Excluir</button>
+                                <button class="btn-editar" data-id="${pac.id}" style="background:var(--accent); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">✏️ Editar Dados</button>
+                                <button class="btn-apagar" data-id="${pac.id}" style="background:var(--danger); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">🗑️ Excluir</button>
                             </div>
                         </td>
                     `;
                     tabela.appendChild(tr);
                 });
-                aplicarFiltros();
-            }
 
-            function aplicarFiltros() {
-                const termo = inputPesq.value.toLowerCase();
-                let visiveis = 0;
-                document.querySelectorAll('.linha-paciente').forEach(linha => {
-                    const passaPesq = linha.textContent.toLowerCase().includes(termo);
-                    linha.style.display = passaPesq ? '' : 'none';
-                    if (passaPesq) visiveis++;
-                });
-                document.getElementById('msg-vazio').style.display = visiveis === 0 ? 'block' : 'none';
+                document.getElementById('msg-vazio').style.display = exibidos === 0 ? 'block' : 'none';
             }
 
             tabela.addEventListener('change', async function(e) {
                 const tr = e.target.closest('tr');
-                const idUnico = tr.dataset.id; // Extrai o ID
+                if (!tr) return;
+                const idUnico = tr.dataset.id;
 
-                // CHECKBOX DE SETOR
                 if (e.target.classList.contains('check-setor-admin')) {
                     const cb = e.target;
                     const setor = cb.dataset.setor;
@@ -374,7 +442,6 @@
                     }
                 }
 
-                // OBSERVAÇÃO DO LABORATÓRIO
                 if (e.target.classList.contains('obs-input-admin')) {
                     const obsInput = e.target;
                     obsInput.disabled = true;
@@ -397,43 +464,51 @@
             });
 
             tabela.addEventListener('click', async function(e) {
-                // BOTÃO DE EXCLUIR
-                if (e.target.classList.contains('btn-apagar')) {
-                    const btn = e.target;
-                    const tr = btn.closest('tr');
+                const btnApagar = e.target.closest('.btn-apagar');
+                if (btnApagar) {
+                    const tr = btnApagar.closest('tr');
                     const nome = tr.querySelector('.col-nome').textContent;
-                    const idUnico = tr.dataset.id;
+                    const idUnico = btnApagar.dataset.id || tr.dataset.id;
                     
                     if (confirm(`TEM A CERTEZA ABSOLUTA?\n\nDeseja excluir permanentemente o registo de:\n${nome}\n\nEsta ação não pode ser desfeita.`)) {
-                        btn.textContent = "Apagando...";
-                        btn.disabled = true;
+                        btnApagar.textContent = "Apagando...";
+                        btnApagar.disabled = true;
 
                         try {
                             const { error } = await supabase
                                 .from('atendimentos')
                                 .delete()
-                                .eq('id', idUnico); // Exclusão estrita por ID
+                                .eq('id', idUnico);
                                 
                             if (error) throw error;
+                            databaseAdmin = databaseAdmin.filter(p => String(p.id) !== String(idUnico));
                             tr.remove();
+                            if (document.querySelectorAll('.linha-paciente').length === 0) {
+                                document.getElementById('msg-vazio').style.display = 'block';
+                            }
                         } catch (err) {
                             alert("Falha na exclusão: " + err.message); 
-                            btn.textContent = "🗑️ Excluir"; 
-                            btn.disabled = false; 
+                            btnApagar.textContent = "🗑️ Excluir"; 
+                            btnApagar.disabled = false; 
                         }
                     }
                 }
 
-                // ABRIR MODAL DE EDIÇÃO
-                if (e.target.classList.contains('btn-editar')) {
-                    const index = e.target.dataset.index;
-                    const pac = databaseAdmin[index];
-                    abrirModalEdicao(pac);
+                const btnEditar = e.target.closest('.btn-editar');
+                if (btnEditar) {
+                    const tr = btnEditar.closest('tr');
+                    const idUnico = btnEditar.dataset.id || tr.dataset.id;
+                    const pac = databaseAdmin.find(p => String(p.id) === String(idUnico));
+                    if (pac) {
+                        abrirModalEdicao(pac);
+                    } else {
+                        alert("Erro ao localizar o registro selecionado. Atualize a página e tente novamente.");
+                    }
                 }
             });
 
             window.abrirModalEdicao = function(pac) {
-                document.getElementById('edit-id-unico').value = pac.id; // Guarda o ID oculto
+                document.getElementById('edit-id-unico').value = pac.id;
                 
                 document.getElementById('edit-nome').value = pac.nome || "";
                 document.getElementById('edit-empresa').value = pac.empresa || "";
@@ -450,6 +525,7 @@
                 
                 document.getElementById('edit-tem-fono').checked = pac.audiometria;
                 document.getElementById('edit-tem-consulta').checked = pac.consulta_clinica;
+                document.getElementById('edit-tem-psico').checked = Boolean(pac.avaliacao_psicossocial);
 
                 document.getElementById('modal-editar').style.display = 'flex';
             };
@@ -467,7 +543,7 @@
                     return;
                 }
 
-                const idUnico = document.getElementById('edit-id-unico').value; // Recupera o ID oculto
+                const idUnico = document.getElementById('edit-id-unico').value;
                 
                 const dadosEdicao = {
                     nome: document.getElementById('edit-nome').value,
@@ -482,14 +558,14 @@
                     exames_raiox: document.getElementById('edit-ex-raiox').value || "Nenhum",
                     exames_lab: document.getElementById('edit-ex-lab').value || "Nenhum",
                     audiometria: document.getElementById('edit-tem-fono').checked,
-                    consulta_clinica: document.getElementById('edit-tem-consulta').checked
+                    consulta_clinica: document.getElementById('edit-tem-consulta').checked,
+                    avaliacao_psicossocial: document.getElementById('edit-tem-psico').checked
                 };
 
                 btn.textContent = "A gravar...";
                 btn.disabled = true;
 
                 try {
-                    // Update blindado por Chave Primária
                     const { error } = await supabase
                         .from('atendimentos')
                         .update(dadosEdicao)
@@ -500,7 +576,7 @@
                     btn.textContent = "Salvar Alterações";
                     btn.disabled = false;
                     fecharModal();
-                    buscarDados(modoBuscaGlobal); 
+                    buscarDados(modoBuscaPersonalizada); 
 
                 } catch (err) {
                     alert("Falha Crítica ao tentar editar: " + err.message); 
@@ -509,9 +585,15 @@
                 }
             });
 
-            document.getElementById('btn-buscar-data').addEventListener('click', () => buscarDados(false)); 
-            document.getElementById('btn-busca-global').addEventListener('click', () => buscarDados(true)); 
-            inputPesq.addEventListener('input', aplicarFiltros);
+            document.getElementById('btn-executar-busca').addEventListener('click', () => buscarDados(true));
+            document.getElementById('btn-hoje').addEventListener('click', () => {
+                inputPesq.value = '';
+                buscarDados(false);
+            });
+            inputPesq.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') buscarDados(true);
+            });
+
             buscarDados(false);
         });
 

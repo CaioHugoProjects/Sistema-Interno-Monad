@@ -157,6 +157,12 @@
                                     ENCAMINHAR PARA CONSULTA CLÍNICA
                                 </label>
                             </div>
+                            <div style="padding: 12px; background: var(--surface-muted); border: 1px solid var(--border-strong); border-radius: 6px;">
+                                <label style="font-weight: bold; color: var(--text-strong); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px;">
+                                    <input type="checkbox" id="check-psicossocial" class="nav-enter" style="transform: scale(1.3);"> 
+                                    INCLUIR AVALIAÇÃO PSICOSSOCIAL
+                                </label>
+                            </div>
                         </div>
 
                         <div class="exames-grid-master">
@@ -323,10 +329,7 @@
             const inputDataExame = document.getElementById('in-data');
             if (inputDataExame) {
                 const hoje = new Date();
-                // O input type="date" exige o formato YYYY-MM-DD
                 inputDataExame.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-                
-                // Força o espelhamento inicial para as fichas de impressão já nascerem com a data de hoje
                 setTimeout(atualizarEspelhamento, 100); 
             }
             const btnTheme = document.getElementById('btn-theme-toggle');
@@ -352,14 +355,12 @@
             function atualizarEspelhamento() {
                 const getVal = (idOuName) => document.querySelector(idOuName)?.value || '';
 
-                // Formatação de Datas (YYYY-MM-DD para DD/MM/YYYY)
                 const formatarData = (dataStr) => {
                     if (!dataStr) return '';
                     const [ano, mes, dia] = dataStr.split('-');
                     return `${dia}/${mes}/${ano}`;
                 };
 
-                // Coleta dos Textos
                 const nome = getVal('#in-nome');
                 const empresa = getVal('#in-empresa');
                 const cpf = getVal('#in-cpf');
@@ -369,11 +370,9 @@
                 const dn = formatarData(getVal('#in-dn'));
                 const dataExame = formatarData(getVal('#in-data'));
 
-                // Coleta dos Tipos de Exame (ADMISSIONAL, PERIODICO...)
                 const tiposMarcados = Array.from(document.querySelectorAll('.master-tipo:checked')).map(cb => cb.value);
                 const tipoStr = tiposMarcados.length > 0 ? `(${tiposMarcados.join(', ')})` : '';
 
-                // Atualização dos Spans de Impressão
                 document.querySelectorAll('.out-nome').forEach(el => el.textContent = nome);
                 document.querySelectorAll('.out-empresa').forEach(el => el.textContent = empresa);
                 document.querySelectorAll('.out-cpf').forEach(el => el.textContent = cpf);
@@ -384,7 +383,6 @@
                 document.querySelectorAll('.out-data').forEach(el => el.textContent = dataExame);
                 document.querySelectorAll('.out-tipo-exame').forEach(el => el.textContent = tipoStr);
 
-                // Preenchimento Automático das Listas de Exames (UL/LI)
                 const renderizarExames = (setorDataset, ulId) => {
                     const marcados = Array.from(document.querySelectorAll(`.master-checkbox[data-setor="${setorDataset}"]:checked`)).map(cb => cb.dataset.nome);
                     const ul = document.getElementById(ulId);
@@ -401,7 +399,6 @@
                 renderizarExames('raiox', 'lista-raiox');
                 renderizarExames('lab', 'lista-lab');
 
-                // Fonoaudiologia - Ocultar/Mostrar ficha baseada no checkbox
                 const fono = document.getElementById('check-audiometria')?.checked;
                 const setorAudio = document.getElementById('setor-audio');
                 if (setorAudio) {
@@ -409,16 +406,12 @@
                 }
             }
 
-            // Ouve as digitações ou cliques e atualiza tudo simultaneamente
             const masterForm = document.getElementById('masterForm');
             if(masterForm) {
                 masterForm.addEventListener('input', atualizarEspelhamento);
                 masterForm.addEventListener('change', atualizarEspelhamento);
             }
 
-            // ==========================================
-            // RESTANTE DO CÓDIGO EXISTENTE (Máscaras, etc)
-            // ==========================================
             const camposNav = document.querySelectorAll('.nav-enter');
             camposNav.forEach((campo, index) => {
                 campo.addEventListener('keydown', function(e) {
@@ -483,7 +476,6 @@
                         if(pac.data_nascimento) { document.getElementById('in-dn').value = formatarDataParaInput(pac.data_nascimento); }
                         if(pac.telefone) { document.getElementById('in-telefone').value = pac.telefone; }
                         
-                        // Forçar atualização do layout com os dados carregados do banco
                         atualizarEspelhamento();
                         
                         msgFeedback.textContent = '✅ Dados carregados do último cadastro.';

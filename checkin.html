@@ -191,7 +191,9 @@
                             (p.exames_clinicos && p.exames_clinicos !== 'Nenhum') || 
                             (p.exames_raiox && p.exames_raiox !== 'Nenhum') || 
                             (p.exames_lab && p.exames_lab !== 'Nenhum') || 
-                            p.audiometria === true || p.consulta_clinica === true
+                            p.audiometria === true || 
+                            p.consulta_clinica === true || 
+                            p.avaliacao_psicossocial === true
                         );
                         
                         if (pacValidos.length !== document.querySelectorAll('.linha-paciente').length) {
@@ -231,9 +233,16 @@
                     const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
                     const temLab = pac.exames_lab && pac.exames_lab !== 'Nenhum';
                     const temFono = pac.audiometria === true;
-                    const temConsulta = pac.consulta_clinica === true;
+                    const temConsultaMedica = pac.consulta_clinica === true;
+                    const temPsicossocial = pac.avaliacao_psicossocial === true;
+                    const temConsulta = temConsultaMedica || temPsicossocial;
 
                     if (!temClinico && !temRaiox && !temLab && !temFono && !temConsulta) return;
+
+                    let itensConsulta = [];
+                    if (temConsultaMedica) itensConsulta.push("Médico do Trabalho");
+                    if (temPsicossocial) itensConsulta.push("Avaliação Psicossocial");
+                    const textoConsulta = itensConsulta.join(", ");
 
                     const cell = (exame, checked, classe) => `
                         <div class="celula-exame">
@@ -253,7 +262,7 @@
                     const tdR = temRaiox ? cell(pac.exames_raiox, pac.liberado_raiox, 'c-raiox') : `<span class="text-na">—</span>`;
                     const tdF = temFono ? cell("Audiometria", pac.liberado_fono, 'c-fono') : `<span class="text-na">—</span>`;
                     const tdL = temLab ? cellLab(pac.exames_lab, pac.liberado_lab, pac.observacao) : `<span class="text-na">—</span>`;
-                    const tdM = temConsulta ? cell("Médico do Trabalho", pac.liberado_consulta, 'c-consulta') : `<span class="text-na">—</span>`;
+                    const tdM = temConsulta ? cell(textoConsulta, pac.liberado_consulta, 'c-consulta') : `<span class="text-na">—</span>`;
 
                     const iniciais = (pac.nome || '-').split(" ").map((n, i, a) => i === 0 || i === a.length - 1 ? n[0] : "").join("").toUpperCase();
 

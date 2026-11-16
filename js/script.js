@@ -176,7 +176,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     if (btnSalvarImprimir) {
-        // Transformado para async para permitir o 'await' do Supabase
         btnSalvarImprimir.addEventListener('click', async function() {
             if (btnSalvarImprimir.disabled) return;
 
@@ -206,7 +205,6 @@ document.addEventListener("DOMContentLoaded", function() {
             msgStatus.style.background = "var(--accent-soft)";
             msgStatus.textContent = "⏳ A gravar registo no sistema e a gerar ficha...";
 
-            // Mapeia os dados exatamente para os nomes das colunas criadas no PostgreSQL
             const dadosBanco = {
                 empresa: empresa,
                 nome: nome,
@@ -221,23 +219,18 @@ document.addEventListener("DOMContentLoaded", function() {
                 exames_raiox: Array.from(document.querySelectorAll('.master-checkbox[data-setor="raiox"]:checked')).map(cb=>cb.dataset.nome).join(', ') || 'Nenhum',
                 exames_lab: Array.from(document.querySelectorAll('.master-checkbox[data-setor="lab"]:checked')).map(cb=>cb.dataset.nome).join(', ') || 'Nenhum',
                 audiometria: checkAudio ? checkAudio.checked : false,
-                consulta_clinica: document.getElementById('check-consulta') ? document.getElementById('check-consulta').checked : false
+                consulta_clinica: document.getElementById('check-consulta') ? document.getElementById('check-consulta').checked : false,
+                avaliacao_psicossocial: document.getElementById('check-psicossocial') ? document.getElementById('check-psicossocial').checked : false
             };
 
             try {
-                // =======================================================
-                // CONEXÃO DIRETA COM SUPABASE (Substitui o fetch do GAS)
-                // =======================================================
                 const { data, error } = await supabase
                     .from('atendimentos')
                     .insert([dadosBanco])
-                    .select('protocolo'); // Pede para o banco retornar o protocolo (se gerado)
+                    .select('protocolo');
 
                 if (error) throw new Error(error.message);
                 
-                // =======================================================
-                // FEEDBACK DE RASTREABILIDADE (TABOCAS) E SUCESSO
-                // =======================================================
                 const protocolo_gerado = data[0].protocolo;
 
                 if (protocolo_gerado && protocolo_gerado !== "") {
@@ -255,7 +248,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     btnSalvarImprimir.disabled = false;
                     btnSalvarImprimir.style.opacity = "1";
                     
-                    window.print(); // Mantém a impressão automática da ficha
+                    window.print();
                 }, 1500);
 
             } catch (err) {
