@@ -56,6 +56,7 @@
                 <li id="menu-documentos" style="display: none;"><a href="documentos.html">Gerar ASO</a></li>
                 <li id="menu-cadastros" style="display: none;"><a href="cadastros.html">Base Dados</a></li>
                 <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
+                <li id="menu-financeiro" style="display: none;"><a href="financeiro.html">Financeiro</a></li>
             </ul>
         </nav>
         <script>
@@ -66,11 +67,16 @@
                 const elCad = document.getElementById('menu-cadastros');
                 if (elDoc) elDoc.style.display = 'inline-block';
                 if (elCad) elCad.style.display = 'inline-block';
+            
             }
             if (setorNav === 'admin') {
                 const elAdmin = document.getElementById('menu-admin');
                 if (elAdmin) elAdmin.style.display = 'inline-block';
             }
+            if (setorNav === 'admin') {
+    const elFin = document.getElementById('menu-financeiro');
+    if (elFin) elFin.style.display = 'inline-block';
+}
         </script>
     </header>
     
