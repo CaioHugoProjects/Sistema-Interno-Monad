@@ -32,20 +32,22 @@
             .tabela-sem-borda { width: 100%; border-collapse: collapse; }
             .tabela-sem-borda td { border: none; padding: 2px; }
             .titulo-secao { background-color: #f0f0f0 !important; font-weight: bold; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .linha-ass { border-top: 1px solid black; width: 100%; text-align: center; padding-top: 3px; font-size: 11pt; }
+            .linha-ass { border-top: 1px solid black; width: 100%; text-align: center; padding-top: 2px; font-size: 9.5pt; }
             .tabela-exames-interna { width: 100%; border-collapse: collapse; }
             .tabela-exames-interna td { border: none; border-bottom: 1px dashed #ccc; border-right: 1px solid #ccc; padding: 2px 4px; font-size: 11pt; }
             .tabela-exames-interna td:last-child { border-right: none; }
             .tabela-exames-interna tr:last-child td { border-bottom: none; }
             .header-bg { background-color: #e6e6e6 !important; font-weight: bold; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .cb-padrao { display: inline-block; width: 12px; height: 12px; border: 1px solid #000; margin-right: 4px; vertical-align: middle; }
-            .tabela-psico-compacta td, .tabela-psico-compacta th { padding: 1px 3px !important; font-size: 9.5pt !important; }
-            .quebra-pagina-medico { page-break-before: always; margin-top: 0; }
-            .secao-medica { font-size: 13pt !important; line-height: 1.4; border: 2px solid #000; padding: 15px; margin-top: 10px; }
-            .secao-medica table { font-size: 13pt !important; margin-bottom: 12px; }
-            .secao-medica th, .secao-medica td { padding: 8px !important; }
-            .cb-medico { display: inline-block; width: 16px; height: 16px; border: 2px solid #000; margin-right: 6px; vertical-align: middle; }
-            .parecer-box { margin-top: 12px; margin-bottom: 12px; font-size: 12pt; }
+            .cb-padrao { display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 3px; vertical-align: middle; }
+
+            /* Compactação calibrada para caber toda a Avaliação Psicossocial + Médico(a) Responde na Página 4 */
+            #doc-psicossocial { padding: 7mm 12mm !important; }
+            .tabela-psico-compacta td, .tabela-psico-compacta th { padding: 1px 3px !important; font-size: 8.5pt !important; line-height: 1.1 !important; }
+            .secao-medica { font-size: 8.5pt !important; line-height: 1.12 !important; border: 1.5px solid #000; padding: 6px 8px; margin-top: 6px; }
+            .secao-medica table { font-size: 8.5pt !important; margin-bottom: 5px; }
+            .secao-medica th, .secao-medica td { padding: 2px 4px !important; line-height: 1.1 !important; }
+            .cb-medico { display: inline-block; width: 11px; height: 11px; border: 1.2px solid #000; margin-right: 4px; vertical-align: middle; }
+            .parecer-box { margin-top: 4px; margin-bottom: 4px; font-size: 8.5pt !important; line-height: 1.12 !important; }
         }
 
         .area-documentos { display: none; }
@@ -211,7 +213,7 @@
                 <div style="background: var(--surface); padding: 10px 15px; border: 1px solid var(--border-strong); border-radius: 4px;">
                     <label for="chk-imprimir-psico" style="display: flex; flex-direction: row; align-items: center; gap: 10px; cursor: pointer; margin: 0;">
                         <input type="checkbox" id="chk-imprimir-psico" style="width: 18px; height: 18px; cursor: pointer;">
-                        <span style="font-size: 14px; color: var(--text-strong);">Imprimir formulário de Avaliação Psicossocial (Página do Paciente e Parecer Médico)</span>
+                        <span style="font-size: 14px; color: var(--text-strong);">Imprimir formulário de Avaliação Psicossocial (Folha Única com Parecer Médico)</span>
                     </label>
                 </div>
             </div>
@@ -352,23 +354,37 @@
             </table>
         </div>
 
-        <!-- PÁGINA 3: PRONTUÁRIO MÉDICO -->
+        <!-- PÁGINA 3: PRONTUÁRIO MÉDICO (FICHA CLÍNICA UNIFICADA) -->
         <div class="pagina-a4" id="doc-prontuario">
-            <h2 style="font-size: 14pt; margin-bottom: 20px;">FICHA CLÍNICA</h2>
-            <p>Razão social: <strong><span class="out-empresa"></span></strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CNPJ: <span class="out-cnpj"></span></p>
+            <h2 style="font-size: 14pt; margin-bottom: 14px;">FICHA CLÍNICA</h2>
+            <p style="margin-bottom: 6px;">Razão social: <strong><span class="out-empresa"></span></strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CNPJ: <span class="out-cnpj"></span></p>
             <table class="tabela-word" style="font-size: 11pt;">
-                <tr><td colspan="4" class="titulo-secao" style="background-color: #f0f0f0 !important;">Identificação do colaborador</td></tr>
-                <tr><td colspan="4">Nome: <strong><span class="out-nome"></span></strong></td></tr>
+                <tr><td colspan="5" class="titulo-secao" style="background-color: #f0f0f0 !important;">Identificação do colaborador</td></tr>
+                <tr><td colspan="5">Nome: <strong><span class="out-nome"></span></strong></td></tr>
                 <tr>
-                    <td style="width: 30%;">DN: <strong><span class="out-dn"></span></strong></td>
-                    <td colspan="3">CPF: <strong><span class="out-cpf"></span></strong></td>
+                    <td colspan="2" style="width: 40%;">DN: <strong><span class="out-dn"></span></strong></td>
+                    <td colspan="3" style="width: 60%;">CPF: <strong><span class="out-cpf"></span></strong></td>
                 </tr>
-                <tr><td colspan="4">Função: <strong><span class="out-funcao"></span></strong></td></tr>
-                <tr><td>Peso:</td><td>Altura:</td><td>PA:</td><td>FC:</td></tr>
+                <tr><td colspan="5">Função: <strong><span class="out-funcao"></span></strong></td></tr>
+                <tr>
+                    <td style="width: 22%;">Idade: <strong><span class="out-idade"></span></strong></td>
+                    <td style="width: 20%;">Peso:</td>
+                    <td style="width: 20%;">Altura:</td>
+                    <td style="width: 19%;">PA:</td>
+                    <td style="width: 19%;">FC:</td>
+                </tr>
             </table>
-            <p><strong>2 – ANAMNESE – sofreu ou sofre das doenças abaixo relacionada? (marque Sim ou Não)</strong></p>
+
+            <p style="margin-top: 8px; margin-bottom: 4px;"><strong>2 – ANAMNESE – sofreu ou sofre das doenças abaixo relacionada? (marque Sim ou Não)</strong></p>
             <table class="tabela-word" style="font-size: 11pt;">
-                <tr><th style="width: 35%;">Doença</th><th style="width: 5%;">Sim</th><th style="width: 5%;">Não</th><th style="width: 35%;">Doença</th><th style="width: 5%;">Sim</th><th style="width: 5%;">Não</th></tr>
+                <tr>
+                    <th style="width: 38%;">Doença</th>
+                    <th style="width: 6%;">Sim</th>
+                    <th style="width: 6%;">Não</th>
+                    <th style="width: 38%;">Doença</th>
+                    <th style="width: 6%;">Sim</th>
+                    <th style="width: 6%;">Não</th>
+                </tr>
                 <tr><td>Doenças do Coração</td><td></td><td></td><td>Doença dos Nervos</td><td></td><td></td></tr>
                 <tr><td>Hipertensão Arterial (pressão alta)</td><td></td><td></td><td>Doença dos Rins (nefrite, cálculo)</td><td></td><td></td></tr>
                 <tr><td>Dispnéia (falta de ar)</td><td></td><td></td><td>Dores (região)</td><td></td><td></td></tr>
@@ -382,39 +398,75 @@
                 <tr><td>Doença do Pâncreas (Pancreatite)</td><td></td><td></td><td>Obesidade</td><td></td><td></td></tr>
                 <tr><td>Diabetes</td><td></td><td></td><td>Fraturas</td><td></td><td></td></tr>
                 <tr><td>Câncer, tumores</td><td></td><td></td><td>Reumatismo</td><td></td><td></td></tr>
-                <tr><td>Doença da Pele</td><td></td><td></td><td>Foi submetido a alguma cirurgia? Qual? <br></td><td></td><td></td></tr>
-                <tr><td colspan="3">Covid-19 ☐ 1ª dose ☐ 2ª dose ☐ 3ª dose ☐ 4ª dose</td><td>Toma algum medicamento? Qual?<br></td><td></td><td></td></tr>
+                <tr><td>Doença da Pele</td><td></td><td></td><td>Foi submetido a alguma cirurgia? Qual?</td><td></td><td></td></tr>
+                <tr><td>Covid-19</td><td></td><td></td><td>Toma algum medicamento? Qual?</td><td></td><td></td></tr>
+
+                <!-- SEPARADOR INTERNO: 3 – ANTECEDENTES FAMILIARES (APENAS SIM / NÃO) -->
+                <tr>
+                    <td colspan="6" class="titulo-secao" style="text-align: left; padding: 3px 6px;">
+                        3 – ANTECEDENTES FAMILIARES – Seus familiares diretos (pai, mãe, irmãos e avós), mesmo os já falecidos, têm ou tiveram alguma das doenças abaixo?
+                    </td>
+                </tr>
+                <tr>
+                    <th>Doença</th>
+                    <th>Sim</th>
+                    <th>Não</th>
+                    <th>Doença</th>
+                    <th>Sim</th>
+                    <th>Não</th>
+                </tr>
+                <tr>
+                    <td>Diabetes</td>
+                    <td></td>
+                    <td></td>
+                    <td>Pressão Alta</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Doenças do Coração</td>
+                    <td></td>
+                    <td></td>
+                    <td>Câncer</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                <!-- SEPARADOR INTERNO: 4 – ANTECEDENTES OCUPACIONAIS -->
+                <tr>
+                    <td colspan="6" class="titulo-secao" style="text-align: left; padding: 3px 6px;">
+                        4 – ANTECEDENTES OCUPACIONAIS (marque Sim ou Não)
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">Já sofreu algum acidente de trabalho?</td>
+                    <th style="text-align: center;">Sim</th>
+                    <th style="text-align: center;">Não</th>
+                </tr>
+                <tr>
+                    <td colspan="4">Já sofreu de doença do trabalho ou profissional?</td>
+                    <td></td>
+                    <td></td>
+                </tr>
             </table>
-            <p><strong>3 – ANTECEDENTES FAMILIARES - Seus familiares diretos (pai, mãe, irmãos e avós), mesmo os já falecidos, têm ou tiveram alguma das doenças abaixo?</strong></p>
-            <table class="tabela-word" style="font-size: 11pt;">
-                <tr><th style="width: 40%;">Doença</th><th style="width: 10%;">Sim</th><th style="width: 10%;">Não</th><th style="width: 10%;">Não sei</th><th>Parentesco</th></tr>
-                <tr><td>Diabetes</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Doenças do Coração</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Pressão Alta</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Câncer</td><td></td><td></td><td></td><td></td></tr>
+            <table class="tabela-word" style="font-size: 11pt; margin-top: 8px;" height="150px">
+                <tr><td style="height: 36px; vertical-align: top;"><p style="margin: 0;">Observação:</p></td></tr>
             </table>
-            <p><strong>4 - ANTECEDENTES OCUPACIONAIS (marque Sim ou Não)</strong></p>
-            <table class="tabela-word" style="font-size: 11pt;">
-                <tr><th style="width: 80%;"></th><th style="width: 10%;">Sim</th><th style="width: 10%;">Não</th></tr>
-                <tr><td>Já sofreu algum acidente de trabalho</td><td></td><td></td></tr>
-                <tr><td>Já sofreu de doença do trabalho ou profissional</td><td></td><td></td></tr>
-            </table>
-            <p style="text-align: justify; font-size: 11pt; margin-top: 15px;">Declaro que as informações por mim prestadas são verdadeiras e completas.</p>
-            <table class="tabela-sem-borda" style="width: 100%; margin-top: 40px; font-size: 11pt;">
+            <p style="text-align: justify; font-size: 11pt; margin-top: 14px;">Declaro que as informações por mim prestadas são verdadeiras e completas.</p>
+            <br>
+            <table class="tabela-sem-borda" style="width: 100%; margin-top: 38px; font-size: 11pt;">
                 <tr><td style="width: 40%;">Data ______ / ______ / ______</td><td style="width: 60%;"><div class="linha-ass">Assinatura do funcionário</div></td></tr>
             </table>
-            <table  class="tabela-word" style="font-size: 11pt;">
-                <td><p>Observação:</p></td>
-            </table>
+            
         </div>
 
-        <!-- PÁGINA 4: AVALIAÇÃO PSICOSSOCIAL (PARTE DO PACIENTE) -->
+        <!-- PÁGINA 4: AVALIAÇÃO PSICOSSOCIAL COMPLETA (FOLHA ÚNICA: PACIENTE + MÉDICO) -->
         <div class="pagina-a4" id="doc-psicossocial">
-            <h2 style="font-size: 13pt; margin-bottom: 8px;">AVALIAÇÃO PSICOSSOCIAL</h2>
-            <p style="text-align: justify; font-size: 9.5pt; margin-bottom: 8px; line-height: 1.15;">Este protocolo de avaliação psicossocial tem por objetivo auxiliar o médico na investigação de riscos psicossociais conforme definido no item 33.3.4.1 da NR-33 e 35.4.1.2 da NR-35, devendo ser utilizado como instrumento de triagem para avaliação mais detalhada. O formulário deverá ser preenchido e assinado pelo trabalhador e avaliado pelo médico que concluirá quanto à necessidade ou não de avaliações específicas.</p>
+            <h2 style="font-size: 11.5pt; margin-bottom: 3px;">AVALIAÇÃO PSICOSSOCIAL</h2>
+            <p style="text-align: justify; font-size: 8pt; margin-bottom: 4px; line-height: 1.1;">Este protocolo de avaliação psicossocial tem por objetivo auxiliar o médico na investigação de riscos psicossociais conforme definido no item 33.3.4.1 da NR-33 e 35.4.1.2 da NR-35, devendo ser utilizado como instrumento de triagem para avaliação mais detalhada. O formulário deverá ser preenchido e assinado pelo trabalhador e avaliado pelo médico que concluirá quanto à necessidade ou não de avaliações específicas.</p>
             
-            <table class="tabela-word tabela-psico-compacta" style="margin-bottom: 4px;">
-                <tr><td colspan="4" class="titulo-secao" style="background-color: #f0f0f0 !important; padding: 2px !important;">INFORMAÇÕES OBRIGATÓRIAS</td></tr>
+            <table class="tabela-word tabela-psico-compacta" style="margin-bottom: 3px;">
+                <tr><td colspan="4" class="titulo-secao" style="background-color: #f0f0f0 !important; padding: 1px !important;">INFORMAÇÕES OBRIGATÓRIAS</td></tr>
                 <tr><td colspan="4">NOME: <strong><span class="out-nome"></span></strong></td></tr>
                 <tr><td>RG: <strong><span class="out-rg"></span></strong></td><td colspan="3">DN: <strong><span class="out-dn"></span></strong></td></tr>
                 <tr><td>Est. Civil: <span class="out-est-civil"></span></td><td colspan="2">Sexo: <span class="out-box-sexo"></span></td><td>Nº Filhos: <span class="out-filhos"></span></td></tr>
@@ -422,75 +474,80 @@
                 <tr><td colspan="2">Função: <strong><span class="out-funcao"></span></strong></td><td colspan="2">Setor: <span class="out-setor"></span></td></tr>
             </table>
 
-            <div class="titulo-secao" style="padding: 2px !important; font-size: 9.5pt; margin-top: 4px; margin-bottom: 2px;">RESPONDA AS QUESTÕES ABAIXO</div>
-            <table class="tabela-word tabela-psico-compacta" style="margin-bottom: 4px;">
-                <tr><td style="width: 70%;">Possui algum antecedente psiquiátrico?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
+            <div class="titulo-secao" style="padding: 1px !important; font-size: 8.5pt; margin-top: 2px; margin-bottom: 2px;">RESPONDA AS QUESTÕES ABAIXO</div>
+            <table class="tabela-word tabela-psico-compacta" style="margin-bottom: 3px;">
+                <tr><td colspan="2" class="titulo-secao" style="background-color: #f0f0f0 !important; padding: 1px !important;">OBSERVAÇÕES</td></tr>
+                <tr><td style="width: 74%;">Possui algum antecedente psiquiátrico?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
                 <tr><td>Possui familiares com antecedentes psiquiátricos?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
                 <tr><td>Você faz uso de alguma droga?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
+                <tr><td colspan="2" class="titulo-secao" style="background-color: #f0f0f0 !important; padding: 1px !important;">PERCEPÇÕES</td></tr>
                 <tr><td>Costuma ouvir vozes de pessoas que não estão próximas?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
                 <tr><td>Enxerga vultos ou tem visões?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
                 <tr><td>Sente-se perseguido?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
                 <tr><td>Sente-se obrigado a agir contrário à sua vontade?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
+                <tr><td colspan="2" class="titulo-secao" style="background-color: #f0f0f0 !important; padding: 1px !important;">RELACIONAMENTO INTERPESSOAL</td></tr>
                 <tr><td>Costuma ter brigas ou entrar em conflito?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
                 <tr><td>Participa de reuniões familiares?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
                 <tr><td>Gosta de sair com a família ou amigos?</td><td><span class="cb-padrao"></span> Sim &nbsp;&nbsp; <span class="cb-padrao"></span> Não</td></tr>
             </table>
 
-            <table class="tabela-word tabela-psico-compacta" style="margin-bottom: 6px;">
-                <tr><td colspan="5" class="titulo-secao" style="background-color: #f0f0f0 !important; padding: 1px !important;">Anamnese Psicossocial</td></tr>
-                <tr><th style="width: 60%; text-align: left;">Costuma Ter ou Sentir...</th><th style="width: 10%;">NUNCA</th><th style="width: 10%;">RARAMENTE</th><th style="width: 10%;">COM FREQUÊNCIA</th><th style="width: 10%;">SEMPRE</th></tr>
-                <tr><td>Dores de cabeça?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Falta de apetite?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Insônia, sono interrompido ou acorda cansado?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Assusta-se com facilidade?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Tremor nas mãos?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Nervoso, tensão e/ou preocupação?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Má digestão?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Dificuldade de pensar com clareza?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Tristeza?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Chorado mais que o costume?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Dificuldade para realizar com satisfação tarefas diárias?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Dificuldade para tomar decisões?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Dificuldades no serviço / trabalho causa sofrimento?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Incapacidade em desempenhar papel útil na sua vida?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Desinteresse pelas coisas?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Inútil, sem valor?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Ideias de acabar com a vida?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Cansado o tempo todo?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Sensações desagradáveis no estômago?</td><td></td><td></td><td></td><td></td></tr>
-                <tr><td>Cansaço com facilidade?</td><td></td><td></td><td></td><td></td></tr>
-            </table>
-            <br>
-            <br>
-            <table class="tabela-sem-borda" style="width: 100%; margin-top: 15px; font-size: 10pt;">
-                <tr><td style="width: 50%;"><div class="linha-ass">Assinatura Funcionário</div></td><td style="width: 50%; text-align: right;">Data: ______ / ______ / ______</td></tr>
+            <!-- ANAMNESE PSICOSSOCIAL EM 2 AGRUPAMENTOS POR LINHA (SIM / NÃO) -->
+            <table class="tabela-word tabela-psico-compacta" style="margin-bottom: 4px;">
+                <tr><td colspan="6" class="titulo-secao" style="background-color: #f0f0f0 !important; padding: 1px !important;">Anamnese Psicossocial</td></tr>
+                <tr>
+                    <th style="width: 40%; text-align: left;">Costuma Ter ou Sentir...</th>
+                    <th style="width: 5%;">Sim</th>
+                    <th style="width: 5%;">Não</th>
+                    <th style="width: 40%; text-align: left;">Costuma Ter ou Sentir...</th>
+                    <th style="width: 5%;">Sim</th>
+                    <th style="width: 5%;">Não</th>
+                </tr>
+                <tr><td>Dores de cabeça?</td><td></td><td></td><td>Dificuldade para realizar com satisfação tarefas diárias?</td><td></td><td></td></tr>
+                <tr><td>Falta de apetite?</td><td></td><td></td><td>Dificuldade para tomar decisões?</td><td></td><td></td></tr>
+                <tr><td>Insônia, sono interrompido ou acorda cansado?</td><td></td><td></td><td>Dificuldades no serviço / trabalho causa sofrimento?</td><td></td><td></td></tr>
+                <tr><td>Assusta-se com facilidade?</td><td></td><td></td><td>Incapacidade em desempenhar papel útil na sua vida?</td><td></td><td></td></tr>
+                <tr><td>Tremor nas mãos?</td><td></td><td></td><td>Desinteresse pelas coisas?</td><td></td><td></td></tr>
+                <tr><td>Nervoso, tensão e/ou preocupação?</td><td></td><td></td><td>Inútil, sem valor?</td><td></td><td></td></tr>
+                <tr><td>Má digestão?</td><td></td><td></td><td>Ideias de acabar com a vida?</td><td></td><td></td></tr>
+                <tr><td>Dificuldade de pensar com clareza?</td><td></td><td></td><td>Cansado o tempo todo?</td><td></td><td></td></tr>
+                <tr><td>Tristeza?</td><td></td><td></td><td>Sensações desagradáveis no estômago?</td><td></td><td></td></tr>
+                <tr><td>Chorado mais que o costume?</td><td></td><td></td><td>Cansaço com facilidade?</td><td></td><td></td></tr>
             </table>
 
-            <!-- PÁGINA 5: AVALIAÇÃO PSICOSSOCIAL (SEÇÃO DO MÉDICO) -->
-            <div class="quebra-pagina-medico">
-                <div class="secao-medica">
-                    <div class="header-bg" style="font-size: 14pt; padding: 6px; margin-bottom: 12px; border: 1px solid black;">
-                        MÉDICO(A) RESPONDE ⇣
-                    </div>
-                    <table class="tabela-word">
-                        <tr class="header-bg"><th style="width: 75%; text-align: left;">CRITÉRIOS DE AVALIAÇÃO</th><th style="width: 25%;">RESPOSTA</th></tr>
-                        <tr><td><strong>ORIENTAÇÃO NO ESPAÇO TEMPORAL</strong><br>O paciente consegue localizar-se no tempo e no espaço? Sabe onde está? Dia da semana? Data, etc.?</td><td style="text-align: center;"><span class="cb-medico"></span> Sim &nbsp; <span class="cb-medico"></span> Não</td></tr>
-                        <tr><td><strong>ASPECTO GERAL</strong><br>O paciente está vestido de maneira adequada? Sua aparência é de asseio? Postura adequada durante a consulta?</td><td style="text-align: center;"><span class="cb-medico"></span> Sim &nbsp; <span class="cb-medico"></span> Não</td></tr>
-                        <tr><td><strong>COMPORTAMENTO</strong><br>O paciente apresenta gesticulação normal (sem exageros ou excessividade imóvel)? Sem alteração em sua mímica facial?</td><td style="text-align: center;"><span class="cb-medico"></span> Sim &nbsp; <span class="cb-medico"></span> Não</td></tr>
-                        <tr><td><strong>FALA</strong><br>Percebe-se alteração na fala (aceleração ou lentidão)?</td><td style="text-align: center;"><span class="cb-medico"></span> Sim &nbsp; <span class="cb-medico"></span> Não</td></tr>
-                    </table>
-                    <div style="margin-top: 15px;">
-                        <strong>PARECER</strong>
-                        <div class="parecer-box"><span class="cb-medico" style="float: left;"></span><div style="margin-left: 25px;">Existe a necessidade de encaminhamento do paciente para avaliação psicológica / psiquiátrica para a definição de sua aptidão para trabalhos em espaço confinado e em altura. (&gt;7 afirmativos no psicossocial)</div></div>
-                        <div class="parecer-box"><span class="cb-medico" style="float: left;"></span><div style="margin-left: 25px;">Não existem objeções no momento que exijam algum encaminhamento para avaliação especializada, não havendo contra indicação para trabalhos em espaço confinado e em altura.</div></div>
-                    </div>
-                    <table class="tabela-sem-borda" style="width: 100%; margin-top: 40px;">
-                        <tr>
-                            <td style="width: 60%;"><div class="linha-ass" style="width: 90%;">Carimbo e assinatura do médico<br>responsável pelo atendimento</div></td>
-                            <td style="width: 40%; vertical-align: top; text-align: right;">Data: ______ / ______ / ______</td>
-                        </tr>
-                    </table>
+            <table class="tabela-sem-borda" style="width: 100%; margin-top: 12px; margin-bottom: 6px; font-size: 9pt;">
+                <tr>
+                    <br>
+                    <br>
+                    <td style="width: 55%;"><div class="linha-ass" style="width: 90%;">Assinatura Funcionário</div></td>
+                    <td style="width: 45%; text-align: right; vertical-align: bottom;">Data: ______ / ______ / ______</td>
+                </tr>
+            </table>
+
+            <!-- BLOCO 5: MÉDICO(A) RESPONDE NA MESMA FOLHA 4 -->
+            <div class="secao-medica">
+                <div class="header-bg" style="font-size: 9.5pt; padding: 2px; margin-bottom: 4px; border: 1px solid black;">
+                    5 – MÉDICO(A) RESPONDE ⇣
                 </div>
+                <table class="tabela-word">
+                    <tr class="header-bg"><th style="width: 78%; text-align: left;">CRITÉRIOS DE AVALIAÇÃO</th><th style="width: 22%;">RESPOSTA</th></tr>
+                    <tr><td><strong>ORIENTAÇÃO NO ESPAÇO TEMPORAL</strong> — O paciente consegue localizar-se no tempo e no espaço? Sabe onde está? Dia da semana? Data, etc.?</td><td style="text-align: center;"><span class="cb-medico"></span> Sim &nbsp; <span class="cb-medico"></span> Não</td></tr>
+                    <tr><td><strong>ASPECTO GERAL</strong> — O paciente está vestido de maneira adequada? Sua aparência é de asseio? Postura adequada durante a consulta?</td><td style="text-align: center;"><span class="cb-medico"></span> Sim &nbsp; <span class="cb-medico"></span> Não</td></tr>
+                    <tr><td><strong>COMPORTAMENTO</strong> — O paciente apresenta gesticulação normal (sem exageros ou excessividade imóvel)? Sem alteração em sua mímica facial?</td><td style="text-align: center;"><span class="cb-medico"></span> Sim &nbsp; <span class="cb-medico"></span> Não</td></tr>
+                    <tr><td><strong>FALA</strong> — Percebe-se alteração na fala (aceleração ou lentidão)?</td><td style="text-align: center;"><span class="cb-medico"></span> Sim &nbsp; <span class="cb-medico"></span> Não</td></tr>
+                </table>
+                <div style="margin-top: 4px;">
+                    <strong>PARECER</strong>
+                    <div class="parecer-box"><span class="cb-medico" style="float: left;"></span><div style="margin-left: 18px;">Existe a necessidade de encaminhamento do paciente para avaliação psicológica / psiquiátrica para a definição de sua aptidão para trabalhos em espaço confinado e em altura. (&gt;7 afirmativos no psicossocial)</div></div>
+                    <div class="parecer-box"><span class="cb-medico" style="float: left;"></span><div style="margin-left: 18px;">Não existem objeções no momento que exijam algum encaminhamento para avaliação especializada, não havendo contra indicação para trabalhos em espaço confinado e em altura.</div></div>
+                </div>
+                <table class="tabela-sem-borda" style="width: 100%; margin-top: 16px;">
+                    <tr>
+                        <br>
+                        <br>
+                        <td style="width: 60%;"><div class="linha-ass" style="width: 90%;">Carimbo e assinatura do médico responsável pelo atendimento</div></td>
+                        <td style="width: 40%; vertical-align: bottom; text-align: right;">Data: ______ / ______ / ______</td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
@@ -608,6 +665,32 @@
                     if (partes.length === 3) return `${partes[2]}-${partes[1]}-${partes[0]}`;
                 }
                 return data.split('T')[0];
+            }
+
+            function parseDataObj(dataStr) {
+                if (!dataStr) return null;
+                const limpa = String(dataStr).split('T')[0].trim();
+                if (limpa.includes('/')) {
+                    const p = limpa.split('/');
+                    if (p.length === 3) return new Date(Number(p[2]), Number(p[1]) - 1, Number(p[0]));
+                } else if (limpa.includes('-')) {
+                    const p = limpa.split('-');
+                    if (p.length === 3) return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+                }
+                return null;
+            }
+
+            function calcularIdadeNaData(dataNascimento, dataReferencia) {
+                const dn = parseDataObj(dataNascimento);
+                const ref = parseDataObj(dataReferencia) || new Date();
+                if (!dn || isNaN(dn.getTime()) || isNaN(ref.getTime())) return '';
+
+                let idade = ref.getFullYear() - dn.getFullYear();
+                const diffMes = ref.getMonth() - dn.getMonth();
+                if (diffMes < 0 || (diffMes === 0 && ref.getDate() < dn.getDate())) {
+                    idade--;
+                }
+                return idade >= 0 ? `${idade} anos` : '';
             }
 
             function gerarOpcoesEsocial(exameNome) {
@@ -917,6 +1000,12 @@
                 document.querySelectorAll('.out-empresa').forEach(el => el.textContent = empresaVal);
                 document.querySelectorAll('.out-nome').forEach(el => el.textContent = pac.nome);
                 document.querySelectorAll('.out-dn').forEach(el => el.textContent = formatarDataBR(pac.data_nascimento));
+                
+                // Calcula a idade com base na data de nascimento e na data de cadastro/exame
+                const dataRefCadastro = pac.data_exame || pac.created_at || dataAsoInputVal;
+                const idadeCalculada = calcularIdadeNaData(pac.data_nascimento, dataRefCadastro);
+                document.querySelectorAll('.out-idade').forEach(el => el.textContent = idadeCalculada);
+
                 document.querySelectorAll('.out-rg').forEach(el => el.textContent = pac.rg || '');
                 document.querySelectorAll('.out-cpf').forEach(el => el.textContent = pac.cpf || '');
                 

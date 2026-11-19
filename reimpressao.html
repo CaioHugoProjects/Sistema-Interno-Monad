@@ -202,6 +202,8 @@
             const msgVazio = document.getElementById('msg-vazio');
             
             let databasePacientes = []; 
+            let isPolling = false;
+            let ultimoHashDados = "";
 
             function formatarDataBR(data) {
                 if (!data) return '-';
@@ -214,13 +216,37 @@
             const hoje = new Date();
             inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
-            async function buscarPacientesDoBanco() {
-                tabela.innerHTML = ""; 
-                msgVazio.style.display = "none";
-                msgCarregando.style.display = "block";
+            function aplicarFiltroEAtualizarTabela() {
+                const termo = inputPesquisa.value.toLowerCase().trim();
+                const filtrados = termo
+                    ? databasePacientes.filter(pac => 
+                        (pac.nome && pac.nome.toLowerCase().includes(termo)) || 
+                        (pac.cpf && pac.cpf.toLowerCase().includes(termo))
+                    )
+                    : databasePacientes;
 
+                if (filtrados.length > 0) {
+                    msgVazio.style.display = "none";
+                    renderizarTabela(filtrados);
+                } else {
+                    tabela.innerHTML = "";
+                    msgVazio.innerHTML = "<strong>Nenhum paciente encontrado para esta data!</strong>";
+                    msgVazio.style.display = "block";
+                }
+            }
+
+            async function buscarPacientesDoBanco(silencioso = false) {
                 const dataFormatada = inputData.value;
-                if(!dataFormatada) return;
+                if (!dataFormatada) return;
+                if (silencioso && isPolling) return;
+
+                isPolling = true;
+                if (!silencioso) {
+                    tabela.innerHTML = ""; 
+                    msgVazio.style.display = "none";
+                    msgCarregando.style.display = "block";
+                    ultimoHashDados = "";
+                }
 
                 try {
                     const { data, error } = await supabase
@@ -229,21 +255,26 @@
                         .eq('data_exame', dataFormatada)
                         .order('created_at', { ascending: false });
 
-                    msgCarregando.style.display = "none";
+                    if (!silencioso) msgCarregando.style.display = "none";
                     if (error) throw error;
 
-                    if (data && data.length > 0) {
-                        databasePacientes = data; 
-                        renderizarTabela(databasePacientes);
-                    } else {
-                        databasePacientes = [];
-                        msgVazio.style.display = "block";
+                    const novosDados = data || [];
+                    const novoHash = JSON.stringify(novosDados);
+
+                    if (!silencioso || novoHash !== ultimoHashDados) {
+                        ultimoHashDados = novoHash;
+                        databasePacientes = novosDados;
+                        aplicarFiltroEAtualizarTabela();
                     }
                 } catch (error) {
-                    msgCarregando.style.display = "none";
-                    msgVazio.innerHTML = "❌ Erro ao ligar ao banco de dados.";
-                    msgVazio.style.display = "block";
+                    if (!silencioso) {
+                        msgCarregando.style.display = "none";
+                        msgVazio.innerHTML = "❌ Erro ao ligar ao banco de dados.";
+                        msgVazio.style.display = "block";
+                    }
                     console.error("Erro na busca: ", error.message);
+                } finally {
+                    isPolling = false;
                 }
             }
 
@@ -295,17 +326,17 @@
                 });
             }
 
-            inputPesquisa.addEventListener('input', function(e) {
-                const termo = e.target.value.toLowerCase();
-                const filtrados = databasePacientes.filter(pac => 
-                    pac.nome.toLowerCase().includes(termo) || 
-                    pac.cpf.toLowerCase().includes(termo)
-                );
-                renderizarTabela(filtrados);
-            });
+            inputPesquisa.addEventListener('input', aplicarFiltroEAtualizarTabela);
 
-            document.getElementById('btn-buscar-data').addEventListener('click', buscarPacientesDoBanco);
-            buscarPacientesDoBanco();
+            btnBuscarData.addEventListener('click', () => buscarPacientesDoBanco(false));
+            inputData.addEventListener('change', () => buscarPacientesDoBanco(false));
+            
+            buscarPacientesDoBanco(false);
+
+            // Polling silencioso a cada 3 segundos
+            setInterval(() => {
+                buscarPacientesDoBanco(true);
+            }, 3000);
 
             window.imprimirFichaPeloId = function(idUnico) {
                 const pac = databasePacientes.find(p => p.id == idUnico);
