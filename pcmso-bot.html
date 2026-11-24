@@ -31,6 +31,13 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2.5">
+        <button id="btn-empresas-sistema" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-sm font-medium text-teal-800 bg-teal-50 border border-teal-200 hover:bg-teal-100 rounded-lg transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          <span>Empresas (<span id="header-empresas-count">0</span>)</span>
+        </button>
+
         <button id="btn-config-ia" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-sm font-medium text-violet-700 bg-violet-50 border border-violet-200 hover:bg-violet-100 rounded-lg transition">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -53,6 +60,60 @@
 
         <button id="btn-salvar" type="button" disabled class="px-4 py-2.5 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-lg shadow-sm transition">
           Enviar para Cadastro
+        </button>
+      </div>
+    </div>
+
+    <!-- Painel de Empresas Cadastradas no Sistema -->
+    <div id="box-empresas-sistema" class="hidden bg-white border border-teal-200 rounded-xl p-5 shadow-sm space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900">Empresas Cadastradas no Sistema (Destino das Funções)</h2>
+          <p class="text-xs text-slate-500">
+            Somente as empresas registradas nesta base oficial podem receber funções importadas do PCMSO.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="badge-empresas-total" class="px-2.5 py-1 text-xs font-semibold rounded-full bg-teal-50 text-teal-800 border border-teal-200">
+            0 empresa(s) cadastrada(s)
+          </span>
+          <button id="btn-toggle-bulk-empresas" type="button" class="px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100">
+            + Importar Lista/JSON
+          </button>
+        </div>
+      </div>
+
+      <!-- Cadastro rápido de empresa do sistema -->
+      <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+        <input id="input-empresa-nome" type="text" maxlength="100" placeholder="Razão Social / Nome da Empresa Cadastrada *" class="sm:col-span-6 rounded-lg border border-slate-300 px-3 py-2 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-teal-500" />
+        <input id="input-empresa-cnpj" type="text" maxlength="20" placeholder="CNPJ (opcional, ex.: 00.000.000/0001-00)" class="sm:col-span-4 rounded-lg border border-slate-300 px-3 py-2 text-xs font-mono bg-white focus:outline-none focus:ring-2 focus:ring-teal-500" />
+        <button id="btn-add-empresa" type="button" class="sm:col-span-2 px-3.5 py-2 text-xs font-semibold bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+          + Cadastrar Empresa
+        </button>
+      </div>
+
+      <!-- Importação em lote de empresas -->
+      <div id="box-bulk-empresas" class="hidden pt-2 border-t border-slate-200 space-y-2">
+        <label class="block text-xs font-medium text-slate-600">
+          Cole uma lista de empresas (uma por linha no formato <code class="bg-slate-100 px-1 rounded">Nome | CNPJ</code> ou apenas <code class="bg-slate-100 px-1 rounded">Nome</code>) ou um array JSON <code class="bg-slate-100 px-1 rounded">[{"id":"...","nome":"...","cnpj":"..."}]</code>:
+        </label>
+        <textarea id="textarea-bulk-empresas" rows="4" placeholder="AC Engenharia | 12.345.678/0001-90&#10;Carajás Norte Serviços&#10;Servis Segurança" class="w-full rounded-lg border border-slate-300 p-2.5 text-xs font-mono bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+        <div class="flex justify-end gap-2">
+          <button id="btn-cancel-bulk-empresas" type="button" class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
+            Cancelar
+          </button>
+          <button id="btn-confirm-bulk-empresas" type="button" class="px-3.5 py-1.5 text-xs font-semibold bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+            Sincronizar Empresas
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de empresas cadastradas -->
+      <div id="lista-empresas-sistema" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-1"></div>
+
+      <div class="flex justify-end">
+        <button id="btn-fechar-empresas" type="button" class="px-4 py-2 text-xs font-semibold bg-slate-900 text-white rounded-lg hover:bg-slate-800">
+          Concluir
         </button>
       </div>
     </div>
@@ -185,7 +246,7 @@
     </div>
 
     <!-- Indicadores Resumidos -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
         <p class="text-xs font-medium text-slate-500 uppercase">Total de Funções Lidas</p>
         <p id="stat-total-funcoes" class="text-2xl font-bold text-slate-900 mt-1">0</p>
@@ -197,6 +258,10 @@
       <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
         <p class="text-xs font-medium text-slate-500 uppercase">Funções com Variação de Nível</p>
         <p id="stat-com-variacao" class="text-2xl font-bold text-emerald-600 mt-1">0</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        <p class="text-xs font-medium text-slate-500 uppercase">Funções Vinculadas a Empresas</p>
+        <p id="stat-vinculadas" class="text-2xl font-bold text-teal-700 mt-1">0 / 0</p>
       </div>
     </div>
 
@@ -217,7 +282,11 @@
         </div>
 
         <div id="filtros-container" class="pb-3 flex flex-wrap items-center gap-2">
-          <input id="filtro-texto" type="text" placeholder="Buscar função, nível ou risco..." class="px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-56" />
+          <input id="filtro-texto" type="text" placeholder="Buscar função, nível ou risco..." class="px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48" />
+          <select id="filtro-empresa" class="px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 max-w-[200px]">
+            <option value="">Todas as empresas</option>
+            <option value="SEM_EMPRESA">Sem empresa vinculada</option>
+          </select>
           <select id="filtro-variacao" class="px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
             <option value="">Todas as funções</option>
             <option value="COM_NIVEL">Apenas com variação de nível</option>
@@ -229,12 +298,36 @@
         </div>
       </div>
 
+      <!-- Barra de Vinculação em Lote com Empresas Cadastradas -->
+      <div id="bar-vinculo-lote" class="px-6 py-3 bg-teal-50/70 border-b border-teal-100 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-bold text-teal-900">Vincular em lote (somente empresas cadastradas):</span>
+          <select id="select-empresa-lote" class="px-3 py-1.5 text-xs bg-white border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 min-w-[230px]">
+            <option value="">Selecione uma empresa cadastrada...</option>
+          </select>
+          <button id="btn-vincular-todas" type="button" class="px-3 py-1.5 text-xs font-semibold bg-teal-700 text-white rounded-lg hover:bg-teal-800 disabled:bg-slate-300 disabled:cursor-not-allowed">
+            Vincular a Todas
+          </button>
+          <button id="btn-vincular-filtradas" type="button" class="px-3 py-1.5 text-xs font-medium bg-white text-teal-800 border border-teal-300 rounded-lg hover:bg-teal-100 disabled:opacity-50 disabled:cursor-not-allowed">
+            Vincular às Filtradas
+          </button>
+          <button id="btn-substituir-todas" type="button" class="px-3 py-1.5 text-xs font-medium bg-white text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed" title="Define esta empresa como única destinatária de todas as funções">
+            Substituir em Todas
+          </button>
+        </div>
+
+        <button id="btn-limpar-vinculos" type="button" class="px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 rounded-lg">
+          Limpar Vínculos
+        </button>
+      </div>
+
       <!-- Visão 1: Tabela Completa de Funções e Riscos -->
       <div id="view-lista" class="overflow-x-auto">
         <table class="min-w-full divide-y divide-slate-200 text-sm">
           <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
             <tr>
-              <th class="px-4 py-3 text-left w-60">Função Base &amp; Nível</th>
+              <th class="px-4 py-3 text-left w-56">Função Base &amp; Nível</th>
+              <th class="px-3 py-3 text-left w-64">Empresas Cadastradas</th>
               <th class="px-3 py-3 text-left">Físico</th>
               <th class="px-3 py-3 text-left">Químico</th>
               <th class="px-3 py-3 text-left">Biológico</th>
@@ -245,8 +338,8 @@
           </thead>
           <tbody id="tbody-lista" class="divide-y divide-slate-100 bg-white">
             <tr>
-              <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-sm">
-                Importe um PDF de PCMSO para extrair as funções e seus respectivos fatores de risco.
+              <td colspan="8" class="px-6 py-12 text-center text-slate-400 text-sm">
+                Importe um PDF de PCMSO para extrair as funções e vinculá-las às empresas cadastradas no sistema.
               </td>
             </tr>
           </tbody>
@@ -256,7 +349,7 @@
       <!-- Visão 2: Agrupamento por Função Base -->
       <div id="view-agrupado" class="hidden p-6 space-y-4 bg-slate-50/40">
         <p class="text-xs text-slate-500">
-          Exibe as funções base identificadas e suas variações de nível expandidas (ex.: I, II, III, IV, V, VI, JR, PL, SR).
+          Exibe as funções base identificadas, suas variações de nível expandidas e as empresas cadastradas vinculadas.
         </p>
         <div id="grid-agrupado" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </div>
@@ -264,7 +357,7 @@
       <!-- Visão 3: JSON Padronizado -->
       <div id="view-json" class="hidden p-6 space-y-3">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-600 uppercase">Estrutura canônica (Funções e Fatores de Risco)</span>
+          <span class="text-xs font-semibold text-slate-600 uppercase">Estrutura canônica (Funções, Empresas Vinculadas e Fatores de Risco)</span>
           <button id="btn-copiar-json" type="button" class="px-3 py-1.5 text-xs font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
             Copiar JSON
           </button>
@@ -290,7 +383,8 @@
       API_KEYS_POOL: "pcmso_gemini_api_keys_pool",
       LEGACY_API_KEY: "pcmso_gemini_api_key",
       MODEL: "pcmso_gemini_model",
-      MODE: "pcmso_extraction_mode"
+      MODE: "pcmso_extraction_mode",
+      EMPRESAS_CADASTRADAS: "pcmso_empresas_cadastradas"
     };
 
     const STOP_IRRELEVANT_REGEX =
@@ -303,6 +397,172 @@
       /\((?:habitual|permanente|intermitente|eventual|ocasional|qualitativ[ao]|quantitativ[ao]|nr[\s-]?\d+|anexo\s*\d+|limite\s+de\s+toler[aâ]ncia|n[aã]o\s+aplic[aá]vel|na)\b[^)]*\)/gi;
 
     const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    /**
+     * Registro Oficial de Empresas Cadastradas no Sistema
+     * Garante que nenhuma função seja vinculada a empresas fora desta lista.
+     */
+    class EmpresasRegistry {
+      constructor() {
+        this.entries = [];
+        this.load();
+      }
+
+      static normalizeKey(str = "") {
+        return String(str)
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      load() {
+        let loaded = [];
+
+        // 1. Se o sistema hospedeiro injetar window.EMPRESAS_CADASTRADAS, prioriza essa fonte oficial
+        if (Array.isArray(window.EMPRESAS_CADASTRADAS)) {
+          loaded = this.sanitizeList(window.EMPRESAS_CADASTRADAS);
+        } else {
+          try {
+            const raw = localStorage.getItem(STORAGE_KEYS.EMPRESAS_CADASTRADAS);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) {
+                loaded = this.sanitizeList(parsed);
+              }
+            }
+          } catch (e) {
+            console.warn("Erro ao carregar empresas cadastradas:", e);
+          }
+        }
+
+        this.entries = loaded;
+        this.save();
+      }
+
+      sanitizeList(list = []) {
+        const seenNames = new Set();
+        const result = [];
+
+        list.forEach((item, idx) => {
+          const isObj = item && typeof item === "object";
+          const nome = String(isObj ? item.nome || item.razao_social || item.empresa || "" : item || "")
+            .replace(/\s+/g, " ")
+            .trim();
+          if (!nome) return;
+
+          const norm = EmpresasRegistry.normalizeKey(nome);
+          if (seenNames.has(norm)) return;
+          seenNames.add(norm);
+
+          const cnpj = String(isObj ? item.cnpj || "" : "").trim();
+          const id =
+            isObj && item.id !== undefined && item.id !== null && String(item.id).trim() !== ""
+              ? String(item.id).trim()
+              : `emp_${norm.replace(/[^a-z0-9]/g, "_").slice(0, 24)}_${idx + 1}`;
+
+          result.push({ id, nome, cnpj });
+        });
+
+        return result.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }));
+      }
+
+      save() {
+        localStorage.setItem(STORAGE_KEYS.EMPRESAS_CADASTRADAS, JSON.stringify(this.entries));
+      }
+
+      setAll(list = []) {
+        this.entries = this.sanitizeList(list);
+        this.save();
+      }
+
+      addEmpresa(rawNome, rawCnpj = "") {
+        const nome = String(rawNome || "").replace(/\s+/g, " ").trim();
+        const cnpj = String(rawCnpj || "").trim();
+
+        if (!nome) {
+          return { ok: false, reason: "Informe o nome/razão social da empresa." };
+        }
+
+        const norm = EmpresasRegistry.normalizeKey(nome);
+        if (this.entries.some((e) => EmpresasRegistry.normalizeKey(e.nome) === norm)) {
+          return { ok: false, reason: "Esta empresa já está cadastrada no sistema." };
+        }
+
+        const id = `emp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        this.entries.push({ id, nome, cnpj });
+        this.entries.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }));
+        this.save();
+        return { ok: true, id };
+      }
+
+      importBulk(rawText = "") {
+        const text = String(rawText || "").trim();
+        if (!text) return { added: 0, duplicates: 0 };
+
+        let added = 0;
+        let duplicates = 0;
+
+        if (text.startsWith("[")) {
+          try {
+            const arr = JSON.parse(text);
+            if (Array.isArray(arr)) {
+              const sanitized = this.sanitizeList(arr);
+              for (const item of sanitized) {
+                const norm = EmpresasRegistry.normalizeKey(item.nome);
+                if (this.entries.some((e) => EmpresasRegistry.normalizeKey(e.nome) === norm)) {
+                  duplicates++;
+                } else {
+                  this.entries.push(item);
+                  added++;
+                }
+              }
+              this.entries.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }));
+              this.save();
+              return { added, duplicates };
+            }
+          } catch (e) {
+            // Segue para leitura linha a linha se não for JSON válido
+          }
+        }
+
+        const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+        for (const line of lines) {
+          const [nomePart, cnpjPart = ""] = line.split(/[|;\t]/);
+          const res = this.addEmpresa(nomePart, cnpjPart);
+          if (res.ok) added++;
+          else duplicates++;
+        }
+
+        return { added, duplicates };
+      }
+
+      removeEmpresa(id) {
+        this.entries = this.entries.filter((e) => e.id !== id);
+        this.save();
+      }
+
+      exists(id) {
+        return this.entries.some((e) => e.id === id);
+      }
+
+      getById(id) {
+        return this.entries.find((e) => e.id === id) || null;
+      }
+
+      getAll() {
+        return [...this.entries];
+      }
+
+      resolveValidEmpresas(ids = []) {
+        if (!Array.isArray(ids)) return [];
+        const unique = [...new Set(ids)];
+        return unique.map((id) => this.getById(id)).filter(Boolean);
+      }
+    }
+
+    const empresasRegistry = new EmpresasRegistry();
 
     /**
      * Gerenciador de Pool de Chaves API do Google Gemini (até 15 chaves com failover contínuo)
@@ -337,7 +597,6 @@
           console.warn("Erro ao ler pool de chaves:", e);
         }
 
-        // Migração automática da chave única anterior para o pool
         const legacyKey = (localStorage.getItem(STORAGE_KEYS.LEGACY_API_KEY) || "").trim();
         if (legacyKey && !loaded.some((item) => item.key === legacyKey) && loaded.length < MAX_API_KEYS) {
           loaded.unshift({
@@ -963,11 +1222,6 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
         }
       }
 
-      /**
-       * Executa a chamada percorrendo o pool de até 15 chaves API.
-       * Se uma chave atingir cota/limite (429) ou for inválida, troca imediatamente para a próxima chave
-       * e repete o mesmo lote para garantir continuidade ininterrupta.
-       */
       static async callGeminiWithKeyPool({ pool, preferredModel, parts, onStatus, onContextChange }) {
         const totalKeys = pool.getTotalCount();
         let lastError = null;
@@ -1028,7 +1282,6 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
             } catch (err) {
               lastError = err;
 
-              // 1. Limite/cota da chave atingido -> troca imediatamente para a próxima chave API
               if (this.isQuotaOrRateLimitError(err.status, err.message)) {
                 pool.markStatus(keyEntry.id, "rate_limited", "Limite/cota atingido");
                 const remaining = pool.getUsableEntries(attemptedKeyIds);
@@ -1043,7 +1296,6 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
                 break;
               }
 
-              // 2. Chave inválida/sem permissão -> marca como inválida e passa para a próxima chave
               if (this.isInvalidKeyError(err.status, err.message)) {
                 pool.markStatus(keyEntry.id, "invalid", "Chave inválida");
                 const remaining = pool.getUsableEntries(attemptedKeyIds);
@@ -1058,13 +1310,11 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
                 break;
               }
 
-              // 3. Modelo inexistente nesta chave -> tenta o próximo modelo da mesma chave
               if (this.isModelNotFoundError(err.status, err.message)) {
                 this.invalidateModelFromCache(keyEntry.key, currentModel);
                 continue;
               }
 
-              // 4. Sobrecarga transitória de servidor -> tenta próximo modelo ou próxima chave
               if (this.isTransientModelOverloadError(err.status, err.message, err.isTimeout)) {
                 const nextModel = candidateModels[mIdx + 1];
                 if (nextModel && onStatus) {
@@ -1076,14 +1326,12 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
                 continue;
               }
 
-              // Outros erros não recuperáveis
               pool.markStatus(keyEntry.id, "ready", "");
               throw err;
             }
           }
 
           if (!switchToNextKey) {
-            // Todos os modelos falharam por sobrecarga nesta chave; tenta próxima chave se houver
             pool.markStatus(keyEntry.id, "ready", "");
             const remaining = pool.getUsableEntries(attemptedKeyIds);
             if (remaining.length > 0 && onStatus) {
@@ -1155,7 +1403,6 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
             lastKeyInfo = result;
             collected.push(...result.funcoes);
           } catch (batchErr) {
-            // Se já havia extraído lotes anteriores antes de esgotar todas as chaves, preserva o progresso!
             if (collected.length > 0) {
               batchErr.partialFuncoes = collected;
               batchErr.stoppedAtPage = firstPage;
@@ -1446,6 +1693,9 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
         for (const item of rawItems) {
           const rawName = item.funcao || item.funcaoRaw || "";
           const expandedList = this.expandFunctionVariations(rawName);
+          const validEmpresasIds = Array.isArray(item.empresasIds)
+            ? item.empresasIds.filter((id) => empresasRegistry.exists(id))
+            : [];
 
           for (const parsedFn of expandedList) {
             const key = this.normalizeText(parsedFn.funcao);
@@ -1453,8 +1703,12 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
             if (!mapFuncoes.has(key)) {
               mapFuncoes.set(key, {
                 ...parsedFn,
+                empresasIds: [...validEmpresasIds],
                 riscos: this.createEmptyRisksMap()
               });
+            } else if (validEmpresasIds.length > 0) {
+              const existing = mapFuncoes.get(key);
+              existing.empresasIds = [...new Set([...existing.empresasIds, ...validEmpresasIds])];
             }
 
             const target = mapFuncoes.get(key);
@@ -2092,6 +2346,20 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
     };
 
     const els = {
+      btnEmpresasSistema: document.getElementById("btn-empresas-sistema"),
+      headerEmpresasCount: document.getElementById("header-empresas-count"),
+      boxEmpresasSistema: document.getElementById("box-empresas-sistema"),
+      badgeEmpresasTotal: document.getElementById("badge-empresas-total"),
+      inputEmpresaNome: document.getElementById("input-empresa-nome"),
+      inputEmpresaCnpj: document.getElementById("input-empresa-cnpj"),
+      btnAddEmpresa: document.getElementById("btn-add-empresa"),
+      btnToggleBulkEmpresas: document.getElementById("btn-toggle-bulk-empresas"),
+      boxBulkEmpresas: document.getElementById("box-bulk-empresas"),
+      textareaBulkEmpresas: document.getElementById("textarea-bulk-empresas"),
+      btnCancelBulkEmpresas: document.getElementById("btn-cancel-bulk-empresas"),
+      btnConfirmBulkEmpresas: document.getElementById("btn-confirm-bulk-empresas"),
+      listaEmpresasSistema: document.getElementById("lista-empresas-sistema"),
+      btnFecharEmpresas: document.getElementById("btn-fechar-empresas"),
       btnConfigIa: document.getElementById("btn-config-ia"),
       headerKeysCount: document.getElementById("header-keys-count"),
       boxConfigIa: document.getElementById("box-config-ia"),
@@ -2127,6 +2395,7 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
       statTotalFuncoes: document.getElementById("stat-total-funcoes"),
       statFuncoesBase: document.getElementById("stat-funcoes-base"),
       statComVariacao: document.getElementById("stat-com-variacao"),
+      statVinculadas: document.getElementById("stat-vinculadas"),
       tabLista: document.getElementById("tab-lista"),
       tabAgrupado: document.getElementById("tab-agrupado"),
       tabJson: document.getElementById("tab-json"),
@@ -2134,8 +2403,15 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
       countAgrupado: document.getElementById("count-agrupado"),
       filtrosContainer: document.getElementById("filtros-container"),
       filtroTexto: document.getElementById("filtro-texto"),
+      filtroEmpresa: document.getElementById("filtro-empresa"),
       filtroVariacao: document.getElementById("filtro-variacao"),
       btnNovaFuncao: document.getElementById("btn-nova-funcao"),
+      barVinculoLote: document.getElementById("bar-vinculo-lote"),
+      selectEmpresaLote: document.getElementById("select-empresa-lote"),
+      btnVincularTodas: document.getElementById("btn-vincular-todas"),
+      btnVincularFiltradas: document.getElementById("btn-vincular-filtradas"),
+      btnSubstituirTodas: document.getElementById("btn-substituir-todas"),
+      btnLimparVinculos: document.getElementById("btn-limpar-vinculos"),
       viewLista: document.getElementById("view-lista"),
       viewAgrupado: document.getElementById("view-agrupado"),
       viewJson: document.getElementById("view-json"),
@@ -2151,6 +2427,188 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
       BIOLOGICO: "bg-amber-50 text-amber-800 border-amber-200",
       ERGONOMICO: "bg-sky-50 text-sky-800 border-sky-200",
       ACIDENTE: "bg-purple-50 text-purple-800 border-purple-200"
+    };
+
+    function sanitizeFunctionCompanyLinks() {
+      for (const fn of appState.funcoes) {
+        if (!Array.isArray(fn.empresasIds)) {
+          fn.empresasIds = [];
+        } else {
+          fn.empresasIds = [...new Set(fn.empresasIds)].filter((id) => empresasRegistry.exists(id));
+        }
+      }
+    }
+
+    function renderEmpresasUi() {
+      sanitizeFunctionCompanyLinks();
+      const empresas = empresasRegistry.getAll();
+      const total = empresas.length;
+
+      els.headerEmpresasCount.textContent = total;
+      els.badgeEmpresasTotal.textContent = `${total} empresa(s) cadastrada(s)`;
+
+      // Atualiza seletor de vinculação em lote (somente empresas cadastradas)
+      const prevLote = els.selectEmpresaLote.value;
+      if (total === 0) {
+        els.selectEmpresaLote.innerHTML = `<option value="">Nenhuma empresa cadastrada no sistema...</option>`;
+        els.selectEmpresaLote.disabled = true;
+        els.btnVincularTodas.disabled = true;
+        els.btnVincularFiltradas.disabled = true;
+        els.btnSubstituirTodas.disabled = true;
+      } else {
+        els.selectEmpresaLote.disabled = false;
+        els.btnVincularTodas.disabled = false;
+        els.btnVincularFiltradas.disabled = false;
+        els.btnSubstituirTodas.disabled = false;
+        els.selectEmpresaLote.innerHTML =
+          `<option value="">Selecione uma empresa cadastrada...</option>` +
+          empresas
+            .map(
+              (emp) =>
+                `<option value="${escapeHtml(emp.id)}">${escapeHtml(emp.nome)}${
+                  emp.cnpj ? ` (${escapeHtml(emp.cnpj)})` : ""
+                }</option>`
+            )
+            .join("");
+        if (empresas.some((e) => e.id === prevLote)) {
+          els.selectEmpresaLote.value = prevLote;
+        }
+      }
+
+      // Atualiza filtro de empresas na tabela
+      const prevFiltro = els.filtroEmpresa.value;
+      els.filtroEmpresa.innerHTML =
+        `<option value="">Todas as empresas</option>` +
+        `<option value="SEM_EMPRESA">Sem empresa vinculada</option>` +
+        empresas
+          .map((emp) => `<option value="${escapeHtml(emp.id)}">${escapeHtml(emp.nome)}</option>`)
+          .join("");
+      if (prevFiltro === "SEM_EMPRESA" || empresas.some((e) => e.id === prevFiltro)) {
+        els.filtroEmpresa.value = prevFiltro;
+      }
+
+      // Lista no painel de empresas do sistema
+      if (total === 0) {
+        els.listaEmpresasSistema.innerHTML = `
+          <div class="col-span-full text-xs text-slate-500 bg-slate-50 border border-dashed border-slate-300 rounded-lg p-4 text-center">
+            Nenhuma empresa cadastrada no sistema. Cadastre acima ou importe a lista oficial para vincular às funções.
+          </div>`;
+        return;
+      }
+
+      els.listaEmpresasSistema.innerHTML = empresas
+        .map((emp) => {
+          const qtdFuncoes = appState.funcoes.filter((fn) => fn.empresasIds.includes(emp.id)).length;
+          return `
+            <div class="flex items-center justify-between gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs">
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 truncate" title="${escapeHtml(emp.nome)}">${escapeHtml(emp.nome)}</div>
+                <div class="text-[11px] text-slate-500 flex items-center gap-2">
+                  ${emp.cnpj ? `<span class="font-mono">${escapeHtml(emp.cnpj)}</span>` : `<span>Sem CNPJ</span>`}
+                  <span class="px-1.5 py-0.2 rounded bg-teal-100 text-teal-800 font-semibold">${qtdFuncoes} função(ões)</span>
+                </div>
+              </div>
+              <button type="button" onclick="removerEmpresaSistema('${escapeHtml(emp.id)}')" class="text-rose-600 hover:text-rose-800 font-medium shrink-0">
+                Remover
+              </button>
+            </div>`;
+        })
+        .join("");
+    }
+
+    window.removerEmpresaSistema = function (id) {
+      if (!confirm("Remover esta empresa do cadastro? Os vínculos dela nas funções serão desfeitos.")) return;
+      empresasRegistry.removeEmpresa(id);
+      renderEmpresasUi();
+      render();
+    };
+
+    window.vincularEmpresaFuncao = function (funcaoIdx, empresaId) {
+      if (!empresaId) return;
+      if (!empresasRegistry.exists(empresaId)) {
+        alert("Operação bloqueada: somente empresas cadastradas no sistema podem ser vinculadas.");
+        return;
+      }
+      const fn = appState.funcoes[funcaoIdx];
+      if (!fn) return;
+      if (!Array.isArray(fn.empresasIds)) fn.empresasIds = [];
+      if (!fn.empresasIds.includes(empresaId)) {
+        fn.empresasIds.push(empresaId);
+      }
+      renderEmpresasUi();
+      render();
+    };
+
+    window.desvincularEmpresaFuncao = function (funcaoIdx, empresaId) {
+      const fn = appState.funcoes[funcaoIdx];
+      if (!fn || !Array.isArray(fn.empresasIds)) return;
+      fn.empresasIds = fn.empresasIds.filter((id) => id !== empresaId);
+      renderEmpresasUi();
+      render();
+    };
+
+    function getFilteredFunctionsWithIndex() {
+      const busca = PcmsoParser.normalizeText(els.filtroTexto.value);
+      const filtroVar = els.filtroVariacao.value;
+      const filtroEmp = els.filtroEmpresa.value;
+
+      return appState.funcoes
+        .map((fn, idx) => ({ ...fn, idx }))
+        .filter((fn) => {
+          if (filtroVar === "COM_NIVEL" && !fn.possuiVariacao) return false;
+          if (filtroVar === "SEM_NIVEL" && fn.possuiVariacao) return false;
+
+          const validIds = (fn.empresasIds || []).filter((id) => empresasRegistry.exists(id));
+          if (filtroEmp === "SEM_EMPRESA" && validIds.length > 0) return false;
+          if (filtroEmp && filtroEmp !== "SEM_EMPRESA" && !validIds.includes(filtroEmp)) return false;
+
+          if (!busca) return true;
+
+          const empNames = empresasRegistry
+            .resolveValidEmpresas(validIds)
+            .map((e) => e.nome)
+            .join(" ");
+          const allRisksStr = Object.values(fn.riscos).flat().join(" ");
+          const alvo = PcmsoParser.normalizeText(
+            `${fn.funcao} ${fn.funcaoBase} ${fn.nivel || ""} ${empNames} ${allRisksStr}`
+          );
+          return alvo.includes(busca);
+        });
+    }
+
+    function buildPayloadCadastro() {
+      sanitizeFunctionCompanyLinks();
+      return appState.funcoes.map((fn) => {
+        const empresasValidas = empresasRegistry.resolveValidEmpresas(fn.empresasIds);
+        return {
+          funcao: fn.funcao,
+          funcaoBase: fn.funcaoBase,
+          nivel: fn.nivel,
+          possuiVariacao: fn.possuiVariacao,
+          empresasIds: empresasValidas.map((e) => e.id),
+          empresas: empresasValidas.map((e) => ({
+            id: e.id,
+            nome: e.nome,
+            cnpj: e.cnpj || null
+          })),
+          riscos: fn.riscos
+        };
+      });
+    }
+
+    // Ponte pública para o sistema principal injetar/ler empresas cadastradas e receber o payload
+    window.PcmsoEmpresasBridge = {
+      setEmpresas(lista) {
+        empresasRegistry.setAll(lista);
+        renderEmpresasUi();
+        render();
+      },
+      getEmpresas() {
+        return empresasRegistry.getAll();
+      },
+      getPayloadCadastro() {
+        return buildPayloadCadastro();
+      }
     };
 
     function getAiConfig() {
@@ -2327,6 +2785,7 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
     async function syncConfigUi(forceRefreshModels = false) {
       const cfg = getAiConfig();
       els.selectModoLeitura.value = cfg.mode;
+      renderEmpresasUi();
       renderKeyPoolList();
       updateEngineBadges();
       await populateModelSelect(forceRefreshModels);
@@ -2463,16 +2922,17 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
 
           renderKeyPoolList();
           await populateModelSelect(false);
+          renderEmpresasUi();
           render();
           return;
         } catch (aiErr) {
           renderKeyPoolList();
           console.warn("Interrupção na leitura via IA após percorrer pool de chaves:", aiErr);
 
-          // Se parte do documento já foi extraída antes de todas as chaves atingirem limite, preserva!
           if (Array.isArray(aiErr.partialFuncoes) && aiErr.partialFuncoes.length > 0) {
             appState.layout = `IA Parcial (até pág. ${aiErr.stoppedAtPage - 1}/${aiErr.totalPages})`;
             appState.funcoes = PcmsoParser.normalizeAndConsolidate(aiErr.partialFuncoes);
+            renderEmpresasUi();
             render();
             alert(
               `Aviso: ${aiErr.message}\n\nOs dados extraídos até a página ${aiErr.stoppedAtPage - 1} foram preservados na tabela. Adicione novas chaves API ou aguarde a renovação da cota para ler o restante.`
@@ -2487,6 +2947,7 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
       const localRes = PcmsoParser.parseLocal(docData.structuredLines);
       appState.layout = `Parser Local (${localRes.layout})`;
       appState.funcoes = localRes.funcoes;
+      renderEmpresasUi();
       render();
     }
 
@@ -2514,6 +2975,7 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
           appState.funcoes = PcmsoParser.normalizeAndConsolidate(aiRes.funcoes);
           renderKeyPoolList();
           await populateModelSelect(false);
+          renderEmpresasUi();
           render();
           return;
         } catch (aiErr) {
@@ -2521,6 +2983,7 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
           if (Array.isArray(aiErr.partialFuncoes) && aiErr.partialFuncoes.length > 0) {
             appState.layout = "IA Texto (Parcial)";
             appState.funcoes = PcmsoParser.normalizeAndConsolidate(aiErr.partialFuncoes);
+            renderEmpresasUi();
             render();
             alert(`Aviso: ${aiErr.message}\n\nOs dados extraídos antes do limite foram preservados.`);
             return;
@@ -2534,19 +2997,23 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
       const localRes = PcmsoParser.parseLocal(rawText);
       appState.layout = `Parser Local (${localRes.layout})`;
       appState.funcoes = localRes.funcoes;
+      renderEmpresasUi();
       render();
     }
 
     function render() {
+      sanitizeFunctionCompanyLinks();
       els.badgeLayout.textContent = appState.layout || "Concluído";
       els.badgeLayout.classList.remove("hidden");
 
       const basesUnicas = new Set(appState.funcoes.map((f) => PcmsoParser.normalizeText(f.funcaoBase)));
       const comVariacao = appState.funcoes.filter((f) => f.possuiVariacao).length;
+      const vinculadas = appState.funcoes.filter((f) => f.empresasIds.length > 0).length;
 
       els.statTotalFuncoes.textContent = appState.funcoes.length;
       els.statFuncoesBase.textContent = basesUnicas.size;
       els.statComVariacao.textContent = comVariacao;
+      els.statVinculadas.textContent = `${vinculadas} / ${appState.funcoes.length}`;
 
       els.countLista.textContent = appState.funcoes.length;
       els.countAgrupado.textContent = basesUnicas.size;
@@ -2554,7 +3021,7 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
 
       renderTabelaPrincipal();
       renderVisaoAgrupada();
-      els.preJson.textContent = JSON.stringify(appState.funcoes, null, 2);
+      els.preJson.textContent = JSON.stringify(buildPayloadCadastro(), null, 2);
     }
 
     function renderRiskCell(riscosArray, catKey) {
@@ -2569,28 +3036,56 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
         .join("");
     }
 
+    function renderEmpresasCell(fn) {
+      const todasCadastradas = empresasRegistry.getAll();
+      const vinculadas = empresasRegistry.resolveValidEmpresas(fn.empresasIds);
+      const disponiveis = todasCadastradas.filter((e) => !fn.empresasIds.includes(e.id));
+
+      const tagsHtml =
+        vinculadas.length > 0
+          ? `<div class="flex flex-wrap gap-1 mb-1.5">${vinculadas
+              .map(
+                (emp) => `
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded bg-teal-50 text-teal-800 border border-teal-200">
+                    <span class="truncate max-w-[150px]" title="${escapeHtml(emp.nome)}">${escapeHtml(emp.nome)}</span>
+                    <button type="button" onclick="desvincularEmpresaFuncao(${fn.idx}, '${escapeHtml(emp.id)}')" class="text-teal-700 hover:text-rose-700 font-bold leading-none" title="Desvincular empresa">×</button>
+                  </span>`
+              )
+              .join("")}</div>`
+          : `<div class="mb-1.5"><span class="inline-block px-2 py-0.5 text-[10px] font-medium rounded bg-amber-50 text-amber-800 border border-amber-200">Sem empresa vinculada</span></div>`;
+
+      if (todasCadastradas.length === 0) {
+        return `${tagsHtml}<button type="button" onclick="document.getElementById('box-empresas-sistema').classList.remove('hidden')" class="text-[11px] font-semibold text-teal-700 underline hover:text-teal-900">+ Cadastrar empresas no sistema</button>`;
+      }
+
+      if (disponiveis.length === 0) {
+        return `${tagsHtml}<span class="text-[10px] text-slate-400">Todas cadastradas vinculadas</span>`;
+      }
+
+      const optionsHtml = disponiveis
+        .map(
+          (emp) =>
+            `<option value="${escapeHtml(emp.id)}">${escapeHtml(emp.nome)}${
+              emp.cnpj ? ` (${escapeHtml(emp.cnpj)})` : ""
+            }</option>`
+        )
+        .join("");
+
+      return `
+        ${tagsHtml}
+        <select onchange="vincularEmpresaFuncao(${fn.idx}, this.value); this.value='';" class="w-full px-2 py-1 text-[11px] bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <option value="">+ Vincular empresa cadastrada...</option>
+          ${optionsHtml}
+        </select>`;
+    }
+
     function renderTabelaPrincipal() {
-      const busca = PcmsoParser.normalizeText(els.filtroTexto.value);
-      const filtroVar = els.filtroVariacao.value;
-
-      const filtradas = appState.funcoes
-        .map((fn, idx) => ({ ...fn, idx }))
-        .filter((fn) => {
-          if (filtroVar === "COM_NIVEL" && !fn.possuiVariacao) return false;
-          if (filtroVar === "SEM_NIVEL" && fn.possuiVariacao) return false;
-          if (!busca) return true;
-
-          const allRisksStr = Object.values(fn.riscos).flat().join(" ");
-          const alvo = PcmsoParser.normalizeText(
-            `${fn.funcao} ${fn.funcaoBase} ${fn.nivel || ""} ${allRisksStr}`
-          );
-          return alvo.includes(busca);
-        });
+      const filtradas = getFilteredFunctionsWithIndex();
 
       if (filtradas.length === 0) {
         els.tbodyLista.innerHTML = `
           <tr>
-            <td colspan="7" class="px-6 py-10 text-center text-slate-400 text-sm">
+            <td colspan="8" class="px-6 py-10 text-center text-slate-400 text-sm">
               Nenhuma função encontrada para o filtro informado.
             </td>
           </tr>`;
@@ -2611,6 +3106,7 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
                   ${nivelBadge}
                 </div>
               </td>
+              <td class="px-3 py-3 text-xs">${renderEmpresasCell(fn)}</td>
               <td class="px-3 py-3 text-xs">${renderRiskCell(fn.riscos.FISICO, "FISICO")}</td>
               <td class="px-3 py-3 text-xs">${renderRiskCell(fn.riscos.QUIMICO, "QUIMICO")}</td>
               <td class="px-3 py-3 text-xs">${renderRiskCell(fn.riscos.BIOLOGICO, "BIOLOGICO")}</td>
@@ -2634,10 +3130,15 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
         if (!grupos.has(key)) {
           grupos.set(key, {
             funcaoBase: fn.funcaoBase,
-            variacoes: []
+            variacoes: [],
+            empresasMap: new Map()
           });
         }
-        grupos.get(key).variacoes.push(fn);
+        const g = grupos.get(key);
+        g.variacoes.push(fn);
+        for (const emp of empresasRegistry.resolveValidEmpresas(fn.empresasIds)) {
+          g.empresasMap.set(emp.id, emp);
+        }
       }
 
       els.gridAgrupado.innerHTML = Array.from(grupos.values())
@@ -2650,14 +3151,29 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
             )
             .join("");
 
+          const empresasList = Array.from(grupo.empresasMap.values());
+          const empresasHtml =
+            empresasList.length > 0
+              ? empresasList
+                  .map(
+                    (emp) =>
+                      `<span class="px-2 py-0.5 text-[11px] font-semibold rounded bg-teal-50 text-teal-800 border border-teal-200">${escapeHtml(emp.nome)}</span>`
+                  )
+                  .join("")
+              : `<span class="text-[11px] text-amber-700">Nenhuma empresa vinculada</span>`;
+
           return `
-            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2.5">
               <div class="flex items-center justify-between">
                 <h3 class="text-sm font-bold text-slate-900">${escapeHtml(grupo.funcaoBase)}</h3>
                 <span class="text-xs text-slate-400">${grupo.variacoes.length} registro(s)</span>
               </div>
-              <div class="mt-3 flex flex-wrap gap-2">
+              <div class="flex flex-wrap gap-2">
                 ${badges}
+              </div>
+              <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center gap-1.5">
+                <span class="text-[11px] font-semibold text-slate-500">Empresas:</span>
+                ${empresasHtml}
               </div>
             </div>`;
         })
@@ -2674,8 +3190,119 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
 
     window.removerFuncao = function (idx) {
       appState.funcoes.splice(idx, 1);
+      renderEmpresasUi();
       render();
     };
+
+    // Eventos de Empresas Cadastradas no Sistema
+    els.btnEmpresasSistema.addEventListener("click", () => {
+      els.boxEmpresasSistema.classList.toggle("hidden");
+    });
+
+    els.btnFecharEmpresas.addEventListener("click", () => {
+      els.boxEmpresasSistema.classList.add("hidden");
+    });
+
+    function handleAddEmpresaSistema() {
+      const res = empresasRegistry.addEmpresa(
+        els.inputEmpresaNome.value,
+        els.inputEmpresaCnpj.value
+      );
+      if (!res.ok) {
+        alert(res.reason);
+        return;
+      }
+      els.inputEmpresaNome.value = "";
+      els.inputEmpresaCnpj.value = "";
+      renderEmpresasUi();
+      render();
+    }
+
+    els.btnAddEmpresa.addEventListener("click", handleAddEmpresaSistema);
+    els.inputEmpresaNome.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleAddEmpresaSistema();
+      }
+    });
+
+    els.btnToggleBulkEmpresas.addEventListener("click", () => {
+      els.boxBulkEmpresas.classList.toggle("hidden");
+    });
+
+    els.btnCancelBulkEmpresas.addEventListener("click", () => {
+      els.textareaBulkEmpresas.value = "";
+      els.boxBulkEmpresas.classList.add("hidden");
+    });
+
+    els.btnConfirmBulkEmpresas.addEventListener("click", () => {
+      const text = els.textareaBulkEmpresas.value.trim();
+      if (!text) return;
+      const { added, duplicates } = empresasRegistry.importBulk(text);
+      els.textareaBulkEmpresas.value = "";
+      els.boxBulkEmpresas.classList.add("hidden");
+      renderEmpresasUi();
+      render();
+      alert(
+        `${added} empresa(s) sincronizada(s) no cadastro.${
+          duplicates > 0 ? `\n${duplicates} duplicada(s) ignorada(s).` : ""
+        }`
+      );
+    });
+
+    // Eventos de Vinculação em Lote
+    function aplicarVinculoEmLote({ somenteFiltradas = false, substituir = false }) {
+      const empresaId = els.selectEmpresaLote.value;
+      if (!empresaId) {
+        alert("Selecione uma empresa cadastrada no sistema para vincular.");
+        return;
+      }
+      if (!empresasRegistry.exists(empresaId)) {
+        alert("Operação bloqueada: empresa não encontrada no cadastro do sistema.");
+        return;
+      }
+      if (appState.funcoes.length === 0) {
+        alert("Importe ou adicione funções antes de realizar a vinculação.");
+        return;
+      }
+
+      const alvos = somenteFiltradas
+        ? getFilteredFunctionsWithIndex().map((item) => appState.funcoes[item.idx])
+        : appState.funcoes;
+
+      for (const fn of alvos) {
+        if (substituir) {
+          fn.empresasIds = [empresaId];
+        } else if (!fn.empresasIds.includes(empresaId)) {
+          fn.empresasIds.push(empresaId);
+        }
+      }
+
+      renderEmpresasUi();
+      render();
+    }
+
+    els.btnVincularTodas.addEventListener("click", () => {
+      aplicarVinculoEmLote({ somenteFiltradas: false, substituir: false });
+    });
+
+    els.btnVincularFiltradas.addEventListener("click", () => {
+      aplicarVinculoEmLote({ somenteFiltradas: true, substituir: false });
+    });
+
+    els.btnSubstituirTodas.addEventListener("click", () => {
+      aplicarVinculoEmLote({ somenteFiltradas: false, substituir: true });
+    });
+
+    els.btnLimparVinculos.addEventListener("click", () => {
+      if (appState.funcoes.length === 0) return;
+      if (!confirm("Remover os vínculos de empresas de todas as funções?")) return;
+      for (const fn of appState.funcoes) {
+        fn.empresasIds = [];
+      }
+      renderEmpresasUi();
+      render();
+    });
 
     // Eventos de Configuração da IA e Pool de Chaves
     els.btnConfigIa.addEventListener("click", () => {
@@ -2785,6 +3412,7 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
     });
 
     els.filtroTexto.addEventListener("input", renderTabelaPrincipal);
+    els.filtroEmpresa.addEventListener("change", renderTabelaPrincipal);
     els.filtroVariacao.addEventListener("change", renderTabelaPrincipal);
 
     function setActiveTab(tab) {
@@ -2792,6 +3420,7 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
       els.viewAgrupado.classList.toggle("hidden", tab !== "agrupado");
       els.viewJson.classList.toggle("hidden", tab !== "json");
       els.filtrosContainer.classList.toggle("hidden", tab !== "lista");
+      els.barVinculoLote.classList.toggle("hidden", tab !== "lista");
 
       const activeCls = "pb-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600";
       const inactiveCls = "pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700";
@@ -2825,21 +3454,46 @@ REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
       for (const fnObj of expanded) {
         appState.funcoes.push({
           ...fnObj,
+          empresasIds: [],
           riscos: JSON.parse(JSON.stringify(baseRiscos))
         });
       }
       appState.funcoes = PcmsoCanonicalizer.sortFunctions(appState.funcoes);
+      renderEmpresasUi();
       render();
     });
 
     els.btnCopiarJson.addEventListener("click", () => {
-      navigator.clipboard.writeText(JSON.stringify(appState.funcoes, null, 2));
+      navigator.clipboard.writeText(JSON.stringify(buildPayloadCadastro(), null, 2));
       alert("JSON copiado para a área de transferência.");
     });
 
     els.btnSalvar.addEventListener("click", () => {
-      console.log("Dados canônicos prontos para cadastro:", appState.funcoes);
-      alert(`${appState.funcoes.length} função(ões) com fatores de risco específicos prontas para envio.`);
+      const payload = buildPayloadCadastro();
+      const semEmpresa = payload.filter((item) => item.empresasIds.length === 0);
+
+      if (semEmpresa.length > 0) {
+        els.filtroEmpresa.value = "SEM_EMPRESA";
+        setActiveTab("lista");
+        renderTabelaPrincipal();
+        alert(
+          `Atenção: ${semEmpresa.length} função(ões) ainda não possuem empresa cadastrada vinculada.\n\nVincule cada função a pelo menos uma empresa cadastrada no sistema antes de enviar.`
+        );
+        return;
+      }
+
+      window.__PCMSO_ULTIMO_ENVIO__ = payload;
+      window.dispatchEvent(new CustomEvent("pcmso:cadastro-pronto", { detail: payload }));
+      console.log("Dados canônicos vinculados às empresas cadastradas:", payload);
+
+      const empresasDestino = [
+        ...new Set(payload.flatMap((item) => item.empresas.map((e) => e.nome)))
+      ];
+      alert(
+        `${payload.length} função(ões) com fatores de risco específicos enviadas para cadastro nas empresas:\n• ${empresasDestino.join(
+          "\n• "
+        )}`
+      );
     });
 
     // Inicializa configuração e carrega modelos reais da primeira chave ativa
