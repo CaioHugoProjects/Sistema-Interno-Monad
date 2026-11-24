@@ -1,0 +1,2849 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Importação PCMSO — Leitura Padronizada com IA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+  <div class="max-w-7xl mx-auto p-6 space-y-6">
+    <!-- Cabeçalho -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div>
+        <div class="flex flex-wrap items-center gap-2.5">
+          <h1 class="text-xl font-bold text-slate-900">Importação de PCMSO — Funções e Fatores de Risco</h1>
+          <span id="badge-engine" class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-violet-50 text-violet-700 border border-violet-200">
+            Motor: IA (Gemini)
+          </span>
+          <span id="badge-layout" class="hidden px-2.5 py-0.5 text-xs font-semibold rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+            Aguardando arquivo
+          </span>
+        </div>
+        <p class="text-sm text-slate-500 mt-1">
+          Extrai integralmente <strong>funções (expandindo variações de nível)</strong> e <strong>todos os fatores de risco específicos</strong> com rotação automática de até 15 chaves API.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <button id="btn-config-ia" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-sm font-medium text-violet-700 bg-violet-50 border border-violet-200 hover:bg-violet-100 rounded-lg transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Configurar IA (<span id="header-keys-count">0/15</span>)</span>
+        </button>
+
+        <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+          <span>Importar PDF</span>
+          <input id="input-pdf" type="file" accept="application/pdf" class="hidden" />
+        </label>
+
+        <button id="btn-toggle-raw" type="button" class="px-3.5 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition">
+          Colar Texto
+        </button>
+
+        <button id="btn-salvar" type="button" disabled class="px-4 py-2.5 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-lg shadow-sm transition">
+          Enviar para Cadastro
+        </button>
+      </div>
+    </div>
+
+    <!-- Painel de Configuração da IA (Multi-Chave até 15 chaves) -->
+    <div id="box-config-ia" class="hidden bg-white border border-violet-200 rounded-xl p-5 shadow-sm space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900">Configuração do Motor de Leitura Inteligente &amp; Pool de Chaves</h2>
+          <p class="text-xs text-slate-500">
+            Cadastre até <strong>15 chaves API do Google Gemini</strong> (<code class="bg-slate-100 px-1 rounded">localStorage</code>). Se uma chave atingir o limite durante a leitura, a próxima assume automaticamente do ponto onde parou.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span id="status-models-count" class="hidden px-2.5 py-1 text-xs font-medium rounded-full bg-violet-50 text-violet-700 border border-violet-200">
+            0 modelos
+          </span>
+          <span id="status-api-key" class="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+            0/15 chaves configuradas
+          </span>
+        </div>
+      </div>
+
+      <!-- Modo e Modelo Preferencial -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Modo de Extração</label>
+          <select id="select-modo-leitura" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-violet-500">
+            <option value="IA_AUTO">IA Gemini (rotação entre chaves e modelos + fallback local)</option>
+            <option value="IA_VISION">IA Gemini Visão (forçar leitura visual de PDF escaneado)</option>
+            <option value="LOCAL_ONLY">Apenas Parser Local (Offline / Sem API)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Modelo Gemini Preferencial (Ativos na Chave)</label>
+          <div class="flex gap-1.5">
+            <select id="select-modelo-ia" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-violet-500">
+              <option value="gemini-3.8-flash">gemini-3.8-flash (Padrão)</option>
+              <option value="gemini-flash-latest">gemini-flash-latest</option>
+              <option value="gemini-flash-lite-latest">gemini-flash-lite-latest</option>
+              <option value="gemini-pro-latest">gemini-pro-latest</option>
+            </select>
+            <button id="btn-refresh-models" type="button" title="Recarregar modelos disponíveis na API Key ativa" class="px-2.5 py-2 text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 shrink-0">
+              ↻
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cadastro de Chaves API (até 15) -->
+      <div class="bg-slate-50/80 border border-slate-200 rounded-xl p-4 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-800 uppercase">Pool de Chaves API Gemini</span>
+            <span id="badge-pool-counter" class="px-2 py-0.5 text-[11px] font-bold rounded-full bg-violet-100 text-violet-800">
+              0 / 15
+            </span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="btn-toggle-bulk-keys" type="button" class="px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100">
+              + Importar em Lote
+            </button>
+            <button id="btn-reset-keys-status" type="button" class="px-2.5 py-1 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100" title="Reabilita chaves marcadas com limite temporário">
+              Resetar Status
+            </button>
+            <button id="btn-clear-all-keys" type="button" class="px-2.5 py-1 text-xs font-medium text-rose-700 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100">
+              Limpar Todas
+            </button>
+          </div>
+        </div>
+
+        <!-- Adicionar chave individual -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+          <input id="input-key-label" type="text" maxlength="32" placeholder="Identificação (opcional, ex.: Conta 01)" class="sm:col-span-4 rounded-lg border border-slate-300 px-3 py-2 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-violet-500" />
+          <input id="input-api-key" type="password" placeholder="Cole a Google Gemini API Key (AIzaSy...)" class="sm:col-span-6 rounded-lg border border-slate-300 px-3 py-2 text-xs font-mono bg-white focus:outline-none focus:ring-2 focus:ring-violet-500" />
+          <button id="btn-add-key" type="button" class="sm:col-span-2 px-3.5 py-2 text-xs font-semibold bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:bg-slate-300 disabled:cursor-not-allowed">
+            + Adicionar
+          </button>
+        </div>
+
+        <!-- Caixa de importação em lote -->
+        <div id="box-bulk-keys" class="hidden pt-2 border-t border-slate-200 space-y-2">
+          <label class="block text-xs font-medium text-slate-600">
+            Cole até 15 chaves (uma por linha, ou separadas por vírgula/ponto e vírgula):
+          </label>
+          <textarea id="textarea-bulk-keys" rows="4" placeholder="AIzaSy...&#10;AIzaSy...&#10;AIzaSy..." class="w-full rounded-lg border border-slate-300 p-2.5 text-xs font-mono bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+          <div class="flex justify-end gap-2">
+            <button id="btn-cancel-bulk-keys" type="button" class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
+              Cancelar
+            </button>
+            <button id="btn-confirm-bulk-keys" type="button" class="px-3.5 py-1.5 text-xs font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+              Importar Chaves para o Pool
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de chaves cadastradas -->
+        <div id="lista-chaves-api" class="space-y-1.5 max-h-64 overflow-y-auto pr-1"></div>
+      </div>
+
+      <div class="flex justify-end">
+        <button id="btn-fechar-config" type="button" class="px-4 py-2 text-xs font-semibold bg-slate-900 text-white rounded-lg hover:bg-slate-800">
+          Concluir Configuração
+        </button>
+      </div>
+    </div>
+
+    <!-- Entrada Manual de Texto Extraído -->
+    <div id="box-raw-text" class="hidden bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-sm font-semibold text-slate-700">Texto bruto do PCMSO</span>
+        <button id="btn-process-raw" type="button" class="px-3.5 py-1.5 text-xs font-semibold bg-slate-900 text-white rounded-lg hover:bg-slate-800">
+          Processar Texto
+        </button>
+      </div>
+      <textarea id="textarea-raw" rows="6" placeholder="Cole aqui o texto extraído de qualquer modelo de PCMSO..." class="w-full rounded-lg border border-slate-300 p-3 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+    </div>
+
+    <!-- Barra de Carregamento -->
+    <div id="loading-bar" class="hidden bg-violet-50 border border-violet-200 text-violet-900 px-4 py-3 rounded-xl text-sm flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <svg class="animate-spin h-4 w-4 text-violet-600 shrink-0" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span id="loading-text">Analisando documento...</span>
+      </div>
+      <span id="loading-badge" class="text-xs font-mono text-violet-700"></span>
+    </div>
+
+    <!-- Indicadores Resumidos -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        <p class="text-xs font-medium text-slate-500 uppercase">Total de Funções Lidas</p>
+        <p id="stat-total-funcoes" class="text-2xl font-bold text-slate-900 mt-1">0</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        <p class="text-xs font-medium text-slate-500 uppercase">Funções Base (Agrupadas)</p>
+        <p id="stat-funcoes-base" class="text-2xl font-bold text-indigo-600 mt-1">0</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        <p class="text-xs font-medium text-slate-500 uppercase">Funções com Variação de Nível</p>
+        <p id="stat-com-variacao" class="text-2xl font-bold text-emerald-600 mt-1">0</p>
+      </div>
+    </div>
+
+    <!-- Container Principal -->
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <!-- Sub-abas e Filtros -->
+      <div class="border-b border-slate-200 px-6 pt-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-slate-50/60">
+        <div class="flex gap-6">
+          <button id="tab-lista" type="button" class="pb-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600">
+            Funções e Riscos (<span id="count-lista">0</span>)
+          </button>
+          <button id="tab-agrupado" type="button" class="pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700">
+            Variações por Função Base (<span id="count-agrupado">0</span>)
+          </button>
+          <button id="tab-json" type="button" class="pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700">
+            Payload JSON
+          </button>
+        </div>
+
+        <div id="filtros-container" class="pb-3 flex flex-wrap items-center gap-2">
+          <input id="filtro-texto" type="text" placeholder="Buscar função, nível ou risco..." class="px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-56" />
+          <select id="filtro-variacao" class="px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="">Todas as funções</option>
+            <option value="COM_NIVEL">Apenas com variação de nível</option>
+            <option value="SEM_NIVEL">Apenas sem variação de nível</option>
+          </select>
+          <button id="btn-nova-funcao" type="button" class="px-3 py-1.5 text-xs font-medium bg-slate-800 text-white rounded-lg hover:bg-slate-700">
+            + Nova Função
+          </button>
+        </div>
+      </div>
+
+      <!-- Visão 1: Tabela Completa de Funções e Riscos -->
+      <div id="view-lista" class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+          <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold">
+            <tr>
+              <th class="px-4 py-3 text-left w-60">Função Base &amp; Nível</th>
+              <th class="px-3 py-3 text-left">Físico</th>
+              <th class="px-3 py-3 text-left">Químico</th>
+              <th class="px-3 py-3 text-left">Biológico</th>
+              <th class="px-3 py-3 text-left">Ergonômico</th>
+              <th class="px-3 py-3 text-left">Acidente</th>
+              <th class="px-3 py-3 text-right w-20">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-lista" class="divide-y divide-slate-100 bg-white">
+            <tr>
+              <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-sm">
+                Importe um PDF de PCMSO para extrair as funções e seus respectivos fatores de risco.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Visão 2: Agrupamento por Função Base -->
+      <div id="view-agrupado" class="hidden p-6 space-y-4 bg-slate-50/40">
+        <p class="text-xs text-slate-500">
+          Exibe as funções base identificadas e suas variações de nível expandidas (ex.: I, II, III, IV, V, VI, JR, PL, SR).
+        </p>
+        <div id="grid-agrupado" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+
+      <!-- Visão 3: JSON Padronizado -->
+      <div id="view-json" class="hidden p-6 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-600 uppercase">Estrutura canônica (Funções e Fatores de Risco)</span>
+          <button id="btn-copiar-json" type="button" class="px-3 py-1.5 text-xs font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            Copiar JSON
+          </button>
+        </div>
+        <pre id="pre-json" class="bg-slate-900 text-emerald-300 text-xs p-4 rounded-xl overflow-x-auto max-h-[520px]"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const AUSENCIA_PADRAO = "Ausência de fatores de risco";
+    const CATEGORIAS_PADRAO = ["FISICO", "QUIMICO", "BIOLOGICO", "ERGONOMICO", "ACIDENTE"];
+    const DEFAULT_GEMINI_MODEL = "gemini-3.8-flash";
+    const MAX_API_KEYS = 15;
+    const STATIC_FALLBACK_MODELS = [
+      "gemini-3.8-flash",
+      "gemini-flash-latest",
+      "gemini-flash-lite-latest",
+      "gemini-pro-latest"
+    ];
+
+    const STORAGE_KEYS = {
+      API_KEYS_POOL: "pcmso_gemini_api_keys_pool",
+      LEGACY_API_KEY: "pcmso_gemini_api_key",
+      MODEL: "pcmso_gemini_model",
+      MODE: "pcmso_extraction_mode"
+    };
+
+    const STOP_IRRELEVANT_REGEX =
+      /\b(?:causador(?:es)?|fonte(?:s)?\s+geradora(?:s)?|principais\s+fontes|origem\s+do\s+risco|medida(?:s)?\s+de\s+controle|medida(?:s)?\s+preventiva(?:s)?|medida(?:s)?\s+existente(?:s)?|preven[cç][aã]o|preven[cç][oõ]es|recomenda[cç][oõ]es|controle\s+existente|epi\b|epc\b|protetor\s+auricular|luva(?:s)?\s+de|cal[cç]ado\s+de\s+seguran[cç]a|cinto\s+de\s+seguran[cç]a|m[aá]scara\s+de|treinamento\s+nr|t[eé]cnica\s+utilizada|trajet[oó]ria|poss[ií]veis\s+danos|danos\s+[aà]\s+sa[uú]de|tipo\s+de\s+exposi[cç][aã]o|qualitativa|quantitativa|habitual\s+e\s+(?:permanente|intermitente)|eventual|ocasional|execu[cç][aã]o\s+das\s+tarefas|movimentos\s+pessoais|descricao\s*:|nivel\s+do\s+risco|ciclo\s+de\s+jornada)\b/i;
+
+    const SENTENCE_NOISE_REGEX =
+      /^(?:uso\s+de\s+(?:epi|epc|protetor|luva|bota|cal[cç]ado|m[aá]scara|cinto|[oó]culos)|utiliza[cç][aã]o\s+de\s+(?:epi|epc|protetor|luva|bota|cal[cç]ado|m[aá]scara|cinto|[oó]culos)|fornecimento\s+de|realiza[cç][aã]o\s+de\s+(?:exames|treinamento)|manuten[cç][aã]o\s+preventiva|inspe[cç][aã]o\s+de|orienta[cç][aã]o|sinaliza[cç][aã]o|isolamento|enclausuramento|ventila[cç][aã]o|exaust[aã]o|proveniente\s+de|origin[aá]rio\s+de|decorrente\s+de|gerado\s+por|causado\s+por|durante\s+a\s+execu[cç][aã]o)\b/i;
+
+    const METADATA_PARENS_REGEX =
+      /\((?:habitual|permanente|intermitente|eventual|ocasional|qualitativ[ao]|quantitativ[ao]|nr[\s-]?\d+|anexo\s*\d+|limite\s+de\s+toler[aâ]ncia|n[aã]o\s+aplic[aá]vel|na)\b[^)]*\)/gi;
+
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    /**
+     * Gerenciador de Pool de Chaves API do Google Gemini (até 15 chaves com failover contínuo)
+     */
+    class PcmsoKeyPool {
+      constructor() {
+        this.entries = [];
+        this.revealedIds = new Set();
+        this.load();
+      }
+
+      load() {
+        let loaded = [];
+        try {
+          const raw = localStorage.getItem(STORAGE_KEYS.API_KEYS_POOL);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              loaded = parsed
+                .filter((item) => item && typeof item.key === "string" && item.key.trim())
+                .slice(0, MAX_API_KEYS)
+                .map((item, idx) => ({
+                  id: item.id || `key_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 6)}`,
+                  label: (item.label || `Chave #${idx + 1}`).trim(),
+                  key: item.key.trim(),
+                  status: item.status === "invalid" ? "invalid" : "ready",
+                  statusDetail: item.status === "invalid" ? "Chave inválida" : ""
+                }));
+            }
+          }
+        } catch (e) {
+          console.warn("Erro ao ler pool de chaves:", e);
+        }
+
+        // Migração automática da chave única anterior para o pool
+        const legacyKey = (localStorage.getItem(STORAGE_KEYS.LEGACY_API_KEY) || "").trim();
+        if (legacyKey && !loaded.some((item) => item.key === legacyKey) && loaded.length < MAX_API_KEYS) {
+          loaded.unshift({
+            id: `key_${Date.now()}_legacy`,
+            label: "Chave Principal",
+            key: legacyKey,
+            status: "ready",
+            statusDetail: ""
+          });
+        }
+
+        this.entries = loaded;
+        this.save();
+      }
+
+      save() {
+        const serializable = this.entries.slice(0, MAX_API_KEYS).map(({ id, label, key, status }) => ({
+          id,
+          label,
+          key,
+          status: status === "invalid" ? "invalid" : "ready"
+        }));
+        localStorage.setItem(STORAGE_KEYS.API_KEYS_POOL, JSON.stringify(serializable));
+        if (serializable.length > 0) {
+          localStorage.setItem(STORAGE_KEYS.LEGACY_API_KEY, serializable[0].key);
+        } else {
+          localStorage.removeItem(STORAGE_KEYS.LEGACY_API_KEY);
+        }
+      }
+
+      addKey(rawKey, customLabel = "") {
+        const cleanKey = String(rawKey || "").trim();
+        if (!cleanKey) {
+          return { ok: false, reason: "Informe uma chave API válida." };
+        }
+        if (this.entries.length >= MAX_API_KEYS) {
+          return { ok: false, reason: `Limite máximo de ${MAX_API_KEYS} chaves API atingido.` };
+        }
+        if (this.entries.some((item) => item.key === cleanKey)) {
+          return { ok: false, reason: "Esta chave API já está cadastrada no pool." };
+        }
+
+        const nextNumber = this.entries.length + 1;
+        this.entries.push({
+          id: `key_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          label: String(customLabel || "").trim() || `Chave #${nextNumber}`,
+          key: cleanKey,
+          status: "ready",
+          statusDetail: ""
+        });
+        this.save();
+        return { ok: true };
+      }
+
+      addBulkKeys(rawText) {
+        const tokens = String(rawText || "")
+          .split(/[\r\n,;]+/)
+          .map((t) => t.trim())
+          .filter(Boolean);
+
+        let added = 0;
+        let duplicates = 0;
+        let skippedLimit = 0;
+
+        for (const token of tokens) {
+          if (this.entries.length >= MAX_API_KEYS) {
+            skippedLimit++;
+            continue;
+          }
+          if (this.entries.some((item) => item.key === token)) {
+            duplicates++;
+            continue;
+          }
+          const nextNumber = this.entries.length + 1;
+          this.entries.push({
+            id: `key_${Date.now()}_${nextNumber}_${Math.random().toString(36).slice(2, 6)}`,
+            label: `Chave #${nextNumber}`,
+            key: token,
+            status: "ready",
+            statusDetail: ""
+          });
+          added++;
+        }
+
+        this.save();
+        return { added, duplicates, skippedLimit };
+      }
+
+      removeKey(id) {
+        this.entries = this.entries.filter((item) => item.id !== id);
+        this.revealedIds.delete(id);
+        this.save();
+      }
+
+      promoteKey(id) {
+        const idx = this.entries.findIndex((item) => item.id === id);
+        if (idx <= 0) return;
+        const [item] = this.entries.splice(idx, 1);
+        this.entries.unshift(item);
+        this.save();
+      }
+
+      clearAll() {
+        this.entries = [];
+        this.revealedIds.clear();
+        this.save();
+      }
+
+      resetStatuses() {
+        for (const item of this.entries) {
+          item.status = "ready";
+          item.statusDetail = "";
+        }
+        this.save();
+      }
+
+      prepareForNewExtraction() {
+        for (const item of this.entries) {
+          if (item.status === "active" || item.status === "rate_limited") {
+            item.status = "ready";
+            item.statusDetail = "";
+          }
+        }
+      }
+
+      markStatus(id, status, detail = "") {
+        const item = this.entries.find((e) => e.id === id);
+        if (!item) return;
+        item.status = status;
+        item.statusDetail = detail;
+        if (status === "invalid") {
+          this.save();
+        }
+      }
+
+      getTotalCount() {
+        return this.entries.length;
+      }
+
+      getUsableEntries(excludedIds = new Set()) {
+        return this.entries
+          .map((entry, index) => ({ entry, index }))
+          .filter(
+            ({ entry }) =>
+              !excludedIds.has(entry.id) &&
+              entry.status !== "invalid" &&
+              entry.status !== "rate_limited"
+          );
+      }
+
+      getPrimaryKey() {
+        const usable = this.getUsableEntries();
+        return usable.length > 0 ? usable[0].entry.key : this.entries[0]?.key || "";
+      }
+
+      static maskKey(key = "") {
+        const k = String(key);
+        if (k.length <= 12) return "••••••••••••";
+        return `${k.slice(0, 8)}••••••••${k.slice(-4)}`;
+      }
+    }
+
+    const keyPool = new PcmsoKeyPool();
+
+    /**
+     * Camada de Padronização Ortográfica sem Generalização
+     */
+    class PcmsoCanonicalizer {
+      static LEVEL_ORDER = {
+        I: 1,
+        II: 2,
+        III: 3,
+        IV: 4,
+        V: 5,
+        VI: 6,
+        VII: 7,
+        VIII: 8,
+        JR: 10,
+        PL: 11,
+        SR: 12
+      };
+
+      static DIGIT_TO_ROMAN = {
+        "1": "I",
+        "01": "I",
+        "2": "II",
+        "02": "II",
+        "3": "III",
+        "03": "III",
+        "4": "IV",
+        "04": "IV",
+        "5": "V",
+        "05": "V",
+        "6": "VI",
+        "06": "VI",
+        "7": "VII",
+        "07": "VII",
+        "8": "VIII",
+        "08": "VIII"
+      };
+
+      static ACCENT_FIX_MAP = new Map([
+        ["ruido", "ruído"],
+        ["ruidos", "ruídos"],
+        ["continuo", "contínuo"],
+        ["continua", "contínua"],
+        ["fisico", "físico"],
+        ["fisicos", "físicos"],
+        ["quimico", "químico"],
+        ["quimicos", "químicos"],
+        ["biologico", "biológico"],
+        ["biologicos", "biológicos"],
+        ["ergonomico", "ergonômico"],
+        ["ergonomicos", "ergonômicos"],
+        ["eletrico", "elétrico"],
+        ["eletrica", "elétrica"],
+        ["eletricos", "elétricos"],
+        ["eletricas", "elétricas"],
+        ["termico", "térmico"],
+        ["termica", "térmica"],
+        ["termicos", "térmicos"],
+        ["vibracao", "vibração"],
+        ["vibracoes", "vibrações"],
+        ["radiacao", "radiação"],
+        ["radiacoes", "radiações"],
+        ["nao", "não"],
+        ["nivel", "nível"],
+        ["niveis", "níveis"],
+        ["peconhentos", "peçonhentos"],
+        ["peconhento", "peçonhento"],
+        ["maquina", "máquina"],
+        ["maquinas", "máquinas"],
+        ["protecao", "proteção"],
+        ["perfuracao", "perfuração"],
+        ["perfuracoes", "perfurações"],
+        ["projecao", "projeção"],
+        ["particulas", "partículas"],
+        ["particula", "partícula"],
+        ["incendio", "incêndio"],
+        ["explosao", "explosão"],
+        ["explosoes", "explosões"],
+        ["transito", "trânsito"],
+        ["publico", "público"],
+        ["organico", "orgânico"],
+        ["organicos", "orgânicos"],
+        ["organica", "orgânica"],
+        ["organicas", "orgânicas"],
+        ["inorganico", "inorgânico"],
+        ["inorganicos", "inorgânicos"],
+        ["metalico", "metálico"],
+        ["metalicos", "metálicos"],
+        ["metalica", "metálica"],
+        ["oleo", "óleo"],
+        ["oleos", "óleos"],
+        ["nevoa", "névoa"],
+        ["nevoas", "névoas"],
+        ["acido", "ácido"],
+        ["acidos", "ácidos"],
+        ["alcalis", "álcalis"],
+        ["hidroxido", "hidróxido"],
+        ["amonia", "amônia"],
+        ["silica", "sílica"],
+        ["manganes", "manganês"],
+        ["mercurio", "mercúrio"],
+        ["alcool", "álcool"],
+        ["eter", "éter"],
+        ["ester", "éster"],
+        ["aldeido", "aldeído"],
+        ["agrotoxico", "agrotóxico"],
+        ["agrotoxicos", "agrotóxicos"],
+        ["bacterias", "bactérias"],
+        ["bacteria", "bactéria"],
+        ["virus", "vírus"],
+        ["protozoarios", "protozoários"],
+        ["superficie", "superfície"],
+        ["superficies", "superfícies"],
+        ["esforco", "esforço"],
+        ["esforcos", "esforços"],
+        ["exposicao", "exposição"],
+        ["posicao", "posição"],
+        ["posicoes", "posições"],
+        ["mecanico", "mecânico"],
+        ["mecanicos", "mecânicos"],
+        ["mecanica", "mecânica"],
+        ["inflamavel", "inflamável"],
+        ["inflamaveis", "inflamáveis"],
+        ["toxico", "tóxico"],
+        ["toxicos", "tóxicos"],
+        ["toxica", "tóxica"],
+        ["colisao", "colisão"],
+        ["colisoes", "colisões"],
+        ["laceracao", "laceração"],
+        ["abrasao", "abrasão"],
+        ["iluminacao", "iluminação"],
+        ["pressao", "pressão"],
+        ["pressoes", "pressões"],
+        ["hiperbarica", "hiperbárica"],
+        ["hipobarica", "hipobárica"],
+        ["atmosferica", "atmosférica"],
+        ["maos", "mãos"],
+        ["bracos", "braços"],
+        ["pe", "pé"],
+        ["pes", "pés"],
+        ["forcada", "forçada"],
+        ["forcadas", "forçadas"],
+        ["estatica", "estática"],
+        ["dinamica", "dinâmica"],
+        ["biologicas", "biológicas"],
+        ["quimicas", "químicas"],
+        ["fisicas", "físicas"]
+      ]);
+
+      static PRESERVE_UPPER_ACRONYMS = new Set([
+        "EPI", "EPC", "NR", "GLP", "GNV", "CO", "CO2", "HCL", "SIO2", "NO2", "SO2", "O3",
+        "UV", "IV", "PVC", "H2S", "NH3", "BTX", "LER", "DORT", "DB", "DBA"
+      ]);
+
+      static normalizeLevelToken(rawLvl = "") {
+        const clean = String(rawLvl).replace(/\.$/, "").toUpperCase().trim();
+        if (clean === "JÚNIOR" || clean === "JUNIOR") return "JR";
+        if (clean === "PLENO") return "PL";
+        if (clean === "SÊNIOR" || clean === "SENIOR") return "SR";
+        if (this.DIGIT_TO_ROMAN[clean]) return this.DIGIT_TO_ROMAN[clean];
+        return clean;
+      }
+
+      static canonicalizeRiskTerm(rawTerm = "") {
+        let text = String(rawTerm)
+          .replace(/^[\s*\-•▪◦●·–—\d.)]+/, "")
+          .replace(METADATA_PARENS_REGEX, "")
+          .replace(
+            /^(?:riscos?\s+(?:de|da|do|das|dos|a|ao|à)\s+|exposic[aã]o\s+(?:a|ao|à|aos|às)\s+|agente(?:s)?\s+(?:f[ií]sico|qu[ií]mico|biol[oó]gico|ergon[oô]mico|de\s+acidente)s?\s*[:\-]\s*|fator(?:es)?\s+de\s+risco\s*[:\-]\s*)/i,
+            ""
+          )
+          .replace(/[\s*\-•▪◦●·.;:]+$/, "")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        if (!text) return "";
+
+        const words = text.split(" ").map((word, idx) => {
+          const alphaOnly = word.replace(/[^a-zA-ZÀ-ÿ0-9]/g, "");
+          const upper = alphaOnly.toUpperCase();
+          if (this.PRESERVE_UPPER_ACRONYMS.has(upper)) {
+            return word.toUpperCase();
+          }
+
+          if (/^(?:[A-Z][a-z]?\d*){2,}$/.test(alphaOnly)) {
+            return word;
+          }
+
+          const plainLower = alphaOnly
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase();
+
+          let baseWord = this.ACCENT_FIX_MAP.get(plainLower) || word.toLowerCase();
+          if (idx === 0) {
+            baseWord = baseWord.charAt(0).toUpperCase() + baseWord.slice(1);
+          }
+          return baseWord;
+        });
+
+        return words.join(" ");
+      }
+
+      static sortRisks(risks = []) {
+        const seenNorm = new Set();
+        const unique = [];
+
+        for (const r of risks) {
+          if (!r || r === AUSENCIA_PADRAO) continue;
+          const normKey = r
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/\s+/g, " ")
+            .trim();
+          if (!normKey || seenNorm.has(normKey)) continue;
+          seenNorm.add(normKey);
+          unique.push(r);
+        }
+
+        if (unique.length === 0) return [AUSENCIA_PADRAO];
+        return unique.sort((a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" }));
+      }
+
+      static sortFunctions(funcoes = []) {
+        return [...funcoes].sort((a, b) => {
+          const baseCmp = a.funcaoBase.localeCompare(b.funcaoBase, "pt-BR", { sensitivity: "base" });
+          if (baseCmp !== 0) return baseCmp;
+
+          const ordA = a.nivel ? (this.LEVEL_ORDER[a.nivel] ?? 99) : 0;
+          const ordB = b.nivel ? (this.LEVEL_ORDER[b.nivel] ?? 99) : 0;
+          if (ordA !== ordB) return ordA - ordB;
+
+          return a.funcao.localeCompare(b.funcao, "pt-BR", { sensitivity: "base" });
+        });
+      }
+    }
+
+    /**
+     * Motor de IA (Google Gemini com Pool de até 15 Chaves, Descoberta Dinâmica e Failover Contínuo)
+     */
+    class PcmsoAiExtractor {
+      static cachedModelsByKey = new Map();
+
+      static getSystemPrompt() {
+        return `Você é um extrator determinístico especialista em documentos de Saúde Ocupacional (PCMSO / PGR).
+Sua ÚNICA tarefa é extrair FUNÇÕES e TODOS OS FATORES DE RISCO ESPECÍFICOS associados a cada função.
+
+REGRAS CRÍTICAS E OBRIGATÓRIAS (PROIBIÇÃO DE GENERALIZAÇÃO):
+1. NUNCA GENERALIZE, AGRUPE, RESUMA OU OMITA RISCOS — independentemente da quantidade de itens listados (seja 1 item, 5 itens, 15 itens ou 30+ itens em uma categoria).
+   - PROIBIDO substituir substâncias ou riscos específicos por termos guarda-chuva como "Produtos químicos diversos", "Agentes químicos", "Acidentes diversos", "Riscos ergonômicos diversos" ou "Outros riscos", a menos que essa expressão literal esteja escrita no documento.
+   - Se o documento lista vários itens separados por vírgula, ponto e vírgula, barra ou quebra de linha, extraia CADA UM como um item separado no array correspondente.
+2. Extraia SOMENTE o nome da FUNÇÃO e os NOMES DOS FATORES DE RISCO nas 5 categorias: FISICO, QUIMICO, BIOLOGICO, ERGONOMICO, ACIDENTE.
+3. DESCARTE COMPLETAMENTE exames médicos, periodicidade, causadores/fontes geradoras, trajetória, técnica (qualitativa/quantitativa), danos à saúde, tipo de exposição (habitual/permanente/intermitente), nível/grau de risco, descrições de atividades, medidas de controle e EPIs/EPCs.
+4. FORMATAÇÃO DOS NOMES DOS RISCOS:
+   - Remova apenas prefixos redundantes como "Risco de", "Exposição a", "Agente físico:", "Presença de".
+   - Mantenha a especificidade completa do risco com acentuação correta em português e inicial maiúscula (Sentence case).
+   - Se uma categoria não tiver risco ou constar "NA", "-", "Não aplicável", "Não identificado", retorne EXATAMENTE: ["Ausência de fatores de risco"].
+5. VARIAÇÕES DE NÍVEL DA FUNÇÃO:
+   - Desmembre funções agrupadas (ex.: "ANALISTA ADMINISTRATIVO I, II, III" ou "PEDREIRO 1, 2, 3") em registros individuais usando algarismos romanos ("Analista Administrativo I", "Analista Administrativo II", "Analista Administrativo III"), replicando exatamente todos os mesmos riscos.`;
+      }
+
+      static getResponseSchema() {
+        return {
+          type: "OBJECT",
+          properties: {
+            funcoes: {
+              type: "ARRAY",
+              items: {
+                type: "OBJECT",
+                properties: {
+                  funcao: { type: "STRING" },
+                  riscos: {
+                    type: "OBJECT",
+                    properties: {
+                      FISICO: { type: "ARRAY", items: { type: "STRING" } },
+                      QUIMICO: { type: "ARRAY", items: { type: "STRING" } },
+                      BIOLOGICO: { type: "ARRAY", items: { type: "STRING" } },
+                      ERGONOMICO: { type: "ARRAY", items: { type: "STRING" } },
+                      ACIDENTE: { type: "ARRAY", items: { type: "STRING" } }
+                    },
+                    required: ["FISICO", "QUIMICO", "BIOLOGICO", "ERGONOMICO", "ACIDENTE"],
+                    propertyOrdering: ["FISICO", "QUIMICO", "BIOLOGICO", "ERGONOMICO", "ACIDENTE"]
+                  }
+                },
+                required: ["funcao", "riscos"],
+                propertyOrdering: ["funcao", "riscos"]
+              }
+            }
+          },
+          required: ["funcoes"],
+          propertyOrdering: ["funcoes"]
+        };
+      }
+
+      static async discoverAvailableModels(apiKey, preferredModel = DEFAULT_GEMINI_MODEL, forceRefresh = false) {
+        const cleanKey = String(apiKey || "").trim();
+        if (!cleanKey) {
+          return { models: [...STATIC_FALLBACK_MODELS], fromApi: false };
+        }
+
+        if (!forceRefresh && this.cachedModelsByKey.has(cleanKey)) {
+          const cached = this.cachedModelsByKey.get(cleanKey);
+          return {
+            models: this.orderCandidateModels(cached, preferredModel),
+            fromApi: true
+          };
+        }
+
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(cleanKey)}`;
+          const res = await fetch(url);
+          if (!res.ok) {
+            return {
+              models: this.orderCandidateModels(STATIC_FALLBACK_MODELS, preferredModel),
+              fromApi: false
+            };
+          }
+
+          const payload = await res.json();
+          const validModels = (payload.models || [])
+            .filter(
+              (m) =>
+                Array.isArray(m.supportedGenerationMethods) &&
+                m.supportedGenerationMethods.includes("generateContent")
+            )
+            .map((m) => String(m.name || "").replace(/^models\//, ""))
+            .filter(
+              (id) =>
+                id.startsWith("gemini-") &&
+                !/-(?:tts|image|live|audio|embedding|robotics|computer-use|deep-research)/i.test(id)
+            );
+
+          if (validModels.length > 0) {
+            this.cachedModelsByKey.set(cleanKey, validModels);
+            return {
+              models: this.orderCandidateModels(validModels, preferredModel),
+              fromApi: true
+            };
+          }
+        } catch (e) {
+          console.warn("Falha ao consultar ListModels, usando lista padrão:", e);
+        }
+
+        return {
+          models: this.orderCandidateModels(STATIC_FALLBACK_MODELS, preferredModel),
+          fromApi: false
+        };
+      }
+
+      static invalidateModelFromCache(apiKey, modelId) {
+        const cleanKey = String(apiKey || "").trim();
+        if (!cleanKey || !this.cachedModelsByKey.has(cleanKey)) return;
+        const filtered = this.cachedModelsByKey.get(cleanKey).filter((m) => m !== modelId);
+        if (filtered.length > 0) {
+          this.cachedModelsByKey.set(cleanKey, filtered);
+        }
+      }
+
+      static orderCandidateModels(availableModels, preferredModel) {
+        const unique = [...new Set(availableModels)];
+        const score = (id) => {
+          if (id === preferredModel) return 1000;
+          if (/^gemini-3\.8-flash$/i.test(id)) return 950;
+          if (/^gemini-3.*flash/i.test(id) && !/lite/i.test(id)) return 900;
+          if (/^gemini-flash-latest$/i.test(id)) return 850;
+          if (/flash-lite/i.test(id)) return 820;
+          if (/flash/i.test(id)) return 780;
+          if (/^gemini-pro-latest$/i.test(id)) return 720;
+          if (/pro/i.test(id)) return 680;
+          return 100;
+        };
+
+        return unique.sort((a, b) => score(b) - score(a));
+      }
+
+      static isQuotaOrRateLimitError(status, message = "") {
+        if (status === 429) return true;
+        return /resource exhausted|quota|rate limit|too many requests|exceeded.*limit|billing/i.test(
+          message
+        );
+      }
+
+      static isInvalidKeyError(status, message = "") {
+        if (status === 401 || status === 403) return true;
+        if (status === 400 && /api key|key not valid|invalid argument/i.test(message)) return true;
+        return /api key not valid|api_key_invalid|permission denied/i.test(message);
+      }
+
+      static isTransientModelOverloadError(status, message = "", isTimeout = false) {
+        if (isTimeout) return true;
+        if ([408, 500, 502, 503, 504].includes(status)) return true;
+        return /high demand|overloaded|try again later|temporarily unavailable|deadline/i.test(
+          message
+        );
+      }
+
+      static isModelNotFoundError(status, message = "") {
+        if (status === 404) return true;
+        return /is not found for API version|is not supported for generateContent/i.test(message);
+      }
+
+      static async singleRequest({ apiKey, model, parts, timeoutMs = 45000 }) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+          model
+        )}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            signal: controller.signal,
+            body: JSON.stringify({
+              systemInstruction: {
+                parts: [{ text: this.getSystemPrompt() }]
+              },
+              contents: [
+                {
+                  role: "user",
+                  parts
+                }
+              ],
+              generationConfig: {
+                temperature: 0,
+                topK: 1,
+                seed: 42,
+                maxOutputTokens: 16384,
+                responseMimeType: "application/json",
+                responseSchema: this.getResponseSchema()
+              }
+            })
+          });
+
+          if (!response.ok) {
+            const errPayload = await response.json().catch(() => ({}));
+            const msg = errPayload?.error?.message || `Erro HTTP ${response.status}`;
+            const err = new Error(msg);
+            err.status = response.status;
+            throw err;
+          }
+
+          const data = await response.json();
+          const rawJsonText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!rawJsonText) return [];
+
+          const parsed = JSON.parse(rawJsonText);
+          return Array.isArray(parsed.funcoes) ? parsed.funcoes : [];
+        } catch (err) {
+          if (err.name === "AbortError") {
+            const timeoutErr = new Error(`Tempo limite excedido (${timeoutMs / 1000}s) por alta demanda.`);
+            timeoutErr.isTimeout = true;
+            throw timeoutErr;
+          }
+          throw err;
+        } finally {
+          clearTimeout(timer);
+        }
+      }
+
+      /**
+       * Executa a chamada percorrendo o pool de até 15 chaves API.
+       * Se uma chave atingir cota/limite (429) ou for inválida, troca imediatamente para a próxima chave
+       * e repete o mesmo lote para garantir continuidade ininterrupta.
+       */
+      static async callGeminiWithKeyPool({ pool, preferredModel, parts, onStatus, onContextChange }) {
+        const totalKeys = pool.getTotalCount();
+        let lastError = null;
+        const attemptedKeyIds = new Set();
+
+        while (true) {
+          const usable = pool.getUsableEntries(attemptedKeyIds);
+          if (usable.length === 0) {
+            break;
+          }
+
+          const { entry: keyEntry, index: keyIdx } = usable[0];
+          attemptedKeyIds.add(keyEntry.id);
+
+          pool.markStatus(keyEntry.id, "active", "Em execução");
+          if (onContextChange) {
+            onContextChange({
+              model: preferredModel,
+              keyIndex: keyIdx + 1,
+              totalKeys,
+              keyLabel: keyEntry.label
+            });
+          }
+
+          const discovered = await this.discoverAvailableModels(keyEntry.key, preferredModel);
+          let candidateModels = [...discovered.models];
+          let switchToNextKey = false;
+
+          for (let mIdx = 0; mIdx < candidateModels.length; mIdx++) {
+            const currentModel = candidateModels[mIdx];
+
+            if (onContextChange) {
+              onContextChange({
+                model: currentModel,
+                keyIndex: keyIdx + 1,
+                totalKeys,
+                keyLabel: keyEntry.label
+              });
+            }
+
+            try {
+              const funcoes = await this.singleRequest({
+                apiKey: keyEntry.key,
+                model: currentModel,
+                parts
+              });
+
+              pool.markStatus(keyEntry.id, "ready", "Última leitura OK");
+              localStorage.setItem(STORAGE_KEYS.MODEL, currentModel);
+
+              return {
+                funcoes,
+                usedModel: currentModel,
+                usedKeyIndex: keyIdx + 1,
+                totalKeys,
+                usedKeyLabel: keyEntry.label
+              };
+            } catch (err) {
+              lastError = err;
+
+              // 1. Limite/cota da chave atingido -> troca imediatamente para a próxima chave API
+              if (this.isQuotaOrRateLimitError(err.status, err.message)) {
+                pool.markStatus(keyEntry.id, "rate_limited", "Limite/cota atingido");
+                const remaining = pool.getUsableEntries(attemptedKeyIds);
+                if (remaining.length > 0 && onStatus) {
+                  const next = remaining[0];
+                  onStatus(
+                    `Limite atingido na ${keyEntry.label} (#${keyIdx + 1}/${totalKeys}). Continuando com ${next.entry.label} (#${next.index + 1}/${totalKeys})...`,
+                    `Chave #${next.index + 1}/${totalKeys}`
+                  );
+                }
+                switchToNextKey = true;
+                break;
+              }
+
+              // 2. Chave inválida/sem permissão -> marca como inválida e passa para a próxima chave
+              if (this.isInvalidKeyError(err.status, err.message)) {
+                pool.markStatus(keyEntry.id, "invalid", "Chave inválida");
+                const remaining = pool.getUsableEntries(attemptedKeyIds);
+                if (remaining.length > 0 && onStatus) {
+                  const next = remaining[0];
+                  onStatus(
+                    `${keyEntry.label} inválida. Alternando para ${next.entry.label} (#${next.index + 1}/${totalKeys})...`,
+                    `Chave #${next.index + 1}/${totalKeys}`
+                  );
+                }
+                switchToNextKey = true;
+                break;
+              }
+
+              // 3. Modelo inexistente nesta chave -> tenta o próximo modelo da mesma chave
+              if (this.isModelNotFoundError(err.status, err.message)) {
+                this.invalidateModelFromCache(keyEntry.key, currentModel);
+                continue;
+              }
+
+              // 4. Sobrecarga transitória de servidor -> tenta próximo modelo ou próxima chave
+              if (this.isTransientModelOverloadError(err.status, err.message, err.isTimeout)) {
+                const nextModel = candidateModels[mIdx + 1];
+                if (nextModel && onStatus) {
+                  onStatus(
+                    `Alta demanda em ${currentModel} (${keyEntry.label}). Tentando ${nextModel}...`,
+                    `Chave #${keyIdx + 1}/${totalKeys}`
+                  );
+                }
+                continue;
+              }
+
+              // Outros erros não recuperáveis
+              pool.markStatus(keyEntry.id, "ready", "");
+              throw err;
+            }
+          }
+
+          if (!switchToNextKey) {
+            // Todos os modelos falharam por sobrecarga nesta chave; tenta próxima chave se houver
+            pool.markStatus(keyEntry.id, "ready", "");
+            const remaining = pool.getUsableEntries(attemptedKeyIds);
+            if (remaining.length > 0 && onStatus) {
+              const next = remaining[0];
+              onStatus(
+                `Instabilidade na ${keyEntry.label}. Alternando para ${next.entry.label} (#${next.index + 1}/${totalKeys})...`,
+                `Chave #${next.index + 1}/${totalKeys}`
+              );
+            }
+          }
+        }
+
+        throw (
+          lastError ||
+          new Error(
+            `Todas as ${totalKeys} chave(s) API atingiram o limite de uso ou estão indisponíveis no momento.`
+          )
+        );
+      }
+
+      static async extractFromPageTexts(pagesText, { pool, model, onProgress, onContextChange }) {
+        const relevantPages = pagesText.filter(
+          (p) => !/\b11\s*-\s*relat[oó]rio\s+anal[ií]tico\b/i.test(p.text)
+        );
+
+        const BATCH_SIZE = 3;
+        const batches = [];
+        for (let i = 0; i < relevantPages.length; i += BATCH_SIZE) {
+          batches.push(relevantPages.slice(i, i + BATCH_SIZE));
+        }
+
+        const collected = [];
+        let activeModel = model;
+        let lastKeyInfo = { usedKeyIndex: 1, totalKeys: pool.getTotalCount() };
+
+        for (let b = 0; b < batches.length; b++) {
+          const batch = batches[b];
+          const firstPage = batch[0].page;
+          const lastPage = batch[batch.length - 1].page;
+
+          const usableNow = pool.getUsableEntries();
+          const currentKeyIdx = usableNow.length > 0 ? usableNow[0].index + 1 : 1;
+
+          if (onProgress) {
+            onProgress(
+              `IA (Chave #${currentKeyIdx}/${pool.getTotalCount()} • ${activeModel}) lendo páginas ${firstPage}–${lastPage} de ${relevantPages.length}...`,
+              `Lote ${b + 1}/${batches.length}`
+            );
+          }
+
+          const combinedText = batch
+            .map((p) => `--- PÁGINA ${p.page} ---\n${p.text}`)
+            .join("\n\n");
+
+          try {
+            const result = await this.callGeminiWithKeyPool({
+              pool,
+              preferredModel: activeModel,
+              parts: [
+                {
+                  text: `Extraia todas as funções e TODOS os fatores de risco específicos (sem generalizar ou resumir nenhum item) do trecho de PCMSO abaixo:\n\n${combinedText}`
+                }
+              ],
+              onStatus: onProgress,
+              onContextChange
+            });
+
+            activeModel = result.usedModel;
+            lastKeyInfo = result;
+            collected.push(...result.funcoes);
+          } catch (batchErr) {
+            // Se já havia extraído lotes anteriores antes de esgotar todas as chaves, preserva o progresso!
+            if (collected.length > 0) {
+              batchErr.partialFuncoes = collected;
+              batchErr.stoppedAtPage = firstPage;
+              batchErr.totalPages = relevantPages.length;
+            }
+            throw batchErr;
+          }
+        }
+
+        return {
+          funcoes: collected,
+          usedModel: activeModel,
+          usedKeyIndex: lastKeyInfo.usedKeyIndex,
+          totalKeys: lastKeyInfo.totalKeys
+        };
+      }
+
+      static async extractFromPageImages(pageImages, { pool, model, onProgress, onContextChange }) {
+        const BATCH_SIZE = 2;
+        const batches = [];
+        for (let i = 0; i < pageImages.length; i += BATCH_SIZE) {
+          batches.push(pageImages.slice(i, i + BATCH_SIZE));
+        }
+
+        const collected = [];
+        let activeModel = model;
+        let lastKeyInfo = { usedKeyIndex: 1, totalKeys: pool.getTotalCount() };
+
+        for (let b = 0; b < batches.length; b++) {
+          const batch = batches[b];
+          const usableNow = pool.getUsableEntries();
+          const currentKeyIdx = usableNow.length > 0 ? usableNow[0].index + 1 : 1;
+
+          if (onProgress) {
+            onProgress(
+              `IA Visão (Chave #${currentKeyIdx}/${pool.getTotalCount()} • ${activeModel}) lendo páginas ${batch[0].page}–${batch[batch.length - 1].page}...`,
+              `Lote ${b + 1}/${batches.length}`
+            );
+          }
+
+          const parts = [
+            {
+              text: "Leia as tabelas/fichas destas páginas de PCMSO e extraia todas as funções e TODOS os fatores de risco específicos (sem generalizar ou omitir itens)."
+            },
+            ...batch.map((img) => ({
+              inlineData: {
+                mimeType: "image/jpeg",
+                data: img.base64
+              }
+            }))
+          ];
+
+          try {
+            const result = await this.callGeminiWithKeyPool({
+              pool,
+              preferredModel: activeModel,
+              parts,
+              onStatus: onProgress,
+              onContextChange
+            });
+
+            activeModel = result.usedModel;
+            lastKeyInfo = result;
+            collected.push(...result.funcoes);
+          } catch (batchErr) {
+            if (collected.length > 0) {
+              batchErr.partialFuncoes = collected;
+              batchErr.stoppedAtPage = batch[0].page;
+              batchErr.totalPages = pageImages.length;
+            }
+            throw batchErr;
+          }
+        }
+
+        return {
+          funcoes: collected,
+          usedModel: activeModel,
+          usedKeyIndex: lastKeyInfo.usedKeyIndex,
+          totalKeys: lastKeyInfo.totalKeys
+        };
+      }
+    }
+
+    /**
+     * Parser Local + Camada de Normalização sem Generalização
+     */
+    class PcmsoParser {
+      static normalizeText(value = "") {
+        return String(value)
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      static formatTitleCase(text = "") {
+        const keepUpper = new Set([
+          "I", "II", "III", "IV", "V", "VI", "VII", "VIII",
+          "JR", "PL", "SR",
+          "RH", "TI", "NIR", "SADT", "SCIH", "CME", "UTI", "CAF", "PA", "SSMA", "ADM", "GT", "GTE", "NEP", "NVE"
+        ]);
+        const keepLower = new Set(["de", "da", "do", "das", "dos", "e", "em", "para", "com", "ou"]);
+
+        return String(text)
+          .replace(/\s+/g, " ")
+          .trim()
+          .split(" ")
+          .map((word, idx) => {
+            const cleanAlpha = word.replace(/[^a-zA-ZÀ-ÿ0-9]/g, "").toUpperCase();
+            if (keepUpper.has(cleanAlpha)) return word.toUpperCase();
+            const lower = word.toLowerCase();
+            if (idx > 0 && keepLower.has(lower)) return lower;
+            if (word.startsWith("(") && word.length > 1) {
+              const inner = word.slice(1);
+              const innerUpper = inner.replace(/[^a-zA-ZÀ-ÿ0-9]/g, "").toUpperCase();
+              if (keepUpper.has(innerUpper)) return "(" + inner.toUpperCase();
+              return "(" + inner.charAt(0).toUpperCase() + inner.slice(1).toLowerCase();
+            }
+            return lower.charAt(0).toUpperCase() + lower.slice(1);
+          })
+          .join(" ");
+      }
+
+      static expandFunctionVariations(rawName = "") {
+        let cleaned = String(rawName)
+          .replace(/^[\s*\-•]+/, "")
+          .replace(/[:.;]+$/, "")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        if (!cleaned) return [];
+
+        cleaned = cleaned.replace(
+          /\b(PEDREIRO|AJUDANTE|PINTOR|ELETRICISTA|ALMOXARIFE|MOTORISTA|ANALISTA|AUXILIAR)(I|II|III|IV|V|VI)\b/gi,
+          "$1 $2"
+        );
+
+        let trailingParens = "";
+        const parensMatch = cleaned.match(/\s*(\([^)]+\))\s*$/);
+        if (parensMatch) {
+          trailingParens = parensMatch[1];
+          cleaned = cleaned.slice(0, parensMatch.index).trim();
+        }
+
+        const levelToken = "(?:I|II|III|IV|V|VI|VII|VIII|JR|J[ÚU]NIOR|PL|PLENO|SR|S[ÊE]NIOR|0?[1-8])";
+        const levelListRegex = new RegExp(
+          `\\s+(${levelToken}(?:\\s*(?:,|\\/|\\be\\b|&|-)\\s*${levelToken})*)\\.?$`,
+          "i"
+        );
+
+        const match = cleaned.match(levelListRegex);
+
+        if (match) {
+          const baseWithoutLevel = cleaned.slice(0, match.index).trim();
+          if (baseWithoutLevel.length >= 3) {
+            const rawLevels = match[1]
+              .split(/\s*(?:,|\/|\be\b|&|-)\s*/i)
+              .map((lvl) => PcmsoCanonicalizer.normalizeLevelToken(lvl))
+              .filter(Boolean);
+
+            const uniqueLevels = [...new Set(rawLevels)];
+            const baseFormatted = this.formatTitleCase(
+              trailingParens ? `${baseWithoutLevel} ${trailingParens}` : baseWithoutLevel
+            );
+
+            return uniqueLevels.map((nivel) => {
+              const fullFormatted = this.formatTitleCase(
+                trailingParens
+                  ? `${baseWithoutLevel} ${nivel} ${trailingParens}`
+                  : `${baseWithoutLevel} ${nivel}`
+              );
+              return {
+                funcao: fullFormatted,
+                funcaoBase: baseFormatted,
+                nivel,
+                possuiVariacao: true
+              };
+            });
+          }
+        }
+
+        const fullFormatted = this.formatTitleCase(
+          trailingParens ? `${cleaned} ${trailingParens}` : cleaned
+        );
+
+        return [
+          {
+            funcao: fullFormatted,
+            funcaoBase: fullFormatted,
+            nivel: null,
+            possuiVariacao: false
+          }
+        ];
+      }
+
+      static normalizeRiskCategory(rawCategory = "") {
+        const clean = this.normalizeText(rawCategory).replace(/[^a-z\s]/g, "");
+        if (!clean) return null;
+        if (clean.startsWith("fisic")) return "FISICO";
+        if (clean.startsWith("quimic")) return "QUIMICO";
+        if (clean.startsWith("biologic")) return "BIOLOGICO";
+        if (clean.startsWith("acident")) return "ACIDENTE";
+        if (clean.startsWith("ergonom")) return "ERGONOMICO";
+        return null;
+      }
+
+      static isAbsenceToken(rawValue = "") {
+        const norm = this.normalizeText(rawValue).replace(/[.*()]/g, "").trim();
+        if (!norm || norm === "-") return true;
+        if (
+          [
+            "na",
+            "n/a",
+            "nao aplicavel",
+            "nao identificado",
+            "nao identificavel",
+            "nenhum",
+            "inexistente",
+            "sem risco",
+            "sem riscos"
+          ].includes(norm)
+        ) {
+          return true;
+        }
+        return (
+          norm.startsWith("ausencia de") ||
+          norm.startsWith("nao aplicavel") ||
+          norm.startsWith("nao identificado") ||
+          norm.startsWith("nao houve")
+        );
+      }
+
+      static extractCleanRiskNames(rawBlock = "") {
+        if (!rawBlock || this.isAbsenceToken(rawBlock)) {
+          return [AUSENCIA_PADRAO];
+        }
+
+        const firstColumnOnly = String(rawBlock).split("\t")[0];
+        const beforeNoise = firstColumnOnly.split(STOP_IRRELEVANT_REGEX)[0];
+        const withoutTrailingNA = beforeNoise.replace(/(?:\s+\bNA\b)+\s*$/gi, "");
+
+        const items = withoutTrailingNA
+          .split(/[;\r\n•▪◦●·]+|\s*\/\s*(?!\s*(?:noturno|intermitente|ou|vocal)\b)|,\s+(?=[A-Za-zÀ-ÿ])/i)
+          .map((item) =>
+            item
+              .replace(/^[\s*\-•▪◦●·]+/, "")
+              .replace(/[\s*\-•▪◦●·.]+$/, "")
+              .replace(/\s+descricao$/i, "")
+              .replace(/\s+atividade$/i, "")
+              .replace(/\s+/g, " ")
+              .trim()
+          )
+          .filter(
+            (item) =>
+              item.length > 1 &&
+              !this.isAbsenceToken(item) &&
+              !SENTENCE_NOISE_REGEX.test(item)
+          )
+          .map((item) => PcmsoCanonicalizer.canonicalizeRiskTerm(item))
+          .filter((item) => item.length > 1 && !this.isAbsenceToken(item));
+
+        if (items.length === 0) {
+          return [AUSENCIA_PADRAO];
+        }
+
+        return PcmsoCanonicalizer.sortRisks(items);
+      }
+
+      static createEmptyRisksMap() {
+        return {
+          FISICO: [AUSENCIA_PADRAO],
+          QUIMICO: [AUSENCIA_PADRAO],
+          BIOLOGICO: [AUSENCIA_PADRAO],
+          ERGONOMICO: [AUSENCIA_PADRAO],
+          ACIDENTE: [AUSENCIA_PADRAO]
+        };
+      }
+
+      static mergeRiskList(existingList, newRisks) {
+        const combined = [...existingList, ...newRisks].filter((r) => r !== AUSENCIA_PADRAO);
+        return PcmsoCanonicalizer.sortRisks(combined);
+      }
+
+      static normalizeAndConsolidate(rawItems = []) {
+        const mapFuncoes = new Map();
+
+        for (const item of rawItems) {
+          const rawName = item.funcao || item.funcaoRaw || "";
+          const expandedList = this.expandFunctionVariations(rawName);
+
+          for (const parsedFn of expandedList) {
+            const key = this.normalizeText(parsedFn.funcao);
+
+            if (!mapFuncoes.has(key)) {
+              mapFuncoes.set(key, {
+                ...parsedFn,
+                riscos: this.createEmptyRisksMap()
+              });
+            }
+
+            const target = mapFuncoes.get(key);
+            const rawRiscos = item.riscos || {};
+
+            for (const cat of CATEGORIAS_PADRAO) {
+              const catValues = Array.isArray(rawRiscos[cat])
+                ? rawRiscos[cat]
+                : rawRiscos[cat]
+                  ? [rawRiscos[cat]]
+                  : [];
+
+              for (const val of catValues) {
+                const cleaned = this.extractCleanRiskNames(val);
+                target.riscos[cat] = this.mergeRiskList(target.riscos[cat], cleaned);
+              }
+            }
+          }
+        }
+
+        return PcmsoCanonicalizer.sortFunctions(Array.from(mapFuncoes.values()));
+      }
+
+      static detectLayout(plainText = "") {
+        const norm = this.normalizeText(plainText);
+        if (/\bges\s*\d+\b/.test(norm) && /\bcargos?\s+e\s+funcoes?\b/.test(norm)) {
+          return "ANEXO_2_GES";
+        }
+        if (
+          /\bquadro\s*ii\b/.test(norm) ||
+          /\bregistro\s*n[°ºo]?\s*\d+/i.test(plainText) ||
+          /\biii\.\s*cronograma\b/.test(norm)
+        ) {
+          return "ANEXO_3_HMRJ";
+        }
+        return "ANEXO_1_INDIVIDUAL";
+      }
+
+      static parseLocal(input) {
+        const isStructured = Array.isArray(input);
+        const structuredLines = isStructured
+          ? input
+          : String(input)
+              .split(/\r?\n/)
+              .map((line, idx) => ({
+                page: 1,
+                y: 10000 - idx * 14,
+                text: line.trim(),
+                cells: line
+                  .split("\t")
+                  .map((c, cIdx) => ({ text: c.trim(), x: cIdx * 150, endX: (cIdx + 1) * 150 }))
+                  .filter((c) => c.text)
+              }))
+              .filter((l) => l.text);
+
+        const plainText = structuredLines.map((l) => l.text.replace(/\t/g, " ")).join("\n");
+        const layout = this.detectLayout(plainText);
+        let rawFunctions = [];
+
+        if (layout === "ANEXO_2_GES") {
+          rawFunctions = this.parseAnexo2Ges(structuredLines);
+        } else if (layout === "ANEXO_3_HMRJ") {
+          rawFunctions = this.parseAnexo3Hmrj(structuredLines);
+          if (rawFunctions.length === 0) {
+            rawFunctions = this.parseAnexo3Cronograma(plainText);
+          }
+        } else {
+          rawFunctions = isStructured
+            ? this.parseAnexo1Geometric(structuredLines)
+            : this.parseAnexo1PlainText(plainText);
+        }
+
+        return {
+          layout,
+          funcoes: this.normalizeAndConsolidate(rawFunctions)
+        };
+      }
+
+      static parseAnexo1Geometric(structuredLines) {
+        const list = [];
+        let currentFuncao = "";
+        let categoryAnchors = [];
+        let riskColumnLines = [];
+        let riskMinX = 110;
+        let riskMaxX = 360;
+
+        const flushSection = () => {
+          if (currentFuncao && categoryAnchors.length > 0) {
+            const riscos = this.createEmptyRisksMap();
+            const sortedAnchors = [...categoryAnchors].sort((a, b) =>
+              a.page !== b.page ? a.page - b.page : b.y - a.y
+            );
+
+            const buckets = new Map();
+            sortedAnchors.forEach((_, idx) => buckets.set(idx, []));
+
+            const sortedRisks = [...riskColumnLines].sort((a, b) =>
+              a.page !== b.page ? a.page - b.page : b.y - a.y
+            );
+
+            for (const rLine of sortedRisks) {
+              let assignedIdx = -1;
+
+              for (let idx = 0; idx < sortedAnchors.length; idx++) {
+                const curr = sortedAnchors[idx];
+                const next = sortedAnchors[idx + 1];
+
+                const startsBeforeOrAtLine =
+                  rLine.page > curr.page || (rLine.page === curr.page && rLine.y <= curr.y + 8);
+
+                const endsAfterLine =
+                  !next ||
+                  rLine.page < next.page ||
+                  (rLine.page === next.page && rLine.y > next.y + 6);
+
+                if (startsBeforeOrAtLine && endsAfterLine) {
+                  assignedIdx = idx;
+                  break;
+                }
+              }
+
+              if (assignedIdx !== -1) {
+                buckets.get(assignedIdx).push(rLine.text);
+              }
+            }
+
+            sortedAnchors.forEach((anchor, idx) => {
+              const rawJoined = buckets.get(idx).join(" ; ");
+              const cleanRisks = this.extractCleanRiskNames(rawJoined);
+              riscos[anchor.cat] = this.mergeRiskList(riscos[anchor.cat], cleanRisks);
+            });
+
+            list.push({ funcaoRaw: currentFuncao, riscos });
+          }
+
+          currentFuncao = "";
+          categoryAnchors = [];
+          riskColumnLines = [];
+        };
+
+        for (const lineObj of structuredLines) {
+          const linePlain = lineObj.text.replace(/\t+/g, " ").trim();
+          const norm = this.normalizeText(linePlain);
+          const cells = lineObj.cells;
+
+          if (/^fun[çc][ãa]o\s*:/i.test(linePlain)) {
+            flushSection();
+            const fnCell = cells.find((c) => /^fun[çc][ãa]o\s*:/i.test(c.text));
+            const rawFn = fnCell
+              ? fnCell.text.replace(/^fun[çc][ãa]o\s*:\s*/i, "").trim()
+              : linePlain.replace(/^fun[çc][ãa]o\s*:\s*/i, "").split(/\bsetor\s*:/i)[0].trim();
+            currentFuncao = rawFn;
+            continue;
+          }
+
+          if (!currentFuncao) continue;
+
+          if (norm.includes("fator de risco") || norm.includes("tecnica utilizada") || norm.includes("causador")) {
+            const tipoHeader = cells.find((c) => /^tipo$/i.test(c.text.trim()));
+            const fatorHeader = cells.find((c) => /fator\s+de\s+risco/i.test(c.text));
+            const stopHeader = cells.find((c) =>
+              /\b(?:t[eé]cnica|causador|fonte|medida|preven[cç]|trajet[oó]ria|danos|exposi[cç])/i.test(c.text)
+            );
+
+            if (tipoHeader) riskMinX = tipoHeader.endX + 5;
+            if (fatorHeader && !tipoHeader) riskMinX = Math.max(85, fatorHeader.x - 95);
+            if (stopHeader) riskMaxX = stopHeader.x - 10;
+            continue;
+          }
+
+          if (
+            /^(empresa|setor|descri[cç][aã]o|exames?|caracteriza[cç][aã]o)\b/i.test(norm) &&
+            categoryAnchors.length === 0
+          ) {
+            continue;
+          }
+          if (/^exames?\b/i.test(norm) && categoryAnchors.length > 0) {
+            flushSection();
+            continue;
+          }
+
+          for (const cell of cells) {
+            const catMatch = cell.text.match(
+              /^(f[ií]sico|qu[ií]mico|biol[oó]gico|ergon[oô]mico|acidentes?)\b[:\s-]*(.*)$/i
+            );
+
+            if (catMatch && cell.x < riskMinX + 25) {
+              const cat = this.normalizeRiskCategory(catMatch[1]);
+              if (cat) {
+                categoryAnchors.push({ cat, y: lineObj.y, page: lineObj.page });
+                const inlineRisk = (catMatch[2] || "").trim();
+                if (inlineRisk) {
+                  riskColumnLines.push({ text: inlineRisk, y: lineObj.y, page: lineObj.page });
+                }
+              }
+              continue;
+            }
+
+            const cellCenterX = (cell.x + cell.endX) / 2;
+            const isInsideRiskColumn =
+              cell.x >= riskMinX - 15 &&
+              cell.x < riskMaxX &&
+              cellCenterX < riskMaxX;
+
+            if (isInsideRiskColumn) {
+              if (STOP_IRRELEVANT_REGEX.test(cell.text)) continue;
+              if (SENTENCE_NOISE_REGEX.test(cell.text)) continue;
+              if (/^(?:NA\s*)+$/i.test(cell.text)) continue;
+
+              riskColumnLines.push({
+                text: cell.text,
+                y: lineObj.y,
+                page: lineObj.page
+              });
+            }
+          }
+        }
+
+        flushSection();
+        return list;
+      }
+
+      static parseAnexo1PlainText(fullText) {
+        const lines = fullText
+          .split(/\r?\n/)
+          .map((l) => l.trim())
+          .filter(Boolean);
+
+        const list = [];
+        let currentFuncao = "";
+        let currentCat = null;
+        let currentRiscos = this.createEmptyRisksMap();
+        let buffer = [];
+
+        const flushCat = () => {
+          if (currentFuncao && currentCat && buffer.length > 0) {
+            const cleanRisks = this.extractCleanRiskNames(buffer.join(" ; "));
+            currentRiscos[currentCat] = this.mergeRiskList(currentRiscos[currentCat], cleanRisks);
+          }
+          buffer = [];
+        };
+
+        const flushFuncao = () => {
+          flushCat();
+          if (currentFuncao) {
+            list.push({ funcaoRaw: currentFuncao, riscos: currentRiscos });
+          }
+          currentFuncao = "";
+          currentCat = null;
+          currentRiscos = this.createEmptyRisksMap();
+        };
+
+        for (const line of lines) {
+          const norm = this.normalizeText(line);
+
+          if (/^fun[çc][ãa]o\s*:/i.test(line)) {
+            flushFuncao();
+            currentFuncao = line.replace(/^fun[çc][ãa]o\s*:\s*/i, "").split(/\bsetor\s*:/i)[0].trim();
+            continue;
+          }
+
+          if (/^(setor\s*:|exames?\b)/i.test(norm)) {
+            flushCat();
+            currentCat = null;
+            continue;
+          }
+
+          const catMatch = line.match(
+            /^(f[ií]sico|qu[ií]mico|biol[oó]gico|ergon[oô]mico|acidentes?)\b[:\s-]*(.*)$/i
+          );
+
+          if (catMatch && currentFuncao) {
+            flushCat();
+            currentCat = this.normalizeRiskCategory(catMatch[1]);
+            const rest = (catMatch[2] || "").trim();
+            if (rest) {
+              const cut = rest.split(STOP_IRRELEVANT_REGEX)[0].trim();
+              if (cut) buffer.push(cut);
+            }
+            continue;
+          }
+
+          if (currentFuncao && currentCat) {
+            if (STOP_IRRELEVANT_REGEX.test(line)) {
+              const cut = line.split(STOP_IRRELEVANT_REGEX)[0].trim();
+              if (cut) buffer.push(cut);
+            } else if (!/^(?:NA\s*)+$/i.test(line) && !SENTENCE_NOISE_REGEX.test(line)) {
+              buffer.push(line);
+            }
+          }
+        }
+
+        flushFuncao();
+        return list;
+      }
+
+      static parseAnexo2Ges(structuredLines) {
+        const list = [];
+        let state = "IDLE";
+        let funcoesDoGes = [];
+        let pendingUppercaseParts = [];
+
+        let riscosDoGes = this.createEmptyRisksMap();
+        let currentCat = null;
+        let readingAgente = false;
+        let agenteBuffer = [];
+
+        const commitPendingFuncao = () => {
+          if (pendingUppercaseParts.length === 0) return;
+          const candidate = pendingUppercaseParts.join(" ").replace(/[:.;]+$/, "").trim();
+          pendingUppercaseParts = [];
+          if (!candidate || candidate.length < 3 || candidate.length > 75) return;
+          if (/^(SETOR|GES\s*\d+|CARGOS\s+E\s+FUNÇÕES|CARGO|FUNÇÃO|EXPOSIÇÕES|DOCUMENTO)$/i.test(candidate)) {
+            return;
+          }
+          if (!funcoesDoGes.includes(candidate)) {
+            funcoesDoGes.push(candidate);
+          }
+        };
+
+        const flushAgente = () => {
+          if (currentCat && agenteBuffer.length > 0) {
+            const cleanRisks = this.extractCleanRiskNames(agenteBuffer.join(" ; "));
+            riscosDoGes[currentCat] = this.mergeRiskList(riscosDoGes[currentCat], cleanRisks);
+          }
+          agenteBuffer = [];
+          readingAgente = false;
+        };
+
+        const flushGes = () => {
+          commitPendingFuncao();
+          flushAgente();
+          if (funcoesDoGes.length > 0) {
+            for (const fn of funcoesDoGes) {
+              list.push({
+                funcaoRaw: fn,
+                riscos: JSON.parse(JSON.stringify(riscosDoGes))
+              });
+            }
+          }
+          funcoesDoGes = [];
+          riscosDoGes = this.createEmptyRisksMap();
+          currentCat = null;
+        };
+
+        const flatTokens = [];
+        for (const l of structuredLines) {
+          for (const c of l.cells) {
+            if (c.text) flatTokens.push(c.text.trim());
+          }
+        }
+
+        for (const token of flatTokens) {
+          const norm = this.normalizeText(token);
+
+          if (/^11\s*-\s*relatorio\s+analitico/i.test(norm)) {
+            flushGes();
+            break;
+          }
+
+          if (
+            norm === "documento" ||
+            norm.startsWith("pcmso-programa de controle") ||
+            norm.startsWith("local: porto trombetas") ||
+            norm === "reconhecimento exames x riscos ambientais" ||
+            /^\d+\/133$/.test(norm)
+          ) {
+            continue;
+          }
+
+          if (/^ges\s*\d+/i.test(token)) {
+            flushGes();
+            state = "CARGOS";
+            continue;
+          }
+
+          if (state === "CARGOS") {
+            if (/^exposicoes?$/i.test(norm) || /^tipo\s+agente$/i.test(norm)) {
+              commitPendingFuncao();
+              state = "EXPOSICOES";
+              continue;
+            }
+
+            if (/^(cargo|funcao|descricao\s+das\s+atividades|cargos\s+e\s+funcoes|setor)$/i.test(norm)) {
+              commitPendingFuncao();
+              continue;
+            }
+
+            const withoutColon = token.replace(/[:.]+$/, "").trim();
+            const isAllCapsRole =
+              withoutColon.length >= 3 &&
+              withoutColon.length <= 65 &&
+              withoutColon === withoutColon.toUpperCase() &&
+              /[A-ZÀ-Ú]{3,}/.test(withoutColon) &&
+              !withoutColon.startsWith("MARCENEIRO:");
+
+            if (isAllCapsRole) {
+              if (pendingUppercaseParts.join(" ") === withoutColon) continue;
+              if (
+                pendingUppercaseParts.length > 0 &&
+                !/\b(DE|DO|DA|DOS|DAS|E|EM|DESENVOLVIMENTO|SERVIÇOS|SEGURANÇA|MANUTENÇÃO)$/i.test(
+                  pendingUppercaseParts[pendingUppercaseParts.length - 1]
+                )
+              ) {
+                commitPendingFuncao();
+              }
+              pendingUppercaseParts.push(withoutColon);
+            } else {
+              commitPendingFuncao();
+            }
+            continue;
+          }
+
+          if (state === "EXPOSICOES") {
+            if (/^exames\s+recomendados$/i.test(norm) || /^9\s+plano\s+de\s+acao/i.test(norm)) {
+              flushGes();
+              state = "IDLE";
+              continue;
+            }
+
+            const maybeCat = this.normalizeRiskCategory(token);
+            if (maybeCat && token.length <= 18) {
+              flushAgente();
+              currentCat = maybeCat;
+              continue;
+            }
+
+            if (/^agente$/i.test(norm)) {
+              readingAgente = true;
+              continue;
+            }
+
+            if (
+              /^nivel\s+do\s+risco$/i.test(norm) ||
+              /^(dados|descricao\s*:)/i.test(norm) ||
+              /^\d\s*-\s*(trivial|baixo|moderado|alto|muito alto)/i.test(norm)
+            ) {
+              flushAgente();
+              continue;
+            }
+
+            if (readingAgente && currentCat && token !== "*") {
+              agenteBuffer.push(token);
+            }
+          }
+        }
+
+        flushGes();
+        return list;
+      }
+
+      static parseAnexo3Hmrj(structuredLines) {
+        const plainFull = structuredLines.map((l) => l.text.replace(/\t/g, " ")).join("\n");
+        const start = plainFull.search(/\bQUADRO\s*II\b/i);
+        const end = plainFull.search(/\bII\.\s*DADOS\s+DA\s+EMPRESA\b/i);
+        const section =
+          start !== -1
+            ? end > start
+              ? plainFull.slice(start, end)
+              : plainFull.slice(start)
+            : plainFull;
+
+        const blocks = section.split(/REGISTRO\s*N[°ºo]?\s*\d+\.?/i);
+        const list = [];
+
+        for (const block of blocks) {
+          const lines = block
+            .split(/\r?\n/)
+            .map((l) => l.trim())
+            .filter(
+              (l) =>
+                l &&
+                !l.startsWith("http") &&
+                !/^Pag:/i.test(l) &&
+                !/^\d+\/\d+$/.test(l) &&
+                !/^ABJ\b/i.test(l) &&
+                !/^RUA SANTA/i.test(l) &&
+                !/^INSTITUTO SOCIAL/i.test(l) &&
+                !/^PCMSO - Programa/i.test(l) &&
+                !/^NR\s*07$/i.test(l)
+            );
+
+          if (lines.length === 0) continue;
+
+          let inSetorParens = false;
+          let seenSetor = false;
+          const funcoesBloco = [];
+          let currentCat = null;
+          const catBuffers = new Map();
+
+          for (const line of lines) {
+            const norm = this.normalizeText(line);
+
+            if (
+              [
+                "setor/funcao",
+                "risco ocupacional",
+                "especifico",
+                "tipo de exame",
+                "periodicidade",
+                "quadro ii"
+              ].includes(norm) ||
+              norm.startsWith("parametros para monitorizacao")
+            ) {
+              continue;
+            }
+
+            if (
+              norm.startsWith("avaliacao clinica") ||
+              norm.startsWith("hemograma") ||
+              norm.startsWith("glicemia") ||
+              norm.startsWith("colesterol") ||
+              norm.startsWith("triglicerides") ||
+              norm.startsWith("deverao ser") ||
+              norm.startsWith("admissao") ||
+              norm.startsWith("anualmente") ||
+              norm.startsWith("na demissao") ||
+              norm.startsWith("partir de entao")
+            ) {
+              currentCat = null;
+              continue;
+            }
+
+            if (line.startsWith("(")) {
+              inSetorParens = !line.includes(")");
+              seenSetor = true;
+              currentCat = null;
+              continue;
+            }
+
+            if (inSetorParens) {
+              if (line.includes(")")) inSetorParens = false;
+              continue;
+            }
+
+            const maybeCat = this.normalizeRiskCategory(line);
+            if (maybeCat && line.length <= 18) {
+              currentCat = maybeCat;
+              if (!catBuffers.has(currentCat)) catBuffers.set(currentCat, []);
+              continue;
+            }
+
+            const looksLikeRiskValue =
+              line.startsWith("-") ||
+              this.isAbsenceToken(line) ||
+              /^(v[ií]rus|fungos|bact[eé]rias|[aá]cido|formald[eé][ií]do|ciclofosfamida|postura|queda)\b/i.test(
+                line
+              );
+
+            if (seenSetor && !looksLikeRiskValue) {
+              currentCat = null;
+              funcoesBloco.push(line);
+              continue;
+            }
+
+            if (currentCat) {
+              catBuffers.get(currentCat).push(line);
+            }
+          }
+
+          if (funcoesBloco.length === 0 || catBuffers.size === 0) continue;
+
+          const riscosBloco = this.createEmptyRisksMap();
+          for (const [cat, agentLines] of catBuffers.entries()) {
+            const cleanRisks = this.extractCleanRiskNames(agentLines.join(" ; "));
+            riscosBloco[cat] = this.mergeRiskList(riscosBloco[cat], cleanRisks);
+          }
+
+          for (const fn of funcoesBloco) {
+            list.push({
+              funcaoRaw: fn,
+              riscos: JSON.parse(JSON.stringify(riscosBloco))
+            });
+          }
+        }
+
+        return list;
+      }
+
+      static parseAnexo3Cronograma(plainText) {
+        const start = plainText.search(/\bIII\.\s*CRONOGRAMA\b/i);
+        if (start === -1) return [];
+
+        const section = plainText.slice(start);
+        const blocks = section.split(/SETOR:\s*/i).slice(1);
+        const list = [];
+
+        for (const block of blocks) {
+          const funcMatch = block.match(/Fun[çc][ãa]o\s*:?\s*([^\r\n]+)/i);
+          const riscosMatch = block.match(/Agentes-Riscos:\s*([\s\S]*?)(?=\bExames\b)/i);
+          if (!funcMatch || !riscosMatch) continue;
+
+          const funcoes = funcMatch[1]
+            .split(",")
+            .map((f) => f.replace(/\.$/, "").trim())
+            .filter(Boolean);
+
+          const riscosBloco = this.createEmptyRisksMap();
+          const riscosStr = riscosMatch[1].replace(/\r?\n/g, " ");
+          const regexGrupo = /([A-ZÀ-Ú]+)\s*\(([^)]+)\)/gi;
+          let m;
+
+          while ((m = regexGrupo.exec(riscosStr)) !== null) {
+            const cat = this.normalizeRiskCategory(m[1]);
+            if (!cat) continue;
+            const cleanRisks = this.extractCleanRiskNames(
+              m[2].replace(/,\s+/g, ";").replace(/\s+e\s+/gi, ";")
+            );
+            riscosBloco[cat] = this.mergeRiskList(riscosBloco[cat], cleanRisks);
+          }
+
+          for (const fn of funcoes) {
+            list.push({
+              funcaoRaw: fn,
+              riscos: JSON.parse(JSON.stringify(riscosBloco))
+            });
+          }
+        }
+
+        return list;
+      }
+    }
+
+    /**
+     * Estado e Interface
+     */
+    const appState = {
+      layout: null,
+      funcoes: [],
+      runtimeContext: {
+        model: DEFAULT_GEMINI_MODEL,
+        keyIndex: 1,
+        totalKeys: 0
+      }
+    };
+
+    const els = {
+      btnConfigIa: document.getElementById("btn-config-ia"),
+      headerKeysCount: document.getElementById("header-keys-count"),
+      boxConfigIa: document.getElementById("box-config-ia"),
+      statusApiKey: document.getElementById("status-api-key"),
+      statusModelsCount: document.getElementById("status-models-count"),
+      badgePoolCounter: document.getElementById("badge-pool-counter"),
+      selectModoLeitura: document.getElementById("select-modo-leitura"),
+      selectModeloIa: document.getElementById("select-modelo-ia"),
+      btnRefreshModels: document.getElementById("btn-refresh-models"),
+      inputKeyLabel: document.getElementById("input-key-label"),
+      inputApiKey: document.getElementById("input-api-key"),
+      btnAddKey: document.getElementById("btn-add-key"),
+      btnToggleBulkKeys: document.getElementById("btn-toggle-bulk-keys"),
+      boxBulkKeys: document.getElementById("box-bulk-keys"),
+      textareaBulkKeys: document.getElementById("textarea-bulk-keys"),
+      btnCancelBulkKeys: document.getElementById("btn-cancel-bulk-keys"),
+      btnConfirmBulkKeys: document.getElementById("btn-confirm-bulk-keys"),
+      btnResetKeysStatus: document.getElementById("btn-reset-keys-status"),
+      btnClearAllKeys: document.getElementById("btn-clear-all-keys"),
+      listaChavesApi: document.getElementById("lista-chaves-api"),
+      btnFecharConfig: document.getElementById("btn-fechar-config"),
+      badgeEngine: document.getElementById("badge-engine"),
+      inputPdf: document.getElementById("input-pdf"),
+      btnToggleRaw: document.getElementById("btn-toggle-raw"),
+      boxRawText: document.getElementById("box-raw-text"),
+      textareaRaw: document.getElementById("textarea-raw"),
+      btnProcessRaw: document.getElementById("btn-process-raw"),
+      btnSalvar: document.getElementById("btn-salvar"),
+      loadingBar: document.getElementById("loading-bar"),
+      loadingText: document.getElementById("loading-text"),
+      loadingBadge: document.getElementById("loading-badge"),
+      badgeLayout: document.getElementById("badge-layout"),
+      statTotalFuncoes: document.getElementById("stat-total-funcoes"),
+      statFuncoesBase: document.getElementById("stat-funcoes-base"),
+      statComVariacao: document.getElementById("stat-com-variacao"),
+      tabLista: document.getElementById("tab-lista"),
+      tabAgrupado: document.getElementById("tab-agrupado"),
+      tabJson: document.getElementById("tab-json"),
+      countLista: document.getElementById("count-lista"),
+      countAgrupado: document.getElementById("count-agrupado"),
+      filtrosContainer: document.getElementById("filtros-container"),
+      filtroTexto: document.getElementById("filtro-texto"),
+      filtroVariacao: document.getElementById("filtro-variacao"),
+      btnNovaFuncao: document.getElementById("btn-nova-funcao"),
+      viewLista: document.getElementById("view-lista"),
+      viewAgrupado: document.getElementById("view-agrupado"),
+      viewJson: document.getElementById("view-json"),
+      tbodyLista: document.getElementById("tbody-lista"),
+      gridAgrupado: document.getElementById("grid-agrupado"),
+      preJson: document.getElementById("pre-json"),
+      btnCopiarJson: document.getElementById("btn-copiar-json")
+    };
+
+    const CAT_PILL_STYLES = {
+      FISICO: "bg-emerald-50 text-emerald-800 border-emerald-200",
+      QUIMICO: "bg-rose-50 text-rose-800 border-rose-200",
+      BIOLOGICO: "bg-amber-50 text-amber-800 border-amber-200",
+      ERGONOMICO: "bg-sky-50 text-sky-800 border-sky-200",
+      ACIDENTE: "bg-purple-50 text-purple-800 border-purple-200"
+    };
+
+    function getAiConfig() {
+      let savedModel = (localStorage.getItem(STORAGE_KEYS.MODEL) || "").trim();
+      if (!savedModel || savedModel === "gemini-3.8-pro" || /^gemini-2\.5-/i.test(savedModel)) {
+        savedModel = DEFAULT_GEMINI_MODEL;
+        localStorage.setItem(STORAGE_KEYS.MODEL, savedModel);
+      }
+
+      return {
+        primaryKey: keyPool.getPrimaryKey(),
+        totalKeys: keyPool.getTotalCount(),
+        model: savedModel,
+        mode: localStorage.getItem(STORAGE_KEYS.MODE) || "IA_AUTO"
+      };
+    }
+
+    function renderKeyPoolList() {
+      const total = keyPool.getTotalCount();
+      els.headerKeysCount.textContent = `${total}/${MAX_API_KEYS}`;
+      els.badgePoolCounter.textContent = `${total} / ${MAX_API_KEYS}`;
+      els.btnAddKey.disabled = total >= MAX_API_KEYS;
+
+      if (total === 0) {
+        els.listaChavesApi.innerHTML = `
+          <div class="text-xs text-slate-400 bg-white border border-dashed border-slate-300 rounded-lg p-4 text-center">
+            Nenhuma chave API cadastrada. Adicione até ${MAX_API_KEYS} chaves do Google Gemini acima para leitura com contingência automática.
+          </div>`;
+        return;
+      }
+
+      const statusMeta = {
+        ready: {
+          text: "Pronta",
+          cls: "bg-emerald-50 text-emerald-700 border-emerald-200"
+        },
+        active: {
+          text: "Em uso",
+          cls: "bg-indigo-50 text-indigo-700 border-indigo-200 animate-pulse"
+        },
+        rate_limited: {
+          text: "Limite atingido",
+          cls: "bg-amber-50 text-amber-800 border-amber-200"
+        },
+        invalid: {
+          text: "Inválida",
+          cls: "bg-rose-50 text-rose-700 border-rose-200"
+        }
+      };
+
+      els.listaChavesApi.innerHTML = keyPool.entries
+        .map((item, idx) => {
+          const isRevealed = keyPool.revealedIds.has(item.id);
+          const displayedKey = isRevealed ? item.key : PcmsoKeyPool.maskKey(item.key);
+          const meta = statusMeta[item.status] || statusMeta.ready;
+
+          return `
+            <div class="flex flex-wrap items-center justify-between gap-2 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="px-1.5 py-0.5 text-[11px] font-bold rounded bg-slate-100 text-slate-700 shrink-0">#${idx + 1}</span>
+                <span class="font-semibold text-slate-800 truncate max-w-[140px]" title="${escapeHtml(item.label)}">${escapeHtml(item.label)}</span>
+                <code class="font-mono text-[11px] text-slate-500 truncate max-w-[220px]">${escapeHtml(displayedKey)}</code>
+                <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full border ${meta.cls}" title="${escapeHtml(item.statusDetail || meta.text)}">
+                  ${escapeHtml(meta.text)}
+                </span>
+              </div>
+
+              <div class="flex items-center gap-1 shrink-0">
+                ${
+                  idx > 0
+                    ? `<button type="button" onclick="priorizarChaveApi('${item.id}')" title="Mover para #1 (Prioritária)" class="px-2 py-1 text-[11px] font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded">↑ #1</button>`
+                    : `<span class="px-2 py-1 text-[10px] font-semibold text-violet-700 bg-violet-50 rounded">Principal</span>`
+                }
+                <button type="button" onclick="alternarVisibilidadeChave('${item.id}')" title="Mostrar/Ocultar chave" class="px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-100 rounded">
+                  ${isRevealed ? "Ocultar" : "Ver"}
+                </button>
+                <button type="button" onclick="removerChaveApi('${item.id}')" title="Remover chave" class="px-2 py-1 text-[11px] font-medium text-rose-600 hover:bg-rose-50 rounded">
+                  Remover
+                </button>
+              </div>
+            </div>`;
+        })
+        .join("");
+    }
+
+    window.priorizarChaveApi = async function (id) {
+      keyPool.promoteKey(id);
+      renderKeyPoolList();
+      await populateModelSelect(false);
+    };
+
+    window.alternarVisibilidadeChave = function (id) {
+      if (keyPool.revealedIds.has(id)) {
+        keyPool.revealedIds.delete(id);
+      } else {
+        keyPool.revealedIds.add(id);
+      }
+      renderKeyPoolList();
+    };
+
+    window.removerChaveApi = async function (id) {
+      keyPool.removeKey(id);
+      renderKeyPoolList();
+      await populateModelSelect(false);
+    };
+
+    async function populateModelSelect(forceRefresh = false) {
+      const cfg = getAiConfig();
+      const apiKey = cfg.primaryKey;
+      const preferred = els.selectModeloIa.value || cfg.model;
+
+      els.selectModeloIa.disabled = true;
+      els.btnRefreshModels.disabled = true;
+      els.selectModeloIa.innerHTML = `<option value="${escapeHtml(preferred)}">Consultando modelos disponíveis...</option>`;
+
+      try {
+        const { models, fromApi } = await PcmsoAiExtractor.discoverAvailableModels(
+          apiKey,
+          preferred,
+          forceRefresh
+        );
+
+        els.selectModeloIa.innerHTML = models
+          .map((id, idx) => {
+            const label = idx === 0 ? `${id} (Preferencial)` : id;
+            return `<option value="${escapeHtml(id)}">${escapeHtml(label)}</option>`;
+          })
+          .join("");
+
+        const chosen = models.includes(preferred) ? preferred : models[0];
+        els.selectModeloIa.value = chosen;
+        localStorage.setItem(STORAGE_KEYS.MODEL, chosen);
+
+        if (fromApi) {
+          els.statusModelsCount.textContent = `${models.length} modelo(s) ativo(s)`;
+          els.statusModelsCount.classList.remove("hidden");
+        } else {
+          els.statusModelsCount.classList.add("hidden");
+        }
+      } finally {
+        els.selectModeloIa.disabled = false;
+        els.btnRefreshModels.disabled = false;
+        updateEngineBadges();
+      }
+    }
+
+    function updateEngineBadges(ctxOverride = null) {
+      const cfg = getAiConfig();
+      const totalKeys = cfg.totalKeys;
+      const displayModel = ctxOverride?.model || cfg.model;
+      const activeKeyNum = ctxOverride?.keyIndex || 1;
+
+      if (totalKeys > 0) {
+        els.statusApiKey.textContent = `${totalKeys}/${MAX_API_KEYS} chave(s) ativa(s)`;
+        els.statusApiKey.className =
+          "px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200";
+      } else {
+        els.statusApiKey.textContent = "0/15 chaves (usando fallback local)";
+        els.statusApiKey.className =
+          "px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-200";
+      }
+
+      if (cfg.mode === "LOCAL_ONLY" || totalKeys === 0) {
+        els.badgeEngine.textContent = "Motor: Parser Local";
+        els.badgeEngine.className =
+          "px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200";
+      } else {
+        els.badgeEngine.textContent = `Motor: IA (${displayModel} • Chave #${activeKeyNum}/${totalKeys})`;
+        els.badgeEngine.className =
+          "px-2.5 py-0.5 text-xs font-semibold rounded-full bg-violet-50 text-violet-700 border border-violet-200";
+      }
+    }
+
+    async function syncConfigUi(forceRefreshModels = false) {
+      const cfg = getAiConfig();
+      els.selectModoLeitura.value = cfg.mode;
+      renderKeyPoolList();
+      updateEngineBadges();
+      await populateModelSelect(forceRefreshModels);
+    }
+
+    function setLoading(active, text = "", badge = "") {
+      els.loadingBar.classList.toggle("hidden", !active);
+      if (text) els.loadingText.textContent = text;
+      els.loadingBadge.textContent = badge;
+    }
+
+    async function readPdfDocument(file, forceVision = false) {
+      const buffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      const allLines = [];
+      const pagesText = [];
+
+      for (let p = 1; p <= pdf.numPages; p++) {
+        setLoading(true, `Extraindo texto da página ${p} de ${pdf.numPages}...`, `Pág. ${p}/${pdf.numPages}`);
+        const page = await pdf.getPage(p);
+        const content = await page.getTextContent();
+
+        const rows = [];
+        for (const item of content.items) {
+          const str = item.str;
+          if (!str || !str.trim()) continue;
+          const x = Math.round(item.transform[4] * 10) / 10;
+          const y = Math.round(item.transform[5] * 10) / 10;
+          const width = Math.round((item.width || str.length * 5) * 10) / 10;
+
+          let row = rows.find((r) => Math.abs(r.y - y) <= 3.5);
+          if (!row) {
+            row = { y, items: [] };
+            rows.push(row);
+          }
+          row.items.push({ str: str.trim(), x, endX: x + width });
+        }
+
+        rows.sort((a, b) => b.y - a.y);
+
+        const pageLinesPlain = [];
+        for (const row of rows) {
+          row.items.sort((a, b) => a.x - b.x);
+          const cells = [];
+          let currentCell = null;
+
+          for (const it of row.items) {
+            if (!currentCell) {
+              currentCell = { text: it.str, x: it.x, endX: it.endX };
+            } else {
+              const gap = it.x - currentCell.endX;
+              if (gap > 16) {
+                cells.push(currentCell);
+                currentCell = { text: it.str, x: it.x, endX: it.endX };
+              } else if (gap <= 2.5) {
+                currentCell.text += it.str;
+                currentCell.endX = Math.max(currentCell.endX, it.endX);
+              } else {
+                currentCell.text += " " + it.str;
+                currentCell.endX = Math.max(currentCell.endX, it.endX);
+              }
+            }
+          }
+          if (currentCell) cells.push(currentCell);
+
+          const joinedTab = cells.map((c) => c.text).join("\t");
+          pageLinesPlain.push(joinedTab);
+          allLines.push({ page: p, y: row.y, text: joinedTab, cells });
+        }
+
+        pagesText.push({ page: p, text: pageLinesPlain.join("\n") });
+      }
+
+      const totalChars = pagesText.reduce((acc, p) => acc + p.text.replace(/\s+/g, "").length, 0);
+      const isScannedPdf = forceVision || totalChars / Math.max(1, pdf.numPages) < 80;
+
+      let pageImages = [];
+      if (isScannedPdf) {
+        for (let p = 1; p <= pdf.numPages; p++) {
+          setLoading(true, `Renderizando página escaneada ${p} de ${pdf.numPages} para IA Visão...`, `OCR ${p}/${pdf.numPages}`);
+          const page = await pdf.getPage(p);
+          const viewport = page.getViewport({ scale: 1.5 });
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext("2d");
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          const base64 = canvas.toDataURL("image/jpeg", 0.85).split(",")[1];
+          pageImages.push({ page: p, base64 });
+        }
+      }
+
+      return { structuredLines: allLines, pagesText, isScannedPdf, pageImages };
+    }
+
+    async function executarExtracaoPdf(file) {
+      const cfg = getAiConfig();
+      const useAi = cfg.mode !== "LOCAL_ONLY" && cfg.totalKeys > 0;
+      const forceVision = useAi && cfg.mode === "IA_VISION";
+
+      const docData = await readPdfDocument(file, forceVision);
+      els.textareaRaw.value = docData.structuredLines.map((l) => l.text).join("\n");
+
+      if (useAi) {
+        keyPool.prepareForNewExtraction();
+        renderKeyPoolList();
+
+        try {
+          if (docData.isScannedPdf && docData.pageImages.length > 0) {
+            const aiRes = await PcmsoAiExtractor.extractFromPageImages(docData.pageImages, {
+              pool: keyPool,
+              model: cfg.model,
+              onProgress: (msg, badge) => setLoading(true, msg, badge),
+              onContextChange: (ctx) => {
+                updateEngineBadges(ctx);
+                renderKeyPoolList();
+              }
+            });
+            appState.layout = `IA Visão (${aiRes.usedModel} • Chave #${aiRes.usedKeyIndex}/${aiRes.totalKeys})`;
+            appState.funcoes = PcmsoParser.normalizeAndConsolidate(aiRes.funcoes);
+          } else {
+            const aiRes = await PcmsoAiExtractor.extractFromPageTexts(docData.pagesText, {
+              pool: keyPool,
+              model: cfg.model,
+              onProgress: (msg, badge) => setLoading(true, msg, badge),
+              onContextChange: (ctx) => {
+                updateEngineBadges(ctx);
+                renderKeyPoolList();
+              }
+            });
+            appState.layout = `IA Estruturada (${aiRes.usedModel} • Chave #${aiRes.usedKeyIndex}/${aiRes.totalKeys})`;
+            appState.funcoes = PcmsoParser.normalizeAndConsolidate(aiRes.funcoes);
+          }
+
+          renderKeyPoolList();
+          await populateModelSelect(false);
+          render();
+          return;
+        } catch (aiErr) {
+          renderKeyPoolList();
+          console.warn("Interrupção na leitura via IA após percorrer pool de chaves:", aiErr);
+
+          // Se parte do documento já foi extraída antes de todas as chaves atingirem limite, preserva!
+          if (Array.isArray(aiErr.partialFuncoes) && aiErr.partialFuncoes.length > 0) {
+            appState.layout = `IA Parcial (até pág. ${aiErr.stoppedAtPage - 1}/${aiErr.totalPages})`;
+            appState.funcoes = PcmsoParser.normalizeAndConsolidate(aiErr.partialFuncoes);
+            render();
+            alert(
+              `Aviso: ${aiErr.message}\n\nOs dados extraídos até a página ${aiErr.stoppedAtPage - 1} foram preservados na tabela. Adicione novas chaves API ou aguarde a renovação da cota para ler o restante.`
+            );
+            return;
+          }
+
+          alert(`Aviso da IA: ${aiErr.message}\n\nAplicando leitura local como alternativa.`);
+        }
+      }
+
+      const localRes = PcmsoParser.parseLocal(docData.structuredLines);
+      appState.layout = `Parser Local (${localRes.layout})`;
+      appState.funcoes = localRes.funcoes;
+      render();
+    }
+
+    async function executarExtracaoTextoManual(rawText) {
+      const cfg = getAiConfig();
+      const useAi = cfg.mode !== "LOCAL_ONLY" && cfg.totalKeys > 0;
+
+      if (useAi) {
+        keyPool.prepareForNewExtraction();
+        renderKeyPoolList();
+        setLoading(true, `IA (Chave #1/${cfg.totalKeys} • ${cfg.model}) analisando texto colado...`, cfg.model);
+
+        try {
+          const pagesText = [{ page: 1, text: rawText }];
+          const aiRes = await PcmsoAiExtractor.extractFromPageTexts(pagesText, {
+            pool: keyPool,
+            model: cfg.model,
+            onProgress: (msg, badge) => setLoading(true, msg, badge),
+            onContextChange: (ctx) => {
+              updateEngineBadges(ctx);
+              renderKeyPoolList();
+            }
+          });
+          appState.layout = `IA Texto (${aiRes.usedModel} • Chave #${aiRes.usedKeyIndex}/${aiRes.totalKeys})`;
+          appState.funcoes = PcmsoParser.normalizeAndConsolidate(aiRes.funcoes);
+          renderKeyPoolList();
+          await populateModelSelect(false);
+          render();
+          return;
+        } catch (aiErr) {
+          renderKeyPoolList();
+          if (Array.isArray(aiErr.partialFuncoes) && aiErr.partialFuncoes.length > 0) {
+            appState.layout = "IA Texto (Parcial)";
+            appState.funcoes = PcmsoParser.normalizeAndConsolidate(aiErr.partialFuncoes);
+            render();
+            alert(`Aviso: ${aiErr.message}\n\nOs dados extraídos antes do limite foram preservados.`);
+            return;
+          }
+          alert(`Aviso da IA: ${aiErr.message}\n\nAplicando leitura local como alternativa.`);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      const localRes = PcmsoParser.parseLocal(rawText);
+      appState.layout = `Parser Local (${localRes.layout})`;
+      appState.funcoes = localRes.funcoes;
+      render();
+    }
+
+    function render() {
+      els.badgeLayout.textContent = appState.layout || "Concluído";
+      els.badgeLayout.classList.remove("hidden");
+
+      const basesUnicas = new Set(appState.funcoes.map((f) => PcmsoParser.normalizeText(f.funcaoBase)));
+      const comVariacao = appState.funcoes.filter((f) => f.possuiVariacao).length;
+
+      els.statTotalFuncoes.textContent = appState.funcoes.length;
+      els.statFuncoesBase.textContent = basesUnicas.size;
+      els.statComVariacao.textContent = comVariacao;
+
+      els.countLista.textContent = appState.funcoes.length;
+      els.countAgrupado.textContent = basesUnicas.size;
+      els.btnSalvar.disabled = appState.funcoes.length === 0;
+
+      renderTabelaPrincipal();
+      renderVisaoAgrupada();
+      els.preJson.textContent = JSON.stringify(appState.funcoes, null, 2);
+    }
+
+    function renderRiskCell(riscosArray, catKey) {
+      const pillStyle = CAT_PILL_STYLES[catKey];
+      return riscosArray
+        .map((risco) => {
+          if (risco === AUSENCIA_PADRAO) {
+            return `<span class="inline-block px-2 py-0.5 text-[11px] rounded bg-slate-100 text-slate-500 border border-slate-200">${escapeHtml(risco)}</span>`;
+          }
+          return `<span class="inline-block px-2 py-0.5 text-[11px] font-medium rounded border ${pillStyle} mb-1 mr-1">${escapeHtml(risco)}</span>`;
+        })
+        .join("");
+    }
+
+    function renderTabelaPrincipal() {
+      const busca = PcmsoParser.normalizeText(els.filtroTexto.value);
+      const filtroVar = els.filtroVariacao.value;
+
+      const filtradas = appState.funcoes
+        .map((fn, idx) => ({ ...fn, idx }))
+        .filter((fn) => {
+          if (filtroVar === "COM_NIVEL" && !fn.possuiVariacao) return false;
+          if (filtroVar === "SEM_NIVEL" && fn.possuiVariacao) return false;
+          if (!busca) return true;
+
+          const allRisksStr = Object.values(fn.riscos).flat().join(" ");
+          const alvo = PcmsoParser.normalizeText(
+            `${fn.funcao} ${fn.funcaoBase} ${fn.nivel || ""} ${allRisksStr}`
+          );
+          return alvo.includes(busca);
+        });
+
+      if (filtradas.length === 0) {
+        els.tbodyLista.innerHTML = `
+          <tr>
+            <td colspan="7" class="px-6 py-10 text-center text-slate-400 text-sm">
+              Nenhuma função encontrada para o filtro informado.
+            </td>
+          </tr>`;
+        return;
+      }
+
+      els.tbodyLista.innerHTML = filtradas
+        .map((fn) => {
+          const nivelBadge = fn.possuiVariacao
+            ? `<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-indigo-100 text-indigo-800 border border-indigo-200">Nível ${escapeHtml(fn.nivel)}</span>`
+            : `<span class="px-2 py-0.5 text-[11px] rounded bg-slate-100 text-slate-500">Sem variação</span>`;
+
+          return `
+            <tr class="hover:bg-slate-50/80 align-top">
+              <td class="px-4 py-3">
+                <div class="text-xs font-bold text-slate-900">${escapeHtml(fn.funcaoBase)}</div>
+                <div class="mt-1 flex items-center gap-1.5">
+                  ${nivelBadge}
+                </div>
+              </td>
+              <td class="px-3 py-3 text-xs">${renderRiskCell(fn.riscos.FISICO, "FISICO")}</td>
+              <td class="px-3 py-3 text-xs">${renderRiskCell(fn.riscos.QUIMICO, "QUIMICO")}</td>
+              <td class="px-3 py-3 text-xs">${renderRiskCell(fn.riscos.BIOLOGICO, "BIOLOGICO")}</td>
+              <td class="px-3 py-3 text-xs">${renderRiskCell(fn.riscos.ERGONOMICO, "ERGONOMICO")}</td>
+              <td class="px-3 py-3 text-xs">${renderRiskCell(fn.riscos.ACIDENTE, "ACIDENTE")}</td>
+              <td class="px-3 py-3 text-right">
+                <button type="button" onclick="removerFuncao(${fn.idx})" class="text-xs text-rose-600 hover:text-rose-800 font-medium">
+                  Remover
+                </button>
+              </td>
+            </tr>`;
+        })
+        .join("");
+    }
+
+    function renderVisaoAgrupada() {
+      const grupos = new Map();
+
+      for (const fn of appState.funcoes) {
+        const key = PcmsoParser.normalizeText(fn.funcaoBase);
+        if (!grupos.has(key)) {
+          grupos.set(key, {
+            funcaoBase: fn.funcaoBase,
+            variacoes: []
+          });
+        }
+        grupos.get(key).variacoes.push(fn);
+      }
+
+      els.gridAgrupado.innerHTML = Array.from(grupos.values())
+        .map((grupo) => {
+          const badges = grupo.variacoes
+            .map((v) =>
+              v.possuiVariacao
+                ? `<span class="px-2.5 py-1 text-xs font-semibold rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">${escapeHtml(v.funcao)}</span>`
+                : `<span class="px-2.5 py-1 text-xs rounded-md bg-slate-100 text-slate-600 border border-slate-200">Função única (sem nível)</span>`
+            )
+            .join("");
+
+          return `
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+              <div class="flex items-center justify-between">
+                <h3 class="text-sm font-bold text-slate-900">${escapeHtml(grupo.funcaoBase)}</h3>
+                <span class="text-xs text-slate-400">${grupo.variacoes.length} registro(s)</span>
+              </div>
+              <div class="mt-3 flex flex-wrap gap-2">
+                ${badges}
+              </div>
+            </div>`;
+        })
+        .join("");
+    }
+
+    function escapeHtml(str = "") {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    window.removerFuncao = function (idx) {
+      appState.funcoes.splice(idx, 1);
+      render();
+    };
+
+    // Eventos de Configuração da IA e Pool de Chaves
+    els.btnConfigIa.addEventListener("click", () => {
+      els.boxConfigIa.classList.toggle("hidden");
+    });
+
+    els.selectModoLeitura.addEventListener("change", () => {
+      localStorage.setItem(STORAGE_KEYS.MODE, els.selectModoLeitura.value);
+      updateEngineBadges();
+    });
+
+    els.btnRefreshModels.addEventListener("click", async () => {
+      await populateModelSelect(true);
+    });
+
+    els.selectModeloIa.addEventListener("change", () => {
+      localStorage.setItem(STORAGE_KEYS.MODEL, els.selectModeloIa.value);
+      updateEngineBadges();
+    });
+
+    async function handleAddSingleKey() {
+      const res = keyPool.addKey(els.inputApiKey.value, els.inputKeyLabel.value);
+      if (!res.ok) {
+        alert(res.reason);
+        return;
+      }
+      els.inputApiKey.value = "";
+      els.inputKeyLabel.value = "";
+      renderKeyPoolList();
+      await populateModelSelect(keyPool.getTotalCount() === 1);
+    }
+
+    els.btnAddKey.addEventListener("click", handleAddSingleKey);
+    els.inputApiKey.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleAddSingleKey();
+      }
+    });
+
+    els.btnToggleBulkKeys.addEventListener("click", () => {
+      els.boxBulkKeys.classList.toggle("hidden");
+    });
+
+    els.btnCancelBulkKeys.addEventListener("click", () => {
+      els.textareaBulkKeys.value = "";
+      els.boxBulkKeys.classList.add("hidden");
+    });
+
+    els.btnConfirmBulkKeys.addEventListener("click", async () => {
+      const text = els.textareaBulkKeys.value.trim();
+      if (!text) return;
+      const { added, duplicates, skippedLimit } = keyPool.addBulkKeys(text);
+      els.textareaBulkKeys.value = "";
+      els.boxBulkKeys.classList.add("hidden");
+      renderKeyPoolList();
+      await populateModelSelect(true);
+
+      const msgs = [`${added} chave(s) adicionada(s) ao pool.`];
+      if (duplicates > 0) msgs.push(`${duplicates} duplicada(s) ignorada(s).`);
+      if (skippedLimit > 0) msgs.push(`${skippedLimit} ignorada(s) por atingir o limite de ${MAX_API_KEYS} chaves.`);
+      alert(msgs.join("\n"));
+    });
+
+    els.btnResetKeysStatus.addEventListener("click", () => {
+      keyPool.resetStatuses();
+      renderKeyPoolList();
+      updateEngineBadges();
+    });
+
+    els.btnClearAllKeys.addEventListener("click", async () => {
+      if (keyPool.getTotalCount() === 0) return;
+      if (!confirm("Remover todas as chaves API cadastradas?")) return;
+      keyPool.clearAll();
+      renderKeyPoolList();
+      await populateModelSelect(false);
+    });
+
+    els.btnFecharConfig.addEventListener("click", () => {
+      localStorage.setItem(STORAGE_KEYS.MODE, els.selectModoLeitura.value);
+      updateEngineBadges();
+      els.boxConfigIa.classList.add("hidden");
+    });
+
+    // Eventos de Leitura e Filtros
+    els.inputPdf.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      setLoading(true, "Iniciando leitura do PCMSO...", "");
+      try {
+        await executarExtracaoPdf(file);
+      } catch (err) {
+        alert("Falha ao processar PDF: " + err.message);
+      } finally {
+        setLoading(false);
+        e.target.value = "";
+      }
+    });
+
+    els.btnToggleRaw.addEventListener("click", () => {
+      els.boxRawText.classList.toggle("hidden");
+    });
+
+    els.btnProcessRaw.addEventListener("click", async () => {
+      const text = els.textareaRaw.value.trim();
+      if (text) await executarExtracaoTextoManual(text);
+    });
+
+    els.filtroTexto.addEventListener("input", renderTabelaPrincipal);
+    els.filtroVariacao.addEventListener("change", renderTabelaPrincipal);
+
+    function setActiveTab(tab) {
+      els.viewLista.classList.toggle("hidden", tab !== "lista");
+      els.viewAgrupado.classList.toggle("hidden", tab !== "agrupado");
+      els.viewJson.classList.toggle("hidden", tab !== "json");
+      els.filtrosContainer.classList.toggle("hidden", tab !== "lista");
+
+      const activeCls = "pb-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600";
+      const inactiveCls = "pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700";
+
+      els.tabLista.className = tab === "lista" ? activeCls : inactiveCls;
+      els.tabAgrupado.className = tab === "agrupado" ? activeCls : inactiveCls;
+      els.tabJson.className = tab === "json" ? activeCls : inactiveCls;
+    }
+
+    els.tabLista.addEventListener("click", () => setActiveTab("lista"));
+    els.tabAgrupado.addEventListener("click", () => setActiveTab("agrupado"));
+    els.tabJson.addEventListener("click", () => setActiveTab("json"));
+
+    els.btnNovaFuncao.addEventListener("click", () => {
+      const nome = prompt("Nome da Função (ex.: Ajudante I, Analista Administrativo I, II, III):");
+      if (!nome) return;
+      const expanded = PcmsoParser.expandFunctionVariations(nome);
+      const baseRiscos = PcmsoParser.createEmptyRisksMap();
+
+      const catRaw = prompt(
+        "Deseja informar um risco inicial? Digite a categoria (FISICO, QUIMICO, BIOLOGICO, ERGONOMICO, ACIDENTE) ou deixe vazio:"
+      );
+      if (catRaw) {
+        const cat = PcmsoParser.normalizeRiskCategory(catRaw);
+        const riscoNome = cat ? prompt(`Nome do risco (${cat}):`) : null;
+        if (cat && riscoNome) {
+          baseRiscos[cat] = PcmsoParser.extractCleanRiskNames(riscoNome);
+        }
+      }
+
+      for (const fnObj of expanded) {
+        appState.funcoes.push({
+          ...fnObj,
+          riscos: JSON.parse(JSON.stringify(baseRiscos))
+        });
+      }
+      appState.funcoes = PcmsoCanonicalizer.sortFunctions(appState.funcoes);
+      render();
+    });
+
+    els.btnCopiarJson.addEventListener("click", () => {
+      navigator.clipboard.writeText(JSON.stringify(appState.funcoes, null, 2));
+      alert("JSON copiado para a área de transferência.");
+    });
+
+    els.btnSalvar.addEventListener("click", () => {
+      console.log("Dados canônicos prontos para cadastro:", appState.funcoes);
+      alert(`${appState.funcoes.length} função(ões) com fatores de risco específicos prontas para envio.`);
+    });
+
+    // Inicializa configuração e carrega modelos reais da primeira chave ativa
+    syncConfigUi(false);
+  </script>
+</body>
+</html>
