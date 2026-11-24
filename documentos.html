@@ -102,9 +102,9 @@
                 if (elAdmin) elAdmin.style.display = 'inline-block';
             }
             if (setorNav === 'admin') {
-    const elFin = document.getElementById('menu-financeiro');
-    if (elFin) elFin.style.display = 'inline-block';
-}
+                const elFin = document.getElementById('menu-financeiro');
+                if (elFin) elFin.style.display = 'inline-block';
+            }
         </script>
     </header>
     
@@ -191,6 +191,7 @@
                 <div class="grid-docs" style="grid-template-columns: 1fr;">
                     <label for="in-conclusao">Conclusão do ASO Geral:
                         <select id="in-conclusao" style="max-width: 300px;">
+                            <option value="sem_marcar">Sem marcar</option>
                             <option value="apto">APTO</option>
                             <option value="inapto">INAPTO</option>
                         </select>
@@ -928,6 +929,7 @@
 
                             document.getElementById('in-funcao').value = pac.funcao || '';
                             document.getElementById('in-data-aso').value = dataExameISO;
+                            document.getElementById('in-conclusao').value = 'sem_marcar';
                             document.getElementById('in-novo-exame-extra').value = '';
 
                             // Carrega riscos e NRs estritamente da empresa identificada
@@ -1136,9 +1138,9 @@
                 document.querySelectorAll('.out-r-psicossocial').forEach(el => el.textContent = document.getElementById('in-r-psicossocial').value);
 
                 const valConclusao = document.getElementById('in-conclusao').value;
-                const txtConclusao = valConclusao === 'apto' 
-                    ? '☑ Apto para função &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ☐ Inapto' 
-                    : '☐ Apto para função &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ☑ Inapto';
+                const chkGeralApto = valConclusao === 'apto' ? '☑' : '☐';
+                const chkGeralInapto = valConclusao === 'inapto' ? '☑' : '☐';
+                const txtConclusao = `${chkGeralApto} Apto para função &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${chkGeralInapto} Inapto`;
                 document.querySelectorAll('.box-conclusao-geral').forEach(el => el.innerHTML = txtConclusao);
                 
                 const linhasNrModal = document.querySelectorAll('.nr-linha-modal');
