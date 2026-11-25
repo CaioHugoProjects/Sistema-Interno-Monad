@@ -191,9 +191,9 @@
                 <div class="grid-docs" style="grid-template-columns: 1fr;">
                     <label for="in-conclusao">Conclusão do ASO Geral:
                         <select id="in-conclusao" style="max-width: 300px;">
-                            <option value="sem_marcar">Sem marcar</option>
-                            <option value="apto">APTO</option>
+                            <option value="apto" selected>APTO</option>
                             <option value="inapto">INAPTO</option>
+                            <option value="sem_marcar">Sem marcar</option>
                         </select>
                     </label>
                     <div style="font-size: 13px; font-weight: bold; color: var(--text-strong); display: flex; flex-direction: column; gap: 5px;">
@@ -929,7 +929,7 @@
 
                             document.getElementById('in-funcao').value = pac.funcao || '';
                             document.getElementById('in-data-aso').value = dataExameISO;
-                            document.getElementById('in-conclusao').value = 'sem_marcar';
+                            document.getElementById('in-conclusao').value = 'apto';
                             document.getElementById('in-novo-exame-extra').value = '';
 
                             // Carrega riscos e NRs estritamente da empresa identificada
