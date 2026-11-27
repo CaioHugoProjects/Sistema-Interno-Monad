@@ -12,53 +12,173 @@
         }
         const tokenAtivo = localStorage.getItem('monad_token');
         const setorLogado = localStorage.getItem('monad_setor');
-        
+
         if (!tokenAtivo || setorLogado === "admin" || setorLogado === "recepcao") {
             window.location.href = "login.html";
         }
     </script>
     <style>
+        .painel-setor-card {
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--accent);
+        }
+
         .card-paciente {
-            background: var(--surface); border: 1px solid var(--border-strong);
-            border-radius: var(--radius-md); padding: 20px; margin-bottom: 15px;
-            box-shadow: var(--shadow-float); display: flex; justify-content: space-between;
-            align-items: center; gap: 15px; transition: all 0.3s ease;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow-float);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            transition: all 0.22s ease;
+        }
+        .card-paciente:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-1px);
         }
         .card-paciente.concluido {
-            opacity: 0.6; border-left: 4px solid var(--success); background: var(--surface-muted);
+            opacity: 0.72;
+            border-left: 4px solid var(--success);
+            background: var(--surface-muted);
         }
         .info-paciente { flex: 1; min-width: 250px; }
-        .acao-setor { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 220px; }
-        
-        .obs-box { width: 100%; margin-top: 10px; }
-        .obs-box textarea {
-            width: 100%; padding: 10px; border: 1px solid var(--border-strong);
-            border-radius: 6px; background: var(--surface-muted); color: var(--text-strong);
-            font-size: 13px; resize: vertical; transition: all 0.2s; font-family: inherit;
-        }
-        .obs-box textarea:focus { border-color: var(--accent); outline: none; }
-        
-        .btn-chamar {
-            background-color: var(--warning); color: #0f172a; border: none; padding: 10px 15px;
-            border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s, background 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-family: inherit;
-        }
-        .btn-chamar:hover { transform: translateY(-2px); background-color: #f59e0b; }
-        .btn-chamar:active { transform: translateY(0); }
+        .acao-setor { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 230px; }
 
-        /* Classes de Toolbar para Responsividade (Mobile First) */
+        .obs-box { width: 100%; margin-top: 12px; }
+        .obs-box textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            background: var(--surface-muted);
+            color: var(--text-strong);
+            font-size: 13px;
+            resize: vertical;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        .obs-box textarea:hover {
+            border-color: var(--border-hover);
+        }
+        .obs-box textarea:focus {
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 4px var(--accent-ring);
+            outline: none;
+        }
+
+        .btn-chamar {
+            background: linear-gradient(135deg, var(--warning) 0%, #b45309 100%);
+            color: #ffffff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: var(--shadow-btn);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .btn-chamar:hover:not(:disabled) {
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+        }
+        .btn-chamar:active:not(:disabled) { transform: translateY(0); }
+        .btn-chamar:disabled { opacity: 0.75; cursor: not-allowed; }
+
+        .label-concluir-setor {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: var(--surface-muted);
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border-strong);
+            cursor: pointer;
+            user-select: none;
+            width: 100%;
+            justify-content: center;
+            box-sizing: border-box;
+            transition: all 0.18s ease;
+        }
+        .label-concluir-setor:hover {
+            border-color: var(--success);
+            background: var(--surface);
+        }
+
         .toolbar-setor { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
         .toolbar-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .input-moderno { padding: 9px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong); font-family: inherit; font-size: 13px;}
-        .btn-acao { background-color: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); font-family: inherit; font-size: 13px; }
-        .input-pesquisa { width: 220px; }
+        .input-moderno {
+            padding: 10px 13px;
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            background: var(--surface-muted);
+            color: var(--text-strong);
+            font-family: inherit;
+            font-size: 13.5px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+        .input-moderno:hover {
+            border-color: var(--border-hover);
+        }
+        .input-moderno:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 4px var(--accent-ring);
+        }
+
+        .btn-acao {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: var(--shadow-btn);
+            font-family: inherit;
+            font-size: 13.5px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-acao:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+        }
+        .btn-acao:active {
+            transform: translateY(0);
+        }
+
+        .input-pesquisa { width: 230px; }
+
+        .estado-vazio-setor {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            display: none;
+            background: var(--surface-muted);
+            border-radius: 12px;
+            border: 1px dashed var(--border-strong);
+        }
 
         @media (max-width: 768px) {
             .toolbar-setor { flex-direction: column; align-items: stretch; }
             .toolbar-group { flex-direction: column; align-items: stretch; width: 100%; }
             .input-moderno, .btn-acao, .input-pesquisa { width: 100%; }
-            
+
             .card-paciente { flex-direction: column; align-items: stretch; }
             .info-paciente { min-width: 100%; }
             .acao-setor { min-width: 100%; align-items: stretch; }
@@ -71,19 +191,19 @@
         <h1 style="color: var(--text-strong);" id="titulo-setor">Painel Técnico</h1>
         <h2>Atendimentos do Dia</h2>
         <div class="header-controls">
-            <button onclick="window.location.href='relacao_lab.html'" id="btn-relacao-lab" class="btn-header-outline" style="display: none; background: #10b981 !important; color: white !important; border: none !important;">🧪 Relação de Envio</button>
-            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
+            <button type="button" id="btn-relacao-lab" class="btn-header-outline" style="display: none; background: linear-gradient(135deg, var(--success) 0%, #047857 100%) !important; color: #ffffff !important; border: none !important;">🧪 Relação de Envio</button>
+            <button type="button" id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
+            <button type="button" id="btn-sair-sistema" class="btn-header-danger">Sair</button>
         </div>
     </header>
-    
+
     <main>
-        <div class="painel-recepcao no-print">
+        <div class="painel-recepcao painel-setor-card no-print">
             <div class="toolbar-setor">
                 <div class="toolbar-group">
-                    <label style="font-weight: bold; color: var(--text-strong);">Data:</label>
+                    <label for="filtro-data" style="font-weight: 600; color: var(--text-strong);">Data:</label>
                     <input type="date" id="filtro-data" class="input-moderno">
-                    <button id="btn-buscar-data" class="btn-acao">Atualizar</button>
+                    <button type="button" id="btn-buscar-data" class="btn-acao">Atualizar</button>
                 </div>
                 <div class="toolbar-group">
                     <input type="text" id="pesquisa-paciente" placeholder="Pesquisar paciente..." class="input-moderno input-pesquisa">
@@ -91,302 +211,347 @@
             </div>
 
             <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ Sincronizando com a base de dados...</div>
-            
+
             <div id="lista-atendimentos"></div>
-            
-            <div id="msg-vazio" style="text-align: center; padding: 40px; color: var(--text-muted); display: none; background: var(--surface-muted); border-radius: 8px; border: 1px dashed var(--border-strong);">
+
+            <div id="msg-vazio" class="estado-vazio-setor">
                 <strong>Nenhum paciente aguardando neste setor para a data selecionada.</strong>
             </div>
         </div>
     </main>
 
-    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const setor = localStorage.getItem('monad_setor');
-            
-            const configSetores = {
-                'clinico': { titulo: 'Avaliação Clínica / Neurológica', flag: p => p.exames_clinicos && p.exames_clinicos !== 'Nenhum', exames: 'exames_clinicos', lib: 'liberado_clinico' },
-                'raiox': { titulo: 'Radiologia (Raio-X)', flag: p => p.exames_raiox && p.exames_raiox !== 'Nenhum', exames: 'exames_raiox', lib: 'liberado_raiox' },
-                'lab': { titulo: 'Laboratório de Coletas', flag: p => p.exames_lab && p.exames_lab !== 'Nenhum', exames: 'exames_lab', lib: 'liberado_lab' },
-                'fono': { titulo: 'Fonoaudiologia', flag: p => p.audiometria === true, exames: null, texto: 'Audiometria Ocupacional', lib: 'liberado_fono' },
-                'consulta': { titulo: 'Consultório Médico', flag: p => p.consulta_clinica === true, exames: null, texto: 'Avaliação Médica Ocupacional', lib: 'liberado_consulta' }
+        (() => {
+            const CONFIG_SETORES = {
+                clinico: {
+                    titulo: 'Avaliação Clínica / Neurológica',
+                    flag: p => Boolean(p.exames_clinicos && p.exames_clinicos !== 'Nenhum'),
+                    exames: 'exames_clinicos',
+                    lib: 'liberado_clinico'
+                },
+                raiox: {
+                    titulo: 'Radiologia (Raio-X)',
+                    flag: p => Boolean(p.exames_raiox && p.exames_raiox !== 'Nenhum'),
+                    exames: 'exames_raiox',
+                    lib: 'liberado_raiox'
+                },
+                lab: {
+                    titulo: 'Laboratório de Coletas',
+                    flag: p => Boolean(p.exames_lab && p.exames_lab !== 'Nenhum'),
+                    exames: 'exames_lab',
+                    lib: 'liberado_lab'
+                },
+                fono: {
+                    titulo: 'Fonoaudiologia',
+                    flag: p => p.audiometria === true,
+                    exames: null,
+                    texto: 'Audiometria Ocupacional',
+                    lib: 'liberado_fono'
+                },
+                consulta: {
+                    titulo: 'Consultório Médico',
+                    flag: p => p.consulta_clinica === true,
+                    exames: null,
+                    texto: 'Avaliação Médica Ocupacional',
+                    lib: 'liberado_consulta'
+                }
             };
-
-            const myConfig = configSetores[setor] || { titulo: 'Setor Desconhecido', flag: null };
-            document.getElementById('titulo-setor').textContent = myConfig.titulo;
-
-            if (setor === 'lab') {
-                document.getElementById('btn-relacao-lab').style.display = 'inline-flex';
-            }
-
-            let databaseSetor = [];
-            const inputData = document.getElementById('filtro-data');
-            const inputPesq = document.getElementById('pesquisa-paciente');
-            const listaDiv = document.getElementById('lista-atendimentos');
-            
-            const hoje = new Date();
-            inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
             function formatarDataBR(data) {
                 if (!data) return '-';
-                if (data.includes('/')) return data;
+                if (String(data).includes('/')) return data;
                 const partes = String(data).split('T')[0].split('-');
                 if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
                 return data;
             }
 
-            async function buscarDados() {
-                if(!inputData.value || !myConfig.flag) return;
-                document.getElementById('msg-carregando').style.display = "block";
-                
-                try {
-                    const { data, error } = await supabase
-                        .from('atendimentos')
-                        .select('*')
-                        .eq('data_exame', inputData.value)
-                        .order('created_at', { ascending: false });
+            function configurarHeader() {
+                const btnTheme = document.getElementById('btn-theme-toggle');
+                if (btnTheme) {
+                    const atualizarIcone = () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        btnTheme.textContent = isDark ? '☀️' : '🌙';
+                    };
+                    atualizarIcone();
 
-                    document.getElementById('msg-carregando').style.display = "none";
-                    if (error) throw error;
-
-                    if (data && data.length > 0) {
-                        databaseSetor = data.filter(myConfig.flag);
-                        renderizarLista(databaseSetor);
-                    } else {
-                        databaseSetor = [];
-                        renderizarLista([]);
-                    }
-                } catch (err) {
-                    console.error("Erro ao buscar dados:", err);
-                    document.getElementById('msg-carregando').style.display = "none";
+                    btnTheme.addEventListener('click', () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        if (isDark) {
+                            document.documentElement.removeAttribute('data-theme');
+                            localStorage.setItem('monad_theme', 'light');
+                        } else {
+                            document.documentElement.setAttribute('data-theme', 'dark');
+                            localStorage.setItem('monad_theme', 'dark');
+                        }
+                        atualizarIcone();
+                    });
                 }
+
+                document.getElementById('btn-sair-sistema')?.addEventListener('click', () => {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                });
+
+                document.getElementById('btn-relacao-lab')?.addEventListener('click', () => {
+                    window.location.href = 'relacao_lab.html';
+                });
             }
 
-            // POLLING: Usa data-id para mapear as atualizações
-            setInterval(async () => {
-                if (document.hidden || !inputData.value || !myConfig.flag) return;
-                try {
-                    const { data, error } = await supabase
-                        .from('atendimentos')
-                        .select('*')
-                        .eq('data_exame', inputData.value);
+            document.addEventListener('DOMContentLoaded', () => {
+                configurarHeader();
 
-                    if (error) throw error;
+                const setor = localStorage.getItem('monad_setor');
+                const myConfig = CONFIG_SETORES[setor] || { titulo: 'Setor Desconhecido', flag: null };
 
-                    if (data) {
+                document.getElementById('titulo-setor').textContent = myConfig.titulo;
+                if (setor === 'lab') {
+                    document.getElementById('btn-relacao-lab').style.display = 'inline-flex';
+                }
+
+                let databaseSetor = [];
+                const inputData = document.getElementById('filtro-data');
+                const inputPesq = document.getElementById('pesquisa-paciente');
+                const listaDiv = document.getElementById('lista-atendimentos');
+                const msgCarregando = document.getElementById('msg-carregando');
+                const msgVazio = document.getElementById('msg-vazio');
+
+                const hoje = new Date();
+                inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+
+                async function buscarDados() {
+                    if (!inputData.value || !myConfig.flag) return;
+                    msgCarregando.style.display = 'block';
+
+                    try {
+                        const { data, error } = await supabase
+                            .from('atendimentos')
+                            .select('*')
+                            .eq('data_exame', inputData.value)
+                            .order('created_at', { ascending: false });
+
+                        if (error) throw error;
+
+                        databaseSetor = (data && data.length > 0) ? data.filter(myConfig.flag) : [];
+                        renderizarLista(databaseSetor);
+                    } catch (err) {
+                        console.error('Erro ao buscar dados:', err);
+                    } finally {
+                        msgCarregando.style.display = 'none';
+                    }
+                }
+
+                async function atualizacaoSilenciosa() {
+                    if (document.hidden || !inputData.value || !myConfig.flag) return;
+
+                    try {
+                        const { data, error } = await supabase
+                            .from('atendimentos')
+                            .select('*')
+                            .eq('data_exame', inputData.value);
+
+                        if (error || !data) return;
+
                         const filtrados = data.filter(myConfig.flag);
-                        
-                        if (filtrados.length !== document.querySelectorAll('.card-paciente').length) {
+                        if (filtrados.length !== listaDiv.querySelectorAll('.card-paciente').length) {
                             databaseSetor = filtrados;
                             renderizarLista(databaseSetor);
                             return;
                         }
-                        
+
                         filtrados.forEach(pac => {
-                            const card = document.querySelector(`.card-paciente[data-id="${pac.id}"]`);
-                            if (card) {
-                                const cb = card.querySelector('.cb-liberar-setor');
-                                if (cb && !cb.disabled && cb.checked !== pac[myConfig.lib]) {
-                                    cb.checked = pac[myConfig.lib];
-                                    if (pac[myConfig.lib]) card.classList.add('concluido');
-                                    else card.classList.remove('concluido');
-                                }
-                                
-                                if (setor === 'lab') {
-                                    const obs = card.querySelector('.obs-setor');
-                                    if (obs && document.activeElement !== obs && !obs.disabled && obs.value !== (pac.observacao || '')) {
-                                        obs.value = pac.observacao || '';
-                                    }
+                            const card = listaDiv.querySelector(`.card-paciente[data-id="${pac.id}"]`);
+                            if (!card) return;
+
+                            const cb = card.querySelector('.cb-liberar-setor');
+                            const statusBanco = Boolean(pac[myConfig.lib]);
+                            if (cb && !cb.disabled && cb.checked !== statusBanco) {
+                                cb.checked = statusBanco;
+                                card.classList.toggle('concluido', statusBanco);
+                            }
+
+                            if (setor === 'lab') {
+                                const obs = card.querySelector('.obs-setor');
+                                const textoBanco = pac.observacao || '';
+                                if (obs && document.activeElement !== obs && !obs.disabled && obs.value !== textoBanco) {
+                                    obs.value = textoBanco;
                                 }
                             }
                         });
+
                         databaseSetor = filtrados;
+                    } catch (e) {
+                        console.error('Erro no polling:', e);
                     }
-                } catch (e) { console.error("Erro no polling:", e); }
-            }, 1000);
-
-            function renderizarLista(pacientes) {
-                listaDiv.innerHTML = "";
-                if (pacientes.length === 0) {
-                    document.getElementById('msg-vazio').style.display = "block";
-                    return;
                 }
-                document.getElementById('msg-vazio').style.display = "none";
 
-                pacientes.forEach((pac) => {
-                    const examesListados = myConfig.exames ? pac[myConfig.exames] : myConfig.texto;
-                    const concluido = pac[myConfig.lib];
-                    const tipoStr = pac.tipo_exame ? `<span style="color:var(--accent); font-weight:600;">${pac.tipo_exame}</span>` : '';
-                    const dataNascFormatada = formatarDataBR(pac.data_nascimento);
-                    
-                    let btnChamar = "";
-                    if (setor === 'consulta') {
-                        btnChamar = `
-                            <button class="btn-chamar no-print" onclick="chamarPaciente('${pac.nome}', '${pac.cpf}', '${pac.id}')" title="Toca o aviso na Receção">
-                                📢 Chamar Paciente
-                            </button>
-                        `;
+                function renderizarLista(pacientes) {
+                    listaDiv.innerHTML = '';
+                    if (!pacientes || pacientes.length === 0) {
+                        msgVazio.style.display = 'block';
+                        return;
                     }
+                    msgVazio.style.display = 'none';
 
-                    let boxObs = "";
-                    if (setor === 'lab') {
-                        boxObs = `
-                            <div class="obs-box">
-                                <textarea class="obs-setor" data-id="${pac.id}" rows="2" placeholder="Observações de coleta (Ex: Veia difícil, Recusou-se...)" title="Salva automaticamente ao sair do campo">${pac.observacao || ''}</textarea>
+                    pacientes.forEach(pac => {
+                        const examesListados = myConfig.exames ? pac[myConfig.exames] : myConfig.texto;
+                        const concluido = Boolean(pac[myConfig.lib]);
+                        const tipoStr = pac.tipo_exame ? `<span style="color:var(--accent); font-weight:600;">${pac.tipo_exame}</span>` : '';
+                        const dataNascFormatada = formatarDataBR(pac.data_nascimento);
+
+                        const btnChamar = setor === 'consulta'
+                            ? `<button type="button" class="btn-chamar no-print" data-id="${pac.id}" title="Toca o aviso na Receção">📢 Chamar Paciente</button>`
+                            : '';
+
+                        const boxObs = setor === 'lab'
+                            ? `<div class="obs-box"><textarea class="obs-setor" data-id="${pac.id}" rows="2" placeholder="Observações de coleta (Ex: Veia difícil, Recusou-se...)" title="Salva automaticamente ao sair do campo">${pac.observacao || ''}</textarea></div>`
+                            : '';
+
+                        const card = document.createElement('div');
+                        card.className = `card-paciente ${concluido ? 'concluido' : ''}`;
+                        card.dataset.id = pac.id;
+
+                        card.innerHTML = `
+                            <div class="info-paciente">
+                                <div style="font-size: 18px; font-weight: bold; color: var(--text-strong);">${pac.nome}</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+                                    CPF: ${pac.cpf || '-'} • RG: ${pac.rg || '-'} • Nasc: ${dataNascFormatada}
+                                </div>
+                                <div style="font-size: 13px; color: var(--text-main);"><strong>Empresa:</strong> ${pac.empresa || '-'} ${tipoStr}</div>
+                                <div style="font-size: 13px; color: var(--text-main); margin-top: 3px;"><strong>Função:</strong> ${pac.funcao || '-'}</div>
+                                <div style="font-size: 13px; color: var(--text-main); margin-top: 5px;">
+                                    <strong>Procedimento(s):</strong> <span style="color: var(--accent); font-weight: 600;">${examesListados}</span>
+                                </div>
+                                ${boxObs}
+                            </div>
+                            <div class="acao-setor">
+                                ${btnChamar}
+                                <label class="label-concluir-setor">
+                                    <input type="checkbox" class="cb-liberar-setor" data-id="${pac.id}" ${concluido ? 'checked' : ''} style="transform: scale(1.3); margin: 0;">
+                                    <span style="font-weight: 700; font-size: 12.5px; color: var(--text-strong);">MARCAR COMO CONCLUÍDO</span>
+                                </label>
                             </div>
                         `;
-                    }
+                        listaDiv.appendChild(card);
+                    });
 
-                    const card = document.createElement('div');
-                    card.className = `card-paciente ${concluido ? 'concluido' : ''}`;
-                    card.dataset.id = pac.id;
-                    
-                    card.innerHTML = `
-                        <div class="info-paciente">
-                            <div style="font-size: 18px; font-weight: bold; color: var(--text-strong);">${pac.nome}</div>
-                            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
-                                CPF: ${pac.cpf || '-'} • RG: ${pac.rg || '-'} • Nasc: ${dataNascFormatada}
-                            </div>
-                            <div style="font-size: 13px; color: var(--text-main);"><strong>Empresa:</strong> ${pac.empresa || '-'} ${tipoStr}</div>
-                            <div style="font-size: 13px; color: var(--text-main); margin-top: 3px;"><strong>Função:</strong> ${pac.funcao || '-'}</div>
-                            <div style="font-size: 13px; color: var(--text-main); margin-top: 5px;">
-                                <strong>Procedimento(s):</strong> <span style="color: var(--accent); font-weight: 500;">${examesListados}</span>
-                            </div>
-                            ${boxObs}
-                        </div>
-                        <div class="acao-setor">
-                            ${btnChamar}
-                            <label style="display: flex; align-items: center; gap: 8px; background: var(--surface-strong); padding: 10px 15px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer; user-select: none; width: 100%; justify-content: center;">
-                                <input type="checkbox" class="cb-liberar-setor" data-id="${pac.id}" ${concluido ? 'checked' : ''} style="transform: scale(1.4); margin: 0;">
-                                <span style="font-weight: bold; color: var(--text-strong);">MARCAR COMO CONCLUÍDO</span>
-                            </label>
-                        </div>
-                    `;
-                    listaDiv.appendChild(card);
+                    aplicarFiltros();
+                }
+
+                listaDiv.addEventListener('click', async (e) => {
+                    const btn = e.target.closest('.btn-chamar');
+                    if (!btn) return;
+
+                    const idUnico = btn.dataset.id;
+                    const pac = databaseSetor.find(p => String(p.id) === String(idUnico));
+                    if (!pac) return;
+
+                    const textoOriginal = btn.innerHTML;
+                    btn.disabled = true;
+                    btn.innerHTML = 'Avisando Receção... ⏳';
+                    btn.style.background = 'linear-gradient(135deg, var(--success) 0%, #047857 100%)';
+                    btn.style.color = '#ffffff';
+
+                    try {
+                        const { error } = await supabase
+                            .from('chamadas')
+                            .insert([{ nome: pac.nome, cpf: pac.cpf }]);
+                        if (error) throw error;
+
+                        btn.innerHTML = '✅ Paciente Chamado';
+                        setTimeout(() => {
+                            btn.innerHTML = textoOriginal;
+                            btn.style.background = '';
+                            btn.style.color = '';
+                            btn.disabled = false;
+                        }, 3000);
+                    } catch (err) {
+                        alert('Erro ao chamar. Verifique a conexão.');
+                        btn.innerHTML = textoOriginal;
+                        btn.style.background = '';
+                        btn.style.color = '';
+                        btn.disabled = false;
+                    }
                 });
-                aplicarFiltros();
-            }
 
-            // FUNÇÃO DE CHAMADA: Mapeia via IDUnico no frontend para evitar erros
-            window.chamarPaciente = async function(nome, cpf, idUnico) {
-                const btns = document.querySelectorAll('.btn-chamar');
-                btns.forEach(async b => { 
-                    if(b.getAttribute('onclick').includes(idUnico)) {
-                        const textoOriginal = b.innerHTML;
-                        b.innerHTML = "Avisando Receção... ⏳";
-                        b.style.backgroundColor = "#10b981";
-                        b.style.color = "white";
-                        
+                listaDiv.addEventListener('change', async (e) => {
+                    if (e.target.classList.contains('cb-liberar-setor')) {
+                        const cb = e.target;
+                        const idUnico = cb.dataset.id;
+                        const liberado = cb.checked;
+                        const card = cb.closest('.card-paciente');
+
+                        cb.disabled = true;
+                        if (card) card.style.opacity = '0.4';
+
                         try {
-                            const { error } = await supabase.from('chamadas').insert([{ nome: nome, cpf: cpf }]);
+                            const { error } = await supabase
+                                .from('atendimentos')
+                                .update({ [myConfig.lib]: liberado })
+                                .eq('id', idUnico);
                             if (error) throw error;
-                            
-                            setTimeout(() => { 
-                                b.innerHTML = "✅ Paciente Chamado"; 
-                                setTimeout(() => { b.innerHTML = textoOriginal; b.style.backgroundColor = ""; b.style.color = ""; }, 3000);
-                            }, 500);
+
+                            if (card) {
+                                card.style.opacity = '1';
+                                card.classList.toggle('concluido', liberado);
+                            }
+                            cb.disabled = false;
                         } catch (err) {
-                            alert("Erro ao chamar. Verifique a conexão."); 
-                            b.innerHTML = textoOriginal; b.style.backgroundColor = ""; b.style.color = "";
+                            alert('Erro ao salvar status no banco. Tente novamente.');
+                            cb.checked = !liberado;
+                            if (card) card.style.opacity = '1';
+                            cb.disabled = false;
+                        }
+                    }
+
+                    if (e.target.classList.contains('obs-setor')) {
+                        const obsInput = e.target;
+                        const idUnico = obsInput.dataset.id;
+                        obsInput.disabled = true;
+                        obsInput.style.opacity = '0.5';
+
+                        try {
+                            const { error } = await supabase
+                                .from('atendimentos')
+                                .update({ observacao: obsInput.value })
+                                .eq('id', idUnico);
+                            if (error) throw error;
+
+                            obsInput.style.opacity = '1';
+                            obsInput.disabled = false;
+                            obsInput.style.borderColor = 'var(--success)';
+                            setTimeout(() => {
+                                obsInput.style.borderColor = 'var(--border-strong)';
+                            }, 2000);
+                        } catch (err) {
+                            alert('Erro ao guardar observação.');
+                            obsInput.style.opacity = '1';
+                            obsInput.disabled = false;
                         }
                     }
                 });
-            };
 
-            // EVENTOS DA INTERFACE (Agora totalmente baseados na PK)
-            listaDiv.addEventListener('change', async function(e) {
-                if (e.target.classList.contains('cb-liberar-setor')) {
-                    const cb = e.target;
-                    const idUnico = cb.dataset.id;
-                    const liberado = cb.checked;
-                    const card = cb.closest('.card-paciente');
-                    
-                    cb.disabled = true;
-                    card.style.opacity = "0.4";
+                function aplicarFiltros() {
+                    const termo = inputPesq.value.toLowerCase();
+                    let visiveis = 0;
 
-                    try {
-                        const updateObj = {};
-                        updateObj[myConfig.lib] = liberado;
+                    listaDiv.querySelectorAll('.card-paciente').forEach(card => {
+                        const mostra = card.textContent.toLowerCase().includes(termo);
+                        card.style.display = mostra ? 'flex' : 'none';
+                        if (mostra) visiveis++;
+                    });
 
-                        const { error } = await supabase.from('atendimentos').update(updateObj).eq('id', idUnico);
-                        if (error) throw error;
-
-                        card.style.opacity = "1";
-                        cb.disabled = false;
-                        if(liberado) card.classList.add('concluido');
-                        else card.classList.remove('concluido');
-
-                    } catch (err) {
-                        alert("Erro ao salvar status no banco. Tente novamente."); 
-                        cb.checked = !liberado; 
-                        card.style.opacity = "1"; 
-                        cb.disabled = false; 
-                    }
+                    msgVazio.style.display = (visiveis === 0 && databaseSetor.length > 0) ? 'block' : 'none';
                 }
 
-                if (e.target.classList.contains('obs-setor')) {
-                    const obsInput = e.target;
-                    const idUnico = obsInput.dataset.id;
-                    obsInput.disabled = true;
-                    obsInput.style.opacity = "0.5";
-                    
-                    try {
-                        const { error } = await supabase.from('atendimentos').update({ observacao: obsInput.value }).eq('id', idUnico);
-                        if (error) throw error;
+                inputPesq.addEventListener('input', aplicarFiltros);
+                document.getElementById('btn-buscar-data').addEventListener('click', buscarDados);
 
-                        obsInput.style.opacity = "1"; 
-                        obsInput.disabled = false;
-                        obsInput.style.borderColor = "var(--success)";
-                        setTimeout(() => obsInput.style.borderColor = "var(--border-strong)", 2000);
-
-                    } catch (err) {
-                        alert("Erro ao guardar observação."); 
-                        obsInput.style.opacity = "1"; 
-                        obsInput.disabled = false;
-                    }
-                }
+                setInterval(atualizacaoSilenciosa, 3000);
+                buscarDados();
             });
-
-            function aplicarFiltros() {
-                const termo = inputPesq.value.toLowerCase();
-                let visiveis = 0;
-                document.querySelectorAll('.card-paciente').forEach(card => {
-                    const texto = card.textContent.toLowerCase();
-                    const mostra = texto.includes(termo);
-                    card.style.display = mostra ? 'flex' : 'none';
-                    if(mostra) visiveis++;
-                });
-                document.getElementById('msg-vazio').style.display = (visiveis === 0 && databaseSetor.length > 0) ? 'block' : 'none';
-            }
-
-            inputPesq.addEventListener('input', aplicarFiltros);
-            document.getElementById('btn-buscar-data').addEventListener('click', buscarDados);
-            
-            buscarDados(); 
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnTheme = document.getElementById('btn-theme-toggle');
-            if (btnTheme) {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                btnTheme.textContent = isDark ? '☀️' : '🌙';
-                btnTheme.addEventListener('click', () => {
-                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                        document.documentElement.removeAttribute('data-theme');
-                        localStorage.setItem('monad_theme', 'light');
-                        btnTheme.textContent = '🌙';
-                    } else {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                        localStorage.setItem('monad_theme', 'dark');
-                        btnTheme.textContent = '☀️';
-                    }
-                });
-            }
-        });
+        })();
     </script>
 </body>
 </html>

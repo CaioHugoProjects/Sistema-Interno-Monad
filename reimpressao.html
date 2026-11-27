@@ -10,27 +10,142 @@
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
-        // Validação de segurança atualizada para verificar token e setor
+
         const tokenAtivo = localStorage.getItem('monad_token');
-        const sec_setor = localStorage.getItem('monad_setor');
-        if (!tokenAtivo || !sec_setor || (sec_setor !== 'recepcao' && sec_setor !== 'todos' && sec_setor !== 'admin')) { 
-            window.location.href = "login.html"; 
+        const secSetor = localStorage.getItem('monad_setor');
+        const setoresPermitidos = ['recepcao', 'todos', 'admin'];
+
+        if (!tokenAtivo || !setoresPermitidos.includes(secSetor)) {
+            localStorage.clear();
+            window.location.href = "login.html";
         }
     </script>
     <style>
-        /* Classes de Toolbar para Responsividade (Mobile First) */
-        .toolbar-geral { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-        .toolbar-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .input-moderno { padding: 9px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong); font-family: inherit; font-size: 13px;}
-        .btn-acao { background-color: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); font-family: inherit; font-size: 13px; transition: opacity 0.2s; }
-        .btn-acao:hover { opacity: 0.9; }
-        .input-pesquisa { width: 220px; }
-        .btn-imprimir-ficha { background-color: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto; width: 100%; max-width: 140px;}
+        .painel-reimpressao-card {
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--accent);
+        }
+
+        .titulo-secao-reimpressao {
+            margin: 0;
+            color: var(--text-strong);
+            font-size: 22px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .toolbar-geral {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .input-moderno {
+            padding: 10px 13px;
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            background: var(--surface-muted);
+            color: var(--text-strong);
+            font-family: inherit;
+            font-size: 13.5px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        .input-moderno:hover {
+            border-color: var(--border-hover);
+        }
+
+        .input-moderno:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 4px var(--accent-ring);
+        }
+
+        .btn-acao {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13.5px;
+            box-shadow: var(--shadow-btn);
+            font-family: inherit;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+
+        .btn-acao:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+        }
+
+        .btn-acao:active {
+            transform: translateY(0);
+        }
+
+        .input-pesquisa {
+            width: 230px;
+        }
+
+        .btn-imprimir-ficha {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 9px 15px;
+            border-radius: 9px;
+            font-weight: 600;
+            font-size: 13px;
+            font-family: inherit;
+            box-shadow: var(--shadow-btn);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 145px;
+            transition: all 0.18s ease;
+        }
+
+        .btn-imprimir-ficha:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+        }
+
+        .btn-imprimir-ficha:active {
+            transform: translateY(0);
+        }
+
+        .estado-vazio-reimpressao {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            display: none;
+            background: var(--surface-muted);
+            border-radius: 12px;
+            border: 1px dashed var(--border-strong);
+            margin-top: 14px;
+        }
 
         @media (max-width: 768px) {
             .toolbar-geral { flex-direction: column; align-items: stretch; }
             .toolbar-group { flex-direction: column; align-items: stretch; width: 100%; }
-            .input-moderno, .btn-acao, .input-pesquisa, .btn-imprimir-ficha { width: 100%; max-width: none;}
+            .input-moderno, .btn-acao, .input-pesquisa, .btn-imprimir-ficha { width: 100%; max-width: none; }
         }
     </style>
 </head>
@@ -39,58 +154,56 @@
         <h1 style="color: var(--text-strong);">Sistema Interno</h1>
         <h2>Painel de Reimpressão e Agendamentos</h2>
         <div class="header-controls">
-            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
+            <button type="button" id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
+            <button type="button" id="btn-sair-sistema" class="btn-header-danger">Sair</button>
         </div>
         <nav style="margin-top: 15px;">
             <ul>
                 <li><a href="index.html">Recepção</a></li>
                 <li><a href="checkin.html">Visão Geral</a></li>
-                <li><a href="reimpressao.html" style="background-color: var(--accent) !important; color: white !important;">Reimpressão / Agendados</a></li>
-                <!-- Apenas Admin e Todos veem a Base de Dados e o ASO -->
+                <li><a href="reimpressao.html" style="background-color: var(--accent) !important; color: #ffffff !important;">Reimpressão / Agendados</a></li>
                 <li id="menu-documentos" style="display: none;"><a href="documentos.html">Gerar ASO</a></li>
                 <li id="menu-cadastros" style="display: none;"><a href="cadastros.html">Base Dados</a></li>
-                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
+                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: #ffffff !important;">Painel Admin</a></li>
                 <li id="menu-financeiro" style="display: none;"><a href="financeiro.html">Financeiro</a></li>
             </ul>
         </nav>
         <script>
-            // Adicionado suporte para mostrar o menu de ASO e Base de dados ao Admin e Todos
-            const setorNav = localStorage.getItem('monad_setor');
-            if (setorNav === 'admin' || setorNav === 'todos') {
-                const elDoc = document.getElementById('menu-documentos');
-                const elCad = document.getElementById('menu-cadastros');
-                if (elDoc) elDoc.style.display = 'inline-block';
-                if (elCad) elCad.style.display = 'inline-block';
-            
-            }
-            if (setorNav === 'admin') {
-                const elAdmin = document.getElementById('menu-admin');
-                if (elAdmin) elAdmin.style.display = 'inline-block';
-            }
-            if (setorNav === 'admin') {
-    const elFin = document.getElementById('menu-financeiro');
-    if (elFin) elFin.style.display = 'inline-block';
-}
+            (() => {
+                const setorNav = localStorage.getItem('monad_setor');
+                const mostrar = (id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'inline-block';
+                };
+
+                if (setorNav === 'admin' || setorNav === 'todos') {
+                    mostrar('menu-documentos');
+                    mostrar('menu-cadastros');
+                }
+                if (setorNav === 'admin') {
+                    mostrar('menu-admin');
+                    mostrar('menu-financeiro');
+                }
+            })();
         </script>
     </header>
-    
+
     <main>
-        <div class="painel-recepcao no-print">
+        <div class="painel-recepcao painel-reimpressao-card no-print">
             <div class="toolbar-geral">
-                <h2 style="margin: 0; color: var(--text-strong); font-size: 22px; border-bottom: 2px solid var(--surface-strong); padding-bottom: 12px; margin-bottom: 5px;">Arquivo e Reimpressão de Fichas</h2>
-                
+                <h2 class="titulo-secao-reimpressao">Arquivo e Reimpressão de Fichas</h2>
+
                 <div class="toolbar-group">
-                    <div style="display: flex; align-items: center; gap: 5px; width: 100%;">
+                    <div style="display: flex; align-items: center; gap: 6px; width: 100%;">
                         <input type="date" id="filtro-data" class="input-moderno" style="flex: 1;">
-                        <button id="btn-buscar-data" class="btn-acao">Buscar</button>
+                        <button type="button" id="btn-buscar-data" class="btn-acao">Buscar</button>
                     </div>
                     <input type="text" id="pesquisa-paciente" placeholder="Pesquisar paciente..." class="input-moderno input-pesquisa">
                 </div>
             </div>
 
-            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">Selecione a data de atendimento (passada ou futura) para visualizar a lista de colaboradores e emitir a segunda via da ficha.</p>
-            
+            <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 20px;">Selecione a data de atendimento (passada ou futura) para visualizar a lista de colaboradores e emitir a segunda via da ficha.</p>
+
             <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">
                 ⏳ A consultar base de dados...
             </div>
@@ -106,312 +219,307 @@
                             <th style="text-align: center;">Ação</th>
                         </tr>
                     </thead>
-                    <tbody id="lista-reimpressao">
-                    </tbody>
+                    <tbody id="lista-reimpressao"></tbody>
                 </table>
             </div>
-            
-            <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-top: 10px;">
+
+            <div id="msg-vazio" class="estado-vazio-reimpressao">
                 <strong>Nenhum paciente encontrado para esta data!</strong>
             </div>
         </div>
 
         <!-- ÁREA DE IMPRESSÃO -->
-        <div class="area-impressao">
-            <div class="ficha-setor" id="setor-clinico">
-                <div class="cabecalho-setor">
-                    <h2>AVALIAÇÃO CLÍNICA / NEUROLÓGICA</h2>
-                    <div class="dados-espelhados">
-                        <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
-                        <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
-                        <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
-                        <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span> <span class="info-menor"><strong>Peso:</strong> _______ kg | <strong>Alt:</strong> _______ m</span></div>
-                    </div>
-                </div>
-                <div class="corpo-setor">
-                    <h3>Exames Solicitados:</h3>
-                    <ul class="lista-exames-print" id="lista-clinico"></ul>
-                </div>
-                <div class="rodape-setor"><div class="area-assinatura">Assinatura do Profissional / Laudo</div></div>
-            </div>
-
-            <div class="ficha-setor" id="setor-raiox">
-                <div class="cabecalho-setor">
-                    <h2>RADIOLOGIA (RAIO-X)</h2>
-                    <div class="dados-espelhados">
-                        <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
-                        <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
-                        <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
-                        <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span></div>
-                    </div>
-                </div>
-                <div class="corpo-setor">
-                    <h3>Exames Solicitados:</h3>
-                    <ul class="lista-exames-print" id="lista-raiox"></ul>
-                </div>
-                <div class="rodape-setor"><div class="area-assinatura">Assinatura do Técnico / Laudo</div></div>
-            </div>
-
-            <div class="ficha-setor" id="setor-audio">
-                <div class="cabecalho-setor">
-                    <h2>FONOAUDIOLOGIA</h2>
-                    <div class="dados-espelhados">
-                        <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
-                        <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
-                        <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
-                        <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span></div>
-                    </div>
-                </div>
-                <div class="corpo-setor">
-                    <h3>Registo Audiométrico:</h3>
-                    <table class="tabela-audiometria">
-                        <thead><tr><th>Hz</th><th>500</th><th>1K</th><th>2K</th><th>3K</th><th>4K</th><th>6K</th><th>8K</th></tr></thead>
-                        <tbody>
-                            <tr><td><strong>OD</strong></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                            <tr><td><strong>OE</strong></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="rodape-setor"><div class="area-assinatura">Assinatura do Fonoaudiólogo / CRM</div></div>
-            </div>
-
-            <div class="ficha-setor" id="setor-lab">
-                <div class="cabecalho-setor">
-                    <h2>LABORATÓRIO (COLETAS)</h2>
-                    <div class="dados-espelhados">
-                        <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
-                        <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
-                        <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
-                        <div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span></div>
-                    </div>
-                </div>
-                <div class="corpo-setor">
-                    <h3>Exames Solicitados:</h3>
-                    <ul class="lista-exames-print" id="lista-lab"></ul>
-                </div>
-                <div class="rodape-setor"><div class="area-assinatura">Responsável pela Coleta</div></div>
-            </div>
+        <div class="area-impressao" id="container-fichas-impressao">
+            <div class="ficha-setor" id="setor-clinico" data-titulo="AVALIAÇÃO CLÍNICA / NEUROLÓGICA" data-exames-titulo="Exames Solicitados:" data-lista-id="lista-clinico" data-assinatura="Assinatura do Profissional / Laudo" data-extra-medidas="true"></div>
+            <div class="ficha-setor" id="setor-raiox" data-titulo="RADIOLOGIA (RAIO-X)" data-exames-titulo="Exames Solicitados:" data-lista-id="lista-raiox" data-assinatura="Assinatura do Técnico / Laudo"></div>
+            <div class="ficha-setor" id="setor-audio" data-titulo="FONOAUDIOLOGIA" data-audiometria="true" data-assinatura="Assinatura do Fonoaudiólogo / CRM"></div>
+            <div class="ficha-setor" id="setor-lab" data-titulo="LABORATÓRIO (COLETAS)" data-exames-titulo="Exames Solicitados:" data-lista-id="lista-lab" data-assinatura="Responsável pela Coleta"></div>
         </div>
     </main>
 
-    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const tabela = document.getElementById('lista-reimpressao');
-            const inputPesquisa = document.getElementById('pesquisa-paciente');
-            const inputData = document.getElementById('filtro-data');
-            const btnBuscarData = document.getElementById('btn-buscar-data');
-            const msgCarregando = document.getElementById('msg-carregando');
-            const msgVazio = document.getElementById('msg-vazio');
-            
-            let databasePacientes = []; 
-            let isPolling = false;
-            let ultimoHashDados = "";
+        (() => {
+            const temListaExames = (val) => Boolean(val && String(val).trim() !== '' && val !== 'Nenhum');
 
-            function formatarDataBR(data) {
+            const quebrarExames = (str) => {
+                if (!temListaExames(str)) return [];
+                return String(str).split(',').map(item => item.trim()).filter(Boolean);
+            };
+
+            const formatarTipoExame = (tipo) => {
+                if (!tipo) return '';
+                const limpo = String(tipo).trim();
+                return limpo.includes('(') ? limpo : `(${limpo})`;
+            };
+
+            const formatarDataBR = (data) => {
                 if (!data) return '-';
-                if (data.includes('/')) return data;
+                if (String(data).includes('/')) return data;
                 const partes = String(data).split('T')[0].split('-');
                 if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
                 return data;
-            }
-
-            const hoje = new Date();
-            inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-
-            function aplicarFiltroEAtualizarTabela() {
-                const termo = inputPesquisa.value.toLowerCase().trim();
-                const filtrados = termo
-                    ? databasePacientes.filter(pac => 
-                        (pac.nome && pac.nome.toLowerCase().includes(termo)) || 
-                        (pac.cpf && pac.cpf.toLowerCase().includes(termo))
-                    )
-                    : databasePacientes;
-
-                if (filtrados.length > 0) {
-                    msgVazio.style.display = "none";
-                    renderizarTabela(filtrados);
-                } else {
-                    tabela.innerHTML = "";
-                    msgVazio.innerHTML = "<strong>Nenhum paciente encontrado para esta data!</strong>";
-                    msgVazio.style.display = "block";
-                }
-            }
-
-            async function buscarPacientesDoBanco(silencioso = false) {
-                const dataFormatada = inputData.value;
-                if (!dataFormatada) return;
-                if (silencioso && isPolling) return;
-
-                isPolling = true;
-                if (!silencioso) {
-                    tabela.innerHTML = ""; 
-                    msgVazio.style.display = "none";
-                    msgCarregando.style.display = "block";
-                    ultimoHashDados = "";
-                }
-
-                try {
-                    const { data, error } = await supabase
-                        .from('atendimentos')
-                        .select('*')
-                        .eq('data_exame', dataFormatada)
-                        .order('created_at', { ascending: false });
-
-                    if (!silencioso) msgCarregando.style.display = "none";
-                    if (error) throw error;
-
-                    const novosDados = data || [];
-                    const novoHash = JSON.stringify(novosDados);
-
-                    if (!silencioso || novoHash !== ultimoHashDados) {
-                        ultimoHashDados = novoHash;
-                        databasePacientes = novosDados;
-                        aplicarFiltroEAtualizarTabela();
-                    }
-                } catch (error) {
-                    if (!silencioso) {
-                        msgCarregando.style.display = "none";
-                        msgVazio.innerHTML = "❌ Erro ao ligar ao banco de dados.";
-                        msgVazio.style.display = "block";
-                    }
-                    console.error("Erro na busca: ", error.message);
-                } finally {
-                    isPolling = false;
-                }
-            }
-
-            function renderizarTabela(pacientes) {
-                tabela.innerHTML = "";
-                pacientes.forEach((pac) => {
-                    const temClinico = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
-                    const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
-                    const temFono = pac.audiometria === true;
-                    const temLab = pac.exames_lab && pac.exames_lab !== 'Nenhum';
-                    const temConsulta = pac.consulta_clinica === true;
-
-                    const setores = [];
-                    if(temClinico) setores.push("Clínicos");
-                    if(temRaiox) setores.push("Raio-X");
-                    if(temFono) setores.push("Audiometria");
-                    if(temLab) setores.push("Laboratório");
-                    if(temConsulta) setores.push("Consulta Médica");
-                    
-                    const resumoSetores = setores.length > 0 ? setores.join(", ") : "Nenhum exame marcado";
-
-                    const tipoStr = pac.tipo_exame ? (pac.tipo_exame.includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
-                    const dataNascimentoBR = formatarDataBR(pac.data_nascimento);
-
-                    const tr = document.createElement('tr');
-                    tr.className = 'linha-paciente';
-                    tr.dataset.id = pac.id;
-                    
-                    tr.innerHTML = `
-                        <td><span class="tag-empresa">${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></span></td>
-                        <td>
-                            <div style="font-weight: bold; font-size: 15px; color:var(--text-strong);">${pac.nome}</div>
-                            <div style="font-size: 12px; color:var(--text-muted);">${pac.funcao || '-'} • Nasc: ${dataNascimentoBR}</div>
-                        </td>
-                        <td>
-                            <div style="font-size: 13px; color:var(--text-main);"><strong>CPF:</strong> ${pac.cpf}</div>
-                            <div style="font-size: 12px; color:var(--text-muted);"><strong>RG:</strong> ${pac.rg || '-'} • <strong>Tel:</strong> ${pac.telefone || '-'}</div>
-                        </td>
-                        <td style="font-size: 12px; color:var(--text-secondary); max-width: 200px; white-space: normal;">
-                            ${resumoSetores}
-                        </td>
-                        <td style="text-align: center;">
-                            <button onclick="imprimirFichaPeloId('${pac.id}')" class="btn-imprimir-ficha">
-                                🖨️ Imprimir
-                            </button>
-                        </td>
-                    `;
-                    tabela.appendChild(tr);
-                });
-            }
-
-            inputPesquisa.addEventListener('input', aplicarFiltroEAtualizarTabela);
-
-            btnBuscarData.addEventListener('click', () => buscarPacientesDoBanco(false));
-            inputData.addEventListener('change', () => buscarPacientesDoBanco(false));
-            
-            buscarPacientesDoBanco(false);
-
-            // Polling silencioso a cada 3 segundos
-            setInterval(() => {
-                buscarPacientesDoBanco(true);
-            }, 3000);
-
-            window.imprimirFichaPeloId = function(idUnico) {
-                const pac = databasePacientes.find(p => p.id == idUnico);
-                if(!pac) {
-                    alert("Erro: Dados do paciente não encontrados em memória.");
-                    return;
-                }
-
-                const dataParaImpressao = formatarDataBR(pac.data_exame);
-                const dataNascimentoImpressao = formatarDataBR(pac.data_nascimento);
-
-                const tipoFormatado = pac.tipo_exame ? (pac.tipo_exame.includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
-                const empresaFormatada = pac.empresa + (tipoFormatado ? ` ${tipoFormatado}` : '');
-
-                document.querySelectorAll('.out-empresa').forEach(el => el.textContent = empresaFormatada);
-                document.querySelectorAll('.out-nome').forEach(el => el.textContent = pac.nome);
-                document.querySelectorAll('.out-funcao').forEach(el => el.textContent = pac.funcao || '');
-                document.querySelectorAll('.out-dn').forEach(el => el.textContent = dataNascimentoImpressao);
-                document.querySelectorAll('.out-cpf').forEach(el => el.textContent = pac.cpf);
-                document.querySelectorAll('.out-rg').forEach(el => el.textContent = pac.rg || '');
-                document.querySelectorAll('.out-telefone').forEach(el => el.textContent = pac.telefone || '');
-                document.querySelectorAll('.out-data').forEach(el => el.textContent = dataParaImpressao);
-
-                function renderizarLista(idElemento, stringExames) {
-                    const ul = document.getElementById(idElemento);
-                    if (!stringExames || stringExames === "Nenhum" || stringExames.trim() === "") {
-                        ul.innerHTML = '<li class="vazio">Nenhum exame selecionado</li>';
-                    } else {
-                        const arr = stringExames.split(',').map(e => e.trim()).filter(e => e);
-                        ul.innerHTML = arr.map(e => `<li>${e}</li>`).join('');
-                    }
-                }
-
-                renderizarLista('lista-clinico', pac.exames_clinicos);
-                renderizarLista('lista-raiox', pac.exames_raiox);
-                renderizarLista('lista-lab', pac.exames_lab);
-
-                document.getElementById('setor-audio').style.display = pac.audiometria ? 'flex' : 'none';
-
-                let examesClinicosStr = pac.exames_clinicos || "";
-                let examesLabStr = pac.exames_lab || "";
-                let totalExames = (examesClinicosStr.match(/,/g) || []).length + (examesLabStr.match(/,/g) || []).length;
-                
-                if(totalExames > 10) document.body.classList.add('print-compacto');
-                else document.body.classList.remove('print-compacto');
-
-                setTimeout(() => window.print(), 300);
             };
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnTheme = document.getElementById('btn-theme-toggle');
-            if (btnTheme) {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                btnTheme.textContent = isDark ? '☀️' : '🌙';
-                btnTheme.addEventListener('click', () => {
-                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                        document.documentElement.removeAttribute('data-theme');
-                        localStorage.setItem('monad_theme', 'light');
-                        btnTheme.textContent = '🌙';
-                    } else {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                        localStorage.setItem('monad_theme', 'dark');
-                        btnTheme.textContent = '☀️';
-                    }
+
+            function montarEstruturaFichas() {
+                document.querySelectorAll('#container-fichas-impressao .ficha-setor').forEach(ficha => {
+                    const titulo = ficha.dataset.titulo || '';
+                    const assinatura = ficha.dataset.assinatura || '';
+                    const isAudio = ficha.dataset.audiometria === 'true';
+                    const extraMedidas = ficha.dataset.extraMedidas === 'true'
+                        ? `<div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span> <span class="info-menor"><strong>Peso:</strong> _______ kg | <strong>Alt:</strong> _______ m</span></div>`
+                        : `<div class="linha-info"><span class="info-maior"><strong>RG:</strong> <span class="out-rg"></span></span></div>`;
+
+                    const corpoHtml = isAudio
+                        ? `
+                            <h3>Registo Audiométrico:</h3>
+                            <table class="tabela-audiometria">
+                                <thead><tr><th>Hz</th><th>500</th><th>1K</th><th>2K</th><th>3K</th><th>4K</th><th>6K</th><th>8K</th></tr></thead>
+                                <tbody>
+                                    <tr><td><strong>OD</strong></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                                    <tr><td><strong>OE</strong></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                                </tbody>
+                            </table>
+                        `
+                        : `
+                            <h3>${ficha.dataset.examesTitulo || 'Exames Solicitados:'}</h3>
+                            <ul class="lista-exames-print" id="${ficha.dataset.listaId}"></ul>
+                        `;
+
+                    ficha.innerHTML = `
+                        <div class="cabecalho-setor">
+                            <h2>${titulo}</h2>
+                            <div class="dados-espelhados">
+                                <div class="linha-info"><span class="info-maior"><strong>Empresa:</strong> <span class="out-empresa"></span></span> <span class="info-menor"><strong>Data:</strong> <span class="out-data"></span></span></div>
+                                <div class="linha-info"><span class="info-maior"><strong>Nome:</strong> <span class="out-nome"></span></span> <span class="info-menor"><strong>Nasc:</strong> <span class="out-dn"></span></span></div>
+                                <div class="linha-info"><span class="info-maior"><strong>Função:</strong> <span class="out-funcao"></span></span> <span class="info-menor"><strong>CPF:</strong> <span class="out-cpf"></span> | <strong>Tel:</strong> <span class="out-telefone"></span></span></div>
+                                ${extraMedidas}
+                            </div>
+                        </div>
+                        <div class="corpo-setor">${corpoHtml}</div>
+                        <div class="rodape-setor"><div class="area-assinatura">${assinatura}</div></div>
+                    `;
                 });
             }
-        });
+
+            function configurarTemaESair() {
+                const btnTheme = document.getElementById('btn-theme-toggle');
+                if (btnTheme) {
+                    const atualizarIcone = () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        btnTheme.textContent = isDark ? '☀️' : '🌙';
+                    };
+                    atualizarIcone();
+
+                    btnTheme.addEventListener('click', () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        if (isDark) {
+                            document.documentElement.removeAttribute('data-theme');
+                            localStorage.setItem('monad_theme', 'light');
+                        } else {
+                            document.documentElement.setAttribute('data-theme', 'dark');
+                            localStorage.setItem('monad_theme', 'dark');
+                        }
+                        atualizarIcone();
+                    });
+                }
+
+                document.getElementById('btn-sair-sistema')?.addEventListener('click', () => {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                });
+            }
+
+            function gerarAssinaturaLeve(lista) {
+                return lista.map(p => [
+                    p.id, p.nome, p.empresa, p.tipo_exame, p.funcao,
+                    p.cpf, p.rg, p.telefone, p.data_nascimento, p.data_exame,
+                    p.exames_clinicos, p.exames_raiox, p.exames_lab,
+                    p.audiometria, p.consulta_clinica
+                ].join('|')).join('~');
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                montarEstruturaFichas();
+                configurarTemaESair();
+
+                const tabela = document.getElementById('lista-reimpressao');
+                const inputPesquisa = document.getElementById('pesquisa-paciente');
+                const inputData = document.getElementById('filtro-data');
+                const btnBuscarData = document.getElementById('btn-buscar-data');
+                const msgCarregando = document.getElementById('msg-carregando');
+                const msgVazio = document.getElementById('msg-vazio');
+
+                let databasePacientes = [];
+                let isPolling = false;
+                let ultimaAssinatura = '';
+
+                const hoje = new Date();
+                inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+
+                function aplicarFiltroEAtualizarTabela() {
+                    const termo = inputPesquisa.value.toLowerCase().trim();
+                    const filtrados = termo
+                        ? databasePacientes.filter(pac =>
+                            (pac.nome && pac.nome.toLowerCase().includes(termo)) ||
+                            (pac.cpf && pac.cpf.toLowerCase().includes(termo))
+                        )
+                        : databasePacientes;
+
+                    if (filtrados.length > 0) {
+                        msgVazio.style.display = 'none';
+                        renderizarTabela(filtrados);
+                    } else {
+                        tabela.innerHTML = '';
+                        msgVazio.innerHTML = '<strong>Nenhum paciente encontrado para esta data!</strong>';
+                        msgVazio.style.display = 'block';
+                    }
+                }
+
+                async function buscarPacientesDoBanco(silencioso = false) {
+                    const dataFormatada = inputData.value;
+                    if (!dataFormatada) return;
+                    if (silencioso && isPolling) return;
+
+                    isPolling = true;
+                    if (!silencioso) {
+                        tabela.innerHTML = '';
+                        msgVazio.style.display = 'none';
+                        msgCarregando.style.display = 'block';
+                        ultimaAssinatura = '';
+                    }
+
+                    try {
+                        const { data, error } = await supabase
+                            .from('atendimentos')
+                            .select('*')
+                            .eq('data_exame', dataFormatada)
+                            .order('created_at', { ascending: false });
+
+                        if (!silencioso) msgCarregando.style.display = 'none';
+                        if (error) throw error;
+
+                        const novosDados = data || [];
+                        const novaAssinatura = gerarAssinaturaLeve(novosDados);
+
+                        if (!silencioso || novaAssinatura !== ultimaAssinatura) {
+                            ultimaAssinatura = novaAssinatura;
+                            databasePacientes = novosDados;
+                            aplicarFiltroEAtualizarTabela();
+                        }
+                    } catch (error) {
+                        if (!silencioso) {
+                            msgCarregando.style.display = 'none';
+                            msgVazio.innerHTML = '❌ Erro ao ligar ao banco de dados.';
+                            msgVazio.style.display = 'block';
+                        }
+                        console.error('Erro na busca:', error.message);
+                    } finally {
+                        isPolling = false;
+                    }
+                }
+
+                function renderizarTabela(pacientes) {
+                    tabela.innerHTML = '';
+                    pacientes.forEach(pac => {
+                        const setores = [];
+                        if (temListaExames(pac.exames_clinicos)) setores.push('Clínicos');
+                        if (temListaExames(pac.exames_raiox)) setores.push('Raio-X');
+                        if (pac.audiometria === true) setores.push('Audiometria');
+                        if (temListaExames(pac.exames_lab)) setores.push('Laboratório');
+                        if (pac.consulta_clinica === true) setores.push('Consulta Médica');
+
+                        const resumoSetores = setores.length > 0 ? setores.join(', ') : 'Nenhum exame marcado';
+                        const tipoStr = formatarTipoExame(pac.tipo_exame);
+                        const dataNascimentoBR = formatarDataBR(pac.data_nascimento);
+
+                        const tr = document.createElement('tr');
+                        tr.className = 'linha-paciente';
+                        tr.dataset.id = pac.id;
+
+                        tr.innerHTML = `
+                            <td><span class="tag-empresa">${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></span></td>
+                            <td>
+                                <div style="font-weight: bold; font-size: 15px; color:var(--text-strong);">${pac.nome}</div>
+                                <div style="font-size: 12px; color:var(--text-muted);">${pac.funcao || '-'} • Nasc: ${dataNascimentoBR}</div>
+                            </td>
+                            <td>
+                                <div style="font-size: 13px; color:var(--text-main);"><strong>CPF:</strong> ${pac.cpf}</div>
+                                <div style="font-size: 12px; color:var(--text-muted);"><strong>RG:</strong> ${pac.rg || '-'} • <strong>Tel:</strong> ${pac.telefone || '-'}</div>
+                            </td>
+                            <td style="font-size: 12px; color:var(--text-secondary); max-width: 200px; white-space: normal;">
+                                ${resumoSetores}
+                            </td>
+                            <td style="text-align: center;">
+                                <button type="button" onclick="imprimirFichaPeloId('${pac.id}')" class="btn-imprimir-ficha">
+                                    🖨️ Imprimir
+                                </button>
+                            </td>
+                        `;
+                        tabela.appendChild(tr);
+                    });
+                }
+
+                inputPesquisa.addEventListener('input', aplicarFiltroEAtualizarTabela);
+                btnBuscarData.addEventListener('click', () => buscarPacientesDoBanco(false));
+                inputData.addEventListener('change', () => buscarPacientesDoBanco(false));
+
+                buscarPacientesDoBanco(false);
+                setInterval(() => buscarPacientesDoBanco(true), 3000);
+
+                window.imprimirFichaPeloId = function(idUnico) {
+                    const pac = databasePacientes.find(p => String(p.id) === String(idUnico));
+                    if (!pac) {
+                        alert('Erro: Dados do paciente não encontrados em memória.');
+                        return;
+                    }
+
+                    const tipoFormatado = formatarTipoExame(pac.tipo_exame);
+                    const empresaFormatada = `${pac.empresa || ''}${tipoFormatado ? ` ${tipoFormatado}` : ''}`;
+
+                    const campos = {
+                        '.out-empresa': empresaFormatada,
+                        '.out-nome': pac.nome || '',
+                        '.out-funcao': pac.funcao || '',
+                        '.out-dn': formatarDataBR(pac.data_nascimento),
+                        '.out-cpf': pac.cpf || '',
+                        '.out-rg': pac.rg || '',
+                        '.out-telefone': pac.telefone || '',
+                        '.out-data': formatarDataBR(pac.data_exame)
+                    };
+
+                    Object.entries(campos).forEach(([sel, val]) => {
+                        document.querySelectorAll(sel).forEach(el => {
+                            el.textContent = val;
+                        });
+                    });
+
+                    const preencherLista = (idElemento, stringExames) => {
+                        const ul = document.getElementById(idElemento);
+                        if (!ul) return;
+                        const arr = quebrarExames(stringExames);
+                        ul.innerHTML = arr.length > 0
+                            ? arr.map(e => `<li>${e}</li>`).join('')
+                            : '<li class="vazio">Nenhum exame selecionado</li>';
+                    };
+
+                    preencherLista('lista-clinico', pac.exames_clinicos);
+                    preencherLista('lista-raiox', pac.exames_raiox);
+                    preencherLista('lista-lab', pac.exames_lab);
+
+                    const setorAudio = document.getElementById('setor-audio');
+                    if (setorAudio) {
+                        setorAudio.style.display = pac.audiometria ? 'flex' : 'none';
+                    }
+
+                    const totalExames = quebrarExames(pac.exames_clinicos).length + quebrarExames(pac.exames_lab).length;
+                    document.body.classList.toggle('print-compacto', totalExames > 10);
+
+                    setTimeout(() => window.print(), 300);
+                };
+            });
+        })();
     </script>
 </body>
 </html>

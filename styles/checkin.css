@@ -1,62 +1,8 @@
 ﻿/* =======================================================
    ESTILOS DE TABELAS, BADGES E FILAS DE ESPERA
-   Foco em UI Cards Mobile e Leitura Limpa
+   UI Moderna, Dinâmica e Responsiva (Desktop + Mobile)
    ======================================================= */
 
-:root {
-    --surface: #ffffff;
-    --surface-muted: #f8fafc;
-    --surface-strong: #f1f5f9;
-    --border: #e2e8f0;
-    --border-hover: #cbd5e1;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
-    
-    /* Cores de Ação Elegantes */
-    --accent: #2563eb;
-    --accent-strong: #1d4ed8;
-    --accent-soft: #eff6ff;
-    
-    /* Cores Semânticas Modernizadas */
-    --success: #059669;
-    --success-soft: #d1fae5;
-    --success-border: #a7f3d0;
-    
-    --warning: #d97706;
-    --warning-soft: #fef3c7;
-    --warning-border: #fde68a;
-
-    --danger: #dc2626;
-    --danger-soft: #fee2e2;
-}
-
-/* VARIÁVEIS EXCLUSIVAS PARA O MODO ESCURO */
-[data-theme="dark"] {
-    --surface: #1e293b;
-    --surface-muted: #0f172a;
-    --surface-strong: #334155;
-    --border: #334155;
-    --border-hover: #475569;
-    --text-primary: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
-    --accent: #3b82f6;
-    --accent-strong: #60a5fa;
-    --accent-soft: rgba(59, 130, 246, 0.2);
-    --success: #10b981;
-    --success-soft: rgba(16, 185, 129, 0.2);
-    --success-border: rgba(16, 185, 129, 0.4);
-    --warning: #f59e0b;
-    --warning-soft: rgba(245, 158, 11, 0.2);
-    --warning-border: rgba(245, 158, 11, 0.4);
-    --danger: #ef4444;
-    --danger-soft: rgba(239, 68, 68, 0.2);
-}
-
-/* ==============================================
-   FILTROS SUPERIORES E BOTÕES
-   ============================================== */
 .painel-topo, .painel-filtros {
     display: flex;
     flex-wrap: wrap;
@@ -65,9 +11,9 @@
 }
 
 #filtro-data, #pesquisa-paciente {
-    padding: 12px 16px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    padding: 11px 15px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
     font-size: 14px;
     color: var(--text-primary);
     background-color: var(--surface-muted);
@@ -75,80 +21,91 @@
     outline: none;
 }
 
+#filtro-data:hover, #pesquisa-paciente:hover {
+    border-color: var(--border-hover);
+}
+
 #filtro-data:focus, #pesquisa-paciente:focus {
     border-color: var(--accent);
     background-color: var(--surface);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 4px var(--accent-ring);
 }
 
 #btn-buscar-data {
-    background-color: var(--accent);
-    color: white;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+    color: #ffffff;
     border: none;
-    border-radius: 8px;
-    padding: 12px 20px;
+    border-radius: 10px;
+    padding: 11px 20px;
     cursor: pointer;
     font-weight: 600;
     font-size: 14px;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-btn);
 }
 
 #btn-buscar-data:hover {
-    background-color: var(--accent-strong);
-    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.25);
     transform: translateY(-1px);
+    box-shadow: 0 8px 18px -4px rgba(37, 99, 235, 0.4);
+    filter: brightness(1.04);
+}
+
+#btn-buscar-data:active {
+    transform: translateY(0);
 }
 
 /* ==============================================
-   NAVEGAÇÃO POR ABAS FLUTUANTES (SETORES)
+   NAVEGAÇÃO POR ABAS DE SETORES
    ============================================== */
 .tabs-setores {
     display: flex;
     gap: 8px;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
     overflow-x: auto;
-    padding: 4px;
-    border-bottom: 2px solid var(--surface-strong);
-    scrollbar-width: none; 
+    padding: 6px;
+    background-color: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    scrollbar-width: none;
 }
 .tabs-setores::-webkit-scrollbar { display: none; }
 
 .tab-btn {
     background-color: transparent;
     color: var(--text-secondary);
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 10px 18px;
+    border-radius: 9px;
     cursor: pointer;
     font-weight: 600;
-    font-size: 14px;
-    transition: all 0.2s ease;
+    font-size: 13.5px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
 }
 
 .tab-btn:hover {
-    background-color: var(--surface-strong);
+    background-color: var(--surface);
     color: var(--text-primary);
+    border-color: var(--border);
 }
 
 .tab-btn.active {
     background-color: var(--surface);
     color: var(--accent);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    border: 1px solid var(--border);
+    box-shadow: 0 4px 12px -3px rgba(15, 23, 42, 0.12);
+    border-color: var(--border);
 }
 
 /* ==============================================
-   TABELA PRINCIPAL - DESIGN DE LISTA MODERNA
+   TABELA PRINCIPAL MODERNA
    ============================================== */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--border);
     background-color: var(--surface);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    box-shadow: var(--shadow-float);
 }
 
 .tabela-liberacao {
@@ -158,70 +115,84 @@
 }
 
 .tabela-liberacao th, .tabela-liberacao td {
-    padding: 16px 20px;
+    padding: 14px 18px;
     vertical-align: middle;
 }
 
 .tabela-liberacao th {
     background-color: var(--surface-muted);
     color: var(--text-secondary);
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
-    font-size: 12px;
+    letter-spacing: 0.7px;
+    font-size: 11.5px;
     border-bottom: 1px solid var(--border);
     text-align: left;
 }
 
 .tabela-liberacao td {
     color: var(--text-primary);
-    border-bottom: 1px solid var(--surface-strong);
+    border-bottom: 1px solid var(--border);
     font-size: 14px;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.16s ease;
 }
 
 .tabela-liberacao tr:last-child td { border-bottom: none; }
-.tabela-liberacao tr:hover td { background-color: var(--surface-strong); }
+.tabela-liberacao tbody tr:hover td {
+    background-color: var(--accent-soft);
+}
 
 /* COMPONENTES DA TABELA */
 .perfil-paciente { display: flex; align-items: center; gap: 12px; }
 .perfil-paciente .avatar {
-    width: 38px; height: 38px;
-    background: linear-gradient(135deg, var(--accent-soft), var(--accent));
-    color: white;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 14px;
-    border: 1px solid var(--accent-strong);
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent) 0%, #0ea5e9 100%);
+    color: #ffffff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 4px 10px -3px rgba(37, 99, 235, 0.35);
+    transition: transform 0.2s ease;
 }
-.col-nome { font-weight: 600; color: var(--text-primary); font-size: 15px; }
+.tabela-liberacao tbody tr:hover .perfil-paciente .avatar {
+    transform: scale(1.05);
+}
+.col-nome { font-weight: 600; color: var(--text-primary); font-size: 14.5px; }
 
 .celula-exame { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.detalhe-exame { font-size: 12px; color: var(--text-secondary); max-width: 150px; text-align: center; line-height: 1.4; }
-.text-na { color: var(--border-hover); font-weight: 600; font-size: 16px; }
+.detalhe-exame { font-size: 12px; color: var(--text-secondary); max-width: 155px; text-align: center; line-height: 1.4; }
+.text-na { color: var(--text-muted); font-weight: 600; font-size: 14px; opacity: 0.7; }
 
 .check-setor, .check-setor-admin {
-    width: 22px; height: 22px;
+    width: 21px;
+    height: 21px;
     accent-color: var(--success);
     cursor: pointer;
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 5px;
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.check-setor:hover { transform: scale(1.15); }
+.check-setor:hover, .check-setor-admin:hover { transform: scale(1.16); }
 
-/* TAGS E BADGES PÍLULA */
+/* TAGS E BADGES */
 .tag-empresa {
-    background-color: var(--surface-strong);
+    background-color: var(--surface-muted);
     color: var(--text-secondary);
-    padding: 6px 12px;
-    border-radius: 6px;
+    padding: 5px 11px;
+    border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
     border: 1px solid var(--border);
+    display: inline-block;
 }
 
 .badge-status {
-    padding: 6px 14px;
-    border-radius: 9999px;
+    padding: 6px 13px;
+    border-radius: 999px;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
@@ -229,6 +200,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 5px;
+    transition: transform 0.18s ease;
 }
 
 .badge-status.pendente {
@@ -243,14 +216,14 @@
     border: 1px solid var(--success-border);
 }
 
-/* CAIXA DE OBSERVAÇÕES E BOTÕES ADMIN */
+/* OBSERVAÇÕES */
 .obs-input, .obs-input-admin {
     width: 100%;
-    max-width: 140px;
+    max-width: 150px;
     font-size: 12px;
-    padding: 8px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
     resize: vertical;
     background-color: var(--surface-muted);
     color: var(--text-primary);
@@ -260,100 +233,108 @@
     border-color: var(--accent);
     background-color: var(--surface);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 /* =======================================================
-   RESPONSIVIDADE (TRANSFORMAÇÃO EM CARDS)
+   RESPONSIVIDADE EM CARDS (MOBILE)
    ======================================================= */
 @media (max-width: 768px) {
     .table-responsive { min-width: 0; background: transparent; border: none; box-shadow: none; }
     .tabela-liberacao { min-width: 0; display: block; }
-    .tabela-liberacao thead { display: none; } 
-    
-    .tabela-liberacao tbody { display: flex; flex-direction: column; gap: 16px; }
-    
+    .tabela-liberacao thead { display: none; }
+
+    .tabela-liberacao tbody { display: flex; flex-direction: column; gap: 14px; }
+
     .tabela-liberacao tr {
         display: flex;
         flex-direction: column;
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: 12px;
+        border-radius: var(--radius-md);
         padding: 18px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        box-shadow: var(--shadow-float);
         gap: 12px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .tabela-liberacao tr:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
     }
 
     .tabela-liberacao td {
         display: flex;
-        flex-direction: column; 
-        align-items: flex-start; 
-        padding: 0 0 12px 0;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0 0 11px 0;
         border-bottom: 1px dashed var(--border);
         text-align: left;
         width: 100%;
     }
-    
-    .tabela-liberacao td:last-child { 
-        border-bottom: none; 
-        padding-bottom: 0; 
-        align-items: center; 
+
+    .tabela-liberacao td:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+        align-items: center;
     }
 
     .tabela-liberacao td::before {
         content: attr(data-label);
-        font-weight: 600;
-        font-size: 12px;
+        font-weight: 700;
+        font-size: 11px;
         color: var(--text-muted);
         text-transform: uppercase;
-        margin-right: 15px;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
     }
 
-    .perfil-paciente { width: 100%; justify-content: flex-start; gap: 14px; margin-bottom: 4px; }
-    .col-nome { font-size: 17px; }
-    .tag-empresa { padding: 6px 12px; font-size: 13px; display: inline-block; width: fit-content; }
-    
-    .celula-exame { 
-        flex-direction: row; 
+    .perfil-paciente { width: 100%; justify-content: flex-start; gap: 12px; margin-bottom: 2px; }
+    .col-nome { font-size: 16.5px; }
+    .tag-empresa { padding: 6px 12px; font-size: 12.5px; width: fit-content; }
+
+    .celula-exame {
+        flex-direction: row;
         flex-wrap: wrap;
-        gap: 10px; 
-        width: 100%; 
-        justify-content: center; 
-        align-items: center; 
+        gap: 10px;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
     }
-    
-    .detalhe-exame { 
-        text-align: center; 
+
+    .detalhe-exame {
+        text-align: left;
         max-width: calc(100% - 45px);
-        font-size: 13.5px; 
-        line-height: 1.5;
+        font-size: 13px;
+        line-height: 1.45;
         color: var(--text-secondary);
     }
-    
-    .obs-input, .obs-input-admin { 
+
+    .obs-input, .obs-input-admin {
         flex-basis: 100%;
-        max-width: 100%; 
-        width: 100%; 
-        margin-top: 4px; 
+        max-width: 100%;
+        width: 100%;
+        margin-top: 4px;
     }
-    
+
     .tabela-liberacao td .badge-status {
         width: 100%;
-        padding: 12px;
-        font-size: 13px;
+        padding: 11px;
+        font-size: 12.5px;
+        border-radius: 10px;
     }
-    
+
     .tabela-liberacao td div[style*="flex-direction: column"] {
         flex-direction: row !important;
         width: 100%;
         justify-content: center;
         gap: 10px;
     }
-    .btn-editar, .btn-apagar { flex: 1; padding: 12px; font-size: 13px; }
+    .btn-editar, .btn-apagar { flex: 1; padding: 11px; font-size: 13px; border-radius: 8px; }
 }
 
 @media (max-width: 480px) {
     #filtro-data, #pesquisa-paciente, #btn-buscar-data { width: 100%; }
-    .tabs-setores { padding-bottom: 10px; }
-    .tab-btn { padding: 10px 14px; font-size: 13px; }
+    .tabs-setores { padding: 5px; }
+    .tab-btn { padding: 9px 13px; font-size: 12.5px; }
 }

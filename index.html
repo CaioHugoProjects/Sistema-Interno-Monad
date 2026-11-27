@@ -9,35 +9,138 @@
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
-        
-        // Verifica se há login e permite acesso
+
         const tokenAtivo = localStorage.getItem('monad_token');
-        const s = localStorage.getItem('monad_setor');
-        if (!tokenAtivo || !s || (s !== 'recepcao' && s !== 'todos' && s !== 'admin')) { 
-            window.location.href = "login.html"; 
+        const setorAtivo = localStorage.getItem('monad_setor');
+        const setoresPermitidos = ['recepcao', 'todos', 'admin'];
+
+        if (!tokenAtivo || !setoresPermitidos.includes(setorAtivo)) {
+            window.location.href = "login.html";
         }
     </script>
     <style>
-        /* Ajustes Estruturais para Mobile First */
-        .painel-recepcao { padding: 30px; }
-        
-        .form-row { display: flex; gap: 20px; margin-bottom: 15px; }
-        .form-col { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-        
-        .input-moderno { padding: 12px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); color: var(--text-strong); font-size: 14px; font-family: inherit; transition: border-color 0.2s; width: 100%; }
-        .input-moderno:focus { outline: none; border-color: var(--accent); }
-        
-        .tipo-exame-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; }
-        .tipo-exame-grid label { display: flex; align-items: center; gap: 8px; padding: 12px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); cursor: pointer; transition: background-color 0.2s; font-size: 13px; font-weight: 500; }
-        .tipo-exame-grid label:hover { background-color: var(--surface-muted); border-color: var(--accent); }
+        .painel-recepcao {
+            padding: 30px;
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--accent);
+        }
 
-        .btn-imprimir-largo { background-color: var(--accent); color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; box-shadow: var(--shadow-btn); font-family: inherit; width: 100%; transition: opacity 0.2s; }
-        .btn-imprimir-largo:hover { opacity: 0.9; }
+        .titulo-recepcao-sec {
+            margin-top: 0;
+            color: var(--text-strong);
+            font-size: 22px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+        }
+
+        .form-row { display: flex; gap: 20px; margin-bottom: 16px; }
+        .form-col { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+        .form-col label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .input-moderno {
+            padding: 11px 13px;
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            background: var(--surface-muted);
+            color: var(--text-strong);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .input-moderno:hover {
+            border-color: var(--border-hover);
+        }
+        .input-moderno:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 4px var(--accent-ring);
+        }
+
+        .tipo-exame-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .tipo-exame-grid label {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface-muted);
+            color: var(--text-strong);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .tipo-exame-grid label:hover {
+            background-color: var(--surface);
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .exame-item-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            margin-bottom: 5px;
+            color: var(--text-strong);
+            font-size: 13.5px;
+        }
+
+        .card-destaque-check {
+            padding: 12px 15px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+        .card-destaque-check label {
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13.5px;
+            margin: 0;
+        }
+
+        .btn-imprimir-largo {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 14px 22px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: var(--shadow-btn);
+            font-family: inherit;
+            width: 100%;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-imprimir-largo:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+        }
+        .btn-imprimir-largo:active {
+            transform: translateY(0);
+        }
 
         @media (max-width: 768px) {
-            .painel-recepcao { padding: 15px; }
-            .form-row { flex-direction: column; gap: 15px; margin-bottom: 10px;}
-            fieldset { padding: 15px 10px; }
+            .painel-recepcao { padding: 18px 14px; }
+            .form-row { flex-direction: column; gap: 14px; margin-bottom: 12px; }
+            fieldset { padding: 16px 12px; }
             .exames-grid-master { display: flex; flex-direction: column; gap: 20px; }
         }
     </style>
@@ -48,55 +151,54 @@
         <h2>Clínica Monad Ocupacional - Oriximiná</h2>
         <div class="header-controls">
             <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
+            <button type="button" id="btn-sair-sistema" class="btn-header-danger">Sair</button>
         </div>
         <nav style="margin-top: 15px;">
             <ul>
-                <li><a href="index.html" style="background-color: var(--accent) !important; color: white !important;">Recepção</a></li>
+                <li><a href="index.html" style="background-color: var(--accent) !important; color: #ffffff !important;">Recepção</a></li>
                 <li><a href="checkin.html">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
-                <!-- Apenas Admin vê a Base de Dados e o Painel de Controle -->
                 <li id="menu-documentos" style="display: none;"><a href="documentos.html">Gerar ASO</a></li>
                 <li id="menu-cadastros" style="display: none;"><a href="cadastros.html">Base Dados</a></li>
-                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
+                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: #ffffff !important;">Painel Admin</a></li>
                 <li id="menu-financeiro" style="display: none;"><a href="financeiro.html">Financeiro</a></li>
-            </ul>   
+            </ul>
         </nav>
         <script>
-            // Adicionado suporte para mostrar o menu de ASO e Base de dados ao Admin e Todos
-            const setorNav = localStorage.getItem('monad_setor');
-            if (setorNav === 'admin' || setorNav === 'todos') {
-                const elDoc = document.getElementById('menu-documentos');
-                const elCad = document.getElementById('menu-cadastros');
-                if (elDoc) elDoc.style.display = 'inline-block';
-                if (elCad) elCad.style.display = 'inline-block';
-            
-            }
-            if (setorNav === 'admin') {
-                const elAdmin = document.getElementById('menu-admin');
-                if (elAdmin) elAdmin.style.display = 'inline-block';
-            }
-            if (setorNav === 'admin') {
-    const elFin = document.getElementById('menu-financeiro');
-    if (elFin) elFin.style.display = 'inline-block';
-}
+            (() => {
+                const setorNav = localStorage.getItem('monad_setor');
+                const mostrar = (id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'inline-block';
+                };
+
+                if (setorNav === 'admin' || setorNav === 'todos') {
+                    mostrar('menu-documentos');
+                    mostrar('menu-cadastros');
+                }
+                if (setorNav === 'admin') {
+                    mostrar('menu-admin');
+                    mostrar('menu-financeiro');
+                }
+            })();
         </script>
     </header>
-    
+
     <main>
         <div class="sistema-fichas">
             <div class="no-print painel-recepcao">
-                <h2 style="margin-top: 0; color: var(--text-strong); font-size: 22px; border-bottom: 2px solid var(--surface-strong); padding-bottom: 12px; margin-bottom: 24px;">Painel de Cadastro (Recepção)</h2>
-                <form id="masterForm">
+                <h2 class="titulo-recepcao-sec">Painel de Cadastro (Recepção)</h2>
+
+                <form id="masterForm" autocomplete="off">
                     <fieldset>
                         <legend>Dados do Colaborador</legend>
                         <div class="form-row">
                             <div class="form-col">
-                                <label>Empresa:</label>
+                                <label for="in-empresa">Empresa:</label>
                                 <input type="text" class="input-moderno nav-enter" name="empresa" id="in-empresa">
                             </div>
                             <div class="form-col">
-                                <label>CPF:</label>
+                                <label for="in-cpf">CPF:</label>
                                 <input type="text" class="input-moderno nav-enter" name="cpf" id="in-cpf" placeholder="000.000.000-00" maxlength="14">
                                 <span id="cpf-error" style="color: var(--danger); font-size: 12px; display: none;">⚠️ CPF Inválido</span>
                                 <div id="msg-cpf-feedback" style="font-size: 12px; font-weight: bold; margin-top: 2px;"></div>
@@ -104,31 +206,31 @@
                         </div>
                         <div class="form-row">
                             <div class="form-col">
-                                <label>Nome:</label>
+                                <label for="in-nome">Nome:</label>
                                 <input type="text" class="input-moderno nav-enter" name="nome" id="in-nome">
                             </div>
                             <div class="form-col">
-                                <label>Função:</label>
+                                <label for="in-funcao">Função:</label>
                                 <input type="text" class="input-moderno nav-enter" name="funcao" id="in-funcao">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-col">
-                                <label>Data de Nasc.:</label>
+                                <label for="in-dn">Data de Nasc.:</label>
                                 <input type="date" class="input-moderno nav-enter" name="dn" id="in-dn">
                             </div>
                             <div class="form-col">
-                                <label>RG:</label>
+                                <label for="in-rg">RG:</label>
                                 <input type="text" class="input-moderno nav-enter" name="rg" id="in-rg">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-col">
-                                <label>Telefone:</label>
+                                <label for="in-telefone">Telefone:</label>
                                 <input type="text" class="input-moderno nav-enter" name="telefone" id="in-telefone" placeholder="(00) 00000-0000" maxlength="15">
                             </div>
                             <div class="form-col">
-                                <label>Data Exame:</label>
+                                <label for="in-data">Data Exame:</label>
                                 <input type="date" class="input-moderno nav-enter" name="data" id="in-data">
                             </div>
                         </div>
@@ -136,36 +238,27 @@
 
                     <fieldset>
                         <legend>Tipo de Exame</legend>
-                        <div class="tipo-exame-grid">
-                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="ADMISSIONAL"> ADMISSIONAL</label>
-                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="PERIODICO"> PERIÓDICO</label>
-                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="DEMISSIONAL"> DEMISSIONAL</label>
-                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="MUDANÇA DE FUNÇÃO"> MUD. DE FUNÇÃO</label>
-                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="MUDANÇA DE RISCO"> MUD. DE RISCO</label>
-                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="COMPLEMENTAR"> COMPLEMENTAR</label>
-                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="PARTICULAR"> PARTICULAR</label>
-                            <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="ENCAMINHAMENTO"> ENCAMINHAMENTO</label>
-                        </div>
+                        <div class="tipo-exame-grid" id="container-tipos-exame"></div>
                     </fieldset>
 
                     <fieldset>
                         <legend>Exames Solicitados</legend>
-                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-                            <div style="padding: 12px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 6px;">
-                                <label style="font-weight: bold; color: var(--accent); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px;">
-                                    <input type="checkbox" id="check-audiometria" class="nav-enter" checked style="transform: scale(1.3);"> 
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px;">
+                            <div class="card-destaque-check" style="background: var(--accent-soft); border: 1px solid var(--accent);">
+                                <label style="color: var(--accent);">
+                                    <input type="checkbox" id="check-audiometria" class="nav-enter" checked style="transform: scale(1.25);">
                                     INCLUIR FICHA DE FONOAUDIOLOGIA
                                 </label>
                             </div>
-                            <div style="padding: 12px; background: var(--warning-soft); border: 1px solid var(--warning); border-radius: 6px;">
-                                <label style="font-weight: bold; color: var(--warning); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px;">
-                                    <input type="checkbox" id="check-consulta" class="nav-enter" checked style="transform: scale(1.3);"> 
+                            <div class="card-destaque-check" style="background: var(--warning-soft); border: 1px solid var(--warning);">
+                                <label style="color: var(--warning);">
+                                    <input type="checkbox" id="check-consulta" class="nav-enter" checked style="transform: scale(1.25);">
                                     ENCAMINHAR PARA CONSULTA CLÍNICA
                                 </label>
                             </div>
-                            <div style="padding: 12px; background: var(--surface-muted); border: 1px solid var(--border-strong); border-radius: 6px;">
-                                <label style="font-weight: bold; color: var(--text-strong); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px;">
-                                    <input type="checkbox" id="check-psicossocial" class="nav-enter" style="transform: scale(1.3);"> 
+                            <div class="card-destaque-check" style="background: var(--surface-muted); border: 1px solid var(--border-strong);">
+                                <label style="color: var(--text-strong);">
+                                    <input type="checkbox" id="check-psicossocial" class="nav-enter" style="transform: scale(1.25);">
                                     INCLUIR AVALIAÇÃO PSICOSSOCIAL
                                 </label>
                             </div>
@@ -174,27 +267,18 @@
                         <div class="exames-grid-master">
                             <div>
                                 <h4>Clínicos</h4>
-                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="clinico" data-nome="Eletrocardiograma"> Eletrocardiograma</label><br>
-                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="clinico" data-nome="Espirometria"> Espirometria</label><br>
-                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="clinico" data-nome="Eletroencefalograma"> Eletroencefalograma</label><br>
-                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="clinico" data-nome="Acuidade visual"> Acuidade visual</label><br>
-                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="clinico" data-nome="Campimetria"> Campimetria</label><br>
-                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="clinico" data-nome="Avaliação oftalmológica"> Avaliação oftalmológica</label>
+                                <div id="lista-opcoes-clinico"></div>
                             </div>
-                            
+
                             <div>
                                 <h4>Raio-X</h4>
-                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="raiox" data-nome="Raio-X Tórax PA"> Raio-x torax PA</label><br>
-                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="raiox" data-nome="Raio-X Tórax OIT"> Raio-x tórax OIT</label><br>
-                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="raiox" data-nome="Raio-X Coluna Total"> Raio-x Coluna Total</label><br>
-                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="raiox" data-nome="Raio-X Coluna Lombar"> Raio-x coluna lombar</label><br>
-                                <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="raiox" data-nome="Raio-X Coluna Lombo-Sacra"> Raio-x Coluna Lombo-Sacra</label>
-                                
-                                <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
-                                    <label style="font-size: 12px; color: var(--text-muted);">Adicionar Raio-X Extra:</label>
-                                    <div style="display: flex; gap: 5px; margin-top: 5px;">
-                                        <input type="text" id="input-exame-extra-raiox" class="input-moderno nav-enter" placeholder="Nome do Raio-X..." style="padding: 8px;">
-                                        <button type="button" id="btn-add-exame-raiox" class="btn-header-outline" style="background-color: var(--accent) !important;">Inserir</button>
+                                <div id="lista-opcoes-raiox"></div>
+
+                                <div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed var(--border-strong);">
+                                    <label for="input-exame-extra-raiox" style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Adicionar Raio-X Extra:</label>
+                                    <div style="display: flex; gap: 6px; margin-top: 6px;">
+                                        <input type="text" id="input-exame-extra-raiox" class="input-moderno nav-enter" placeholder="Nome do Raio-X..." style="padding: 9px 11px;">
+                                        <button type="button" id="btn-add-exame-raiox" class="btn-header-outline" style="background-color: var(--accent) !important; border-radius: 10px;">Inserir</button>
                                     </div>
                                     <div id="lista-extras-painel-raiox" style="margin-top: 10px;"></div>
                                 </div>
@@ -203,30 +287,13 @@
                             <div>
                                 <h4>Laboratoriais</h4>
                                 <div class="scroll-box">
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="HEMOGRAMA"> HEMOGRAMA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="GLICEMIA"> GLICEMIA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="TGO/TGP"> TGO/TGP</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="GAMAGT"> GAMA GT</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="ABELHA/MARIMBONDO"> ABELHA/MARIMBONDO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="GOTA-ESPESSA"> GOTA ESPESSA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="CROPOCULTURA"> COPROCULTURA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="TIPAGEM"> TIPAGEM</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="EAS"> EAS</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="EPF"> EPF</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="TOXICOLÓGICO"> TOXICOLÓGICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="HEMOG.-GLICADA"> HEMOG. GLICADA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="MICOLOGICO"> MICOLOGICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="ACIDO-HIPURICO"> ACIDO HIPÚRICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="ACIDO-METIL-HIPURICO"> ÁCIDO METIL HIPÚRICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="PSA"> PSA</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="ACIDO-DELTA-AMINOLEVULINICO"> ACIDO DELTA AMINOLEVULINICO</label><br>
-                                    <label><input type="checkbox" class="master-checkbox nav-enter" data-setor="lab" data-nome="TRICLOROCOMPOSTOS-TOTAIS"> TRICOLOROCOMPOSTOS TOTAIS</label>
-                                    
-                                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-strong);">
-                                        <label style="font-size: 12px; color: var(--text-muted);">Adicionar Exame Extra:</label>
-                                        <div style="display: flex; gap: 5px; margin-top: 5px;">
-                                            <input type="text" id="input-exame-extra" class="input-moderno nav-enter" placeholder="Nome do exame..." style="padding: 8px;">
-                                            <button type="button" id="btn-add-exame" class="btn-header-outline" style="background-color: var(--accent) !important;">Inserir</button>
+                                    <div id="lista-opcoes-lab"></div>
+
+                                    <div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed var(--border-strong);">
+                                        <label for="input-exame-extra" style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Adicionar Exame Extra:</label>
+                                        <div style="display: flex; gap: 6px; margin-top: 6px;">
+                                            <input type="text" id="input-exame-extra" class="input-moderno nav-enter" placeholder="Nome do exame..." style="padding: 9px 11px;">
+                                            <button type="button" id="btn-add-exame" class="btn-header-outline" style="background-color: var(--accent) !important; border-radius: 10px;">Inserir</button>
                                         </div>
                                         <div id="lista-extras-painel" style="margin-top: 10px;"></div>
                                     </div>
@@ -321,191 +388,257 @@
         </div>
     </main>
 
-    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
     <script src="js/script.js"></script>
-    <!-- FIM DA ADAPTAÇÃO -->
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // ==============================================================
-            // PREENCHIMENTO AUTOMÁTICO DA DATA ATUAL NO EXAME
-            // ==============================================================
-            const inputDataExame = document.getElementById('in-data');
-            if (inputDataExame) {
-                const hoje = new Date();
-                inputDataExame.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-                setTimeout(atualizarEspelhamento, 100); 
-            }
-            const btnTheme = document.getElementById('btn-theme-toggle');
-            if (btnTheme) {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                btnTheme.textContent = isDark ? '☀️' : '🌙';
-                btnTheme.addEventListener('click', () => {
-                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                        document.documentElement.removeAttribute('data-theme');
-                        localStorage.setItem('monad_theme', 'light');
-                        btnTheme.textContent = '🌙';
-                    } else {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                        localStorage.setItem('monad_theme', 'dark');
-                        btnTheme.textContent = '☀️';
-                    }
+        (() => {
+            const TIPOS_EXAME = [
+                { value: 'ADMISSIONAL', label: 'ADMISSIONAL' },
+                { value: 'PERIODICO', label: 'PERIÓDICO' },
+                { value: 'DEMISSIONAL', label: 'DEMISSIONAL' },
+                { value: 'MUDANÇA DE FUNÇÃO', label: 'MUD. DE FUNÇÃO' },
+                { value: 'MUDANÇA DE RISCO', label: 'MUD. DE RISCO' },
+                { value: 'COMPLEMENTAR', label: 'COMPLEMENTAR' },
+                { value: 'PARTICULAR', label: 'PARTICULAR' },
+                { value: 'ENCAMINHAMENTO', label: 'ENCAMINHAMENTO' }
+            ];
+
+            const EXAMES_POR_SETOR = {
+                clinico: [
+                    'Eletrocardiograma',
+                    'Espirometria',
+                    'Eletroencefalograma',
+                    'Acuidade visual',
+                    'Campimetria',
+                    'Avaliação oftalmológica'
+                ],
+                raiox: [
+                    { nome: 'Raio-X Tórax PA', rotulo: 'Raio-x torax PA' },
+                    { nome: 'Raio-X Tórax OIT', rotulo: 'Raio-x tórax OIT' },
+                    { nome: 'Raio-X Coluna Total', rotulo: 'Raio-x Coluna Total' },
+                    { nome: 'Raio-X Coluna Lombar', rotulo: 'Raio-x coluna lombar' },
+                    { nome: 'Raio-X Coluna Lombo-Sacra', rotulo: 'Raio-x Coluna Lombo-Sacra' }
+                ],
+                lab: [
+                    { nome: 'HEMOGRAMA', rotulo: 'HEMOGRAMA' },
+                    { nome: 'GLICEMIA', rotulo: 'GLICEMIA' },
+                    { nome: 'TGO/TGP', rotulo: 'TGO/TGP' },
+                    { nome: 'GAMAGT', rotulo: 'GAMA GT' },
+                    { nome: 'ABELHA/MARIMBONDO', rotulo: 'ABELHA/MARIMBONDO' },
+                    { nome: 'GOTA-ESPESSA', rotulo: 'GOTA ESPESSA' },
+                    { nome: 'CROPOCULTURA', rotulo: 'COPROCULTURA' },
+                    { nome: 'TIPAGEM', rotulo: 'TIPAGEM' },
+                    { nome: 'EAS', rotulo: 'EAS' },
+                    { nome: 'EPF', rotulo: 'EPF' },
+                    { nome: 'TOXICOLÓGICO', rotulo: 'TOXICOLÓGICO' },
+                    { nome: 'HEMOG.-GLICADA', rotulo: 'HEMOG. GLICADA' },
+                    { nome: 'MICOLOGICO', rotulo: 'MICOLOGICO' },
+                    { nome: 'ACIDO-HIPURICO', rotulo: 'ACIDO HIPÚRICO' },
+                    { nome: 'ACIDO-METIL-HIPURICO', rotulo: 'ÁCIDO METIL HIPÚRICO' },
+                    { nome: 'PSA', rotulo: 'PSA' },
+                    { nome: 'ACIDO-DELTA-AMINOLEVULINICO', rotulo: 'ACIDO DELTA AMINOLEVULINICO' },
+                    { nome: 'TRICLOROCOMPOSTOS-TOTAIS', rotulo: 'TRICOLOROCOMPOSTOS TOTAIS' }
+                ]
+            };
+
+            function renderizarCheckboxesIniciais() {
+                const containerTipos = document.getElementById('container-tipos-exame');
+                if (containerTipos) {
+                    containerTipos.innerHTML = TIPOS_EXAME.map(t => `
+                        <label><input type="checkbox" class="master-tipo nav-enter" name="tipoExame" value="${t.value}"> ${t.label}</label>
+                    `).join('');
+                }
+
+                Object.entries(EXAMES_POR_SETOR).forEach(([setor, itens]) => {
+                    const target = document.getElementById(`lista-opcoes-${setor}`);
+                    if (!target) return;
+
+                    target.innerHTML = itens.map(item => {
+                        const nome = typeof item === 'string' ? item : item.nome;
+                        const rotulo = typeof item === 'string' ? item : item.rotulo;
+                        return `<label class="exame-item-label"><input type="checkbox" class="master-checkbox nav-enter" data-setor="${setor}" data-nome="${nome}"> ${rotulo}</label><br>`;
+                    }).join('');
                 });
             }
 
-            // ==============================================================
-            // ESPELHAMENTO EM TEMPO REAL PARA AS FICHAS DE IMPRESSÃO
-            // ==============================================================
+            function formatarDataBR(dataStr) {
+                if (!dataStr) return '';
+                const limpa = String(dataStr).split('T')[0].trim();
+                if (limpa.includes('/')) return limpa;
+                const partes = limpa.split('-');
+                if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+                return limpa;
+            }
+
+            function formatarDataISO(dataBanco) {
+                if (!dataBanco) return '';
+                const limpa = String(dataBanco).split('T')[0].trim();
+                if (limpa.includes('/')) {
+                    const [dia, mes, ano] = limpa.split('/');
+                    return `${ano}-${mes}-${dia}`;
+                }
+                return limpa;
+            }
+
             function atualizarEspelhamento() {
-                const getVal = (idOuName) => document.querySelector(idOuName)?.value || '';
-
-                const formatarData = (dataStr) => {
-                    if (!dataStr) return '';
-                    const [ano, mes, dia] = dataStr.split('-');
-                    return `${dia}/${mes}/${ano}`;
-                };
-
-                const nome = getVal('#in-nome');
-                const empresa = getVal('#in-empresa');
-                const cpf = getVal('#in-cpf');
-                const funcao = getVal('#in-funcao');
-                const rg = getVal('#in-rg');
-                const telefone = getVal('#in-telefone');
-                const dn = formatarData(getVal('#in-dn'));
-                const dataExame = formatarData(getVal('#in-data'));
+                const getVal = (sel) => document.querySelector(sel)?.value || '';
 
                 const tiposMarcados = Array.from(document.querySelectorAll('.master-tipo:checked')).map(cb => cb.value);
-                const tipoStr = tiposMarcados.length > 0 ? `(${tiposMarcados.join(', ')})` : '';
-
-                document.querySelectorAll('.out-nome').forEach(el => el.textContent = nome);
-                document.querySelectorAll('.out-empresa').forEach(el => el.textContent = empresa);
-                document.querySelectorAll('.out-cpf').forEach(el => el.textContent = cpf);
-                document.querySelectorAll('.out-funcao').forEach(el => el.textContent = funcao);
-                document.querySelectorAll('.out-rg').forEach(el => el.textContent = rg);
-                document.querySelectorAll('.out-telefone').forEach(el => el.textContent = telefone);
-                document.querySelectorAll('.out-dn').forEach(el => el.textContent = dn);
-                document.querySelectorAll('.out-data').forEach(el => el.textContent = dataExame);
-                document.querySelectorAll('.out-tipo-exame').forEach(el => el.textContent = tipoStr);
-
-                const renderizarExames = (setorDataset, ulId) => {
-                    const marcados = Array.from(document.querySelectorAll(`.master-checkbox[data-setor="${setorDataset}"]:checked`)).map(cb => cb.dataset.nome);
-                    const ul = document.getElementById(ulId);
-                    if (ul) {
-                        if (marcados.length === 0) {
-                            ul.innerHTML = '<li class="vazio">Nenhum exame</li>';
-                        } else {
-                            ul.innerHTML = marcados.map(ex => `<li>${ex}</li>`).join('');
-                        }
-                    }
+                const mapaCampos = {
+                    '.out-nome': getVal('#in-nome'),
+                    '.out-empresa': getVal('#in-empresa'),
+                    '.out-cpf': getVal('#in-cpf'),
+                    '.out-funcao': getVal('#in-funcao'),
+                    '.out-rg': getVal('#in-rg'),
+                    '.out-telefone': getVal('#in-telefone'),
+                    '.out-dn': formatarDataBR(getVal('#in-dn')),
+                    '.out-data': formatarDataBR(getVal('#in-data')),
+                    '.out-tipo-exame': tiposMarcados.length > 0 ? `(${tiposMarcados.join(', ')})` : ''
                 };
 
-                renderizarExames('clinico', 'lista-clinico');
-                renderizarExames('raiox', 'lista-raiox');
-                renderizarExames('lab', 'lista-lab');
+                Object.entries(mapaCampos).forEach(([seletor, valor]) => {
+                    document.querySelectorAll(seletor).forEach(el => {
+                        el.textContent = valor;
+                    });
+                });
 
-                const fono = document.getElementById('check-audiometria')?.checked;
+                ['clinico', 'raiox', 'lab'].forEach(setor => {
+                    const marcados = Array.from(document.querySelectorAll(`.master-checkbox[data-setor="${setor}"]:checked`))
+                        .map(cb => cb.dataset.nome);
+                    const ul = document.getElementById(`lista-${setor}`);
+                    if (ul) {
+                        ul.innerHTML = marcados.length > 0
+                            ? marcados.map(ex => `<li>${ex}</li>`).join('')
+                            : '<li class="vazio">Nenhum exame</li>';
+                    }
+                });
+
+                const fono = Boolean(document.getElementById('check-audiometria')?.checked);
                 const setorAudio = document.getElementById('setor-audio');
                 if (setorAudio) {
                     setorAudio.style.display = fono ? 'flex' : 'none';
                 }
             }
 
-            const masterForm = document.getElementById('masterForm');
-            if(masterForm) {
-                masterForm.addEventListener('input', atualizarEspelhamento);
-                masterForm.addEventListener('change', atualizarEspelhamento);
-            }
+            document.addEventListener('DOMContentLoaded', () => {
+                renderizarCheckboxesIniciais();
 
-            const camposNav = document.querySelectorAll('.nav-enter');
-            camposNav.forEach((campo, index) => {
-                campo.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault(); 
-                        const proximoCampo = camposNav[index + 1];
-                        if (proximoCampo) {
-                            proximoCampo.focus();
+                const inputDataExame = document.getElementById('in-data');
+                if (inputDataExame && !inputDataExame.value) {
+                    const hoje = new Date();
+                    inputDataExame.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+                }
+
+                const btnTheme = document.getElementById('btn-theme-toggle');
+                if (btnTheme) {
+                    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    btnTheme.textContent = isDark ? '☀️' : '🌙';
+                    btnTheme.addEventListener('click', () => {
+                        const agoraDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        if (agoraDark) {
+                            document.documentElement.removeAttribute('data-theme');
+                            localStorage.setItem('monad_theme', 'light');
+                            btnTheme.textContent = '🌙';
                         } else {
-                            document.getElementById('btn-salvar-imprimir').focus();
+                            document.documentElement.setAttribute('data-theme', 'dark');
+                            localStorage.setItem('monad_theme', 'dark');
+                            btnTheme.textContent = '☀️';
                         }
+                    });
+                }
+
+                document.getElementById('btn-sair-sistema')?.addEventListener('click', () => {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                });
+
+                const masterForm = document.getElementById('masterForm');
+                if (masterForm) {
+                    masterForm.addEventListener('input', atualizarEspelhamento);
+                    masterForm.addEventListener('change', atualizarEspelhamento);
+                }
+
+                const camposNav = Array.from(document.querySelectorAll('.nav-enter'));
+                camposNav.forEach((campo, index) => {
+                    campo.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const proximo = camposNav[index + 1];
+                            if (proximo) {
+                                proximo.focus();
+                            } else {
+                                document.getElementById('btn-salvar-imprimir')?.focus();
+                            }
+                        }
+                    });
+                });
+
+                const cpfInput = document.getElementById('in-cpf');
+                const msgFeedback = document.getElementById('msg-cpf-feedback');
+
+                cpfInput?.addEventListener('input', (e) => {
+                    let digitos = e.target.value.replace(/\D/g, '').slice(0, 11);
+                    digitos = digitos.replace(/(\d{3})(\d)/, '$1.$2');
+                    digitos = digitos.replace(/(\d{3})(\d)/, '$1.$2');
+                    digitos = digitos.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                    e.target.value = digitos;
+
+                    if (e.target.value.length === 14) {
+                        buscarDadosAnteriores(e.target.value);
+                    } else if (msgFeedback) {
+                        msgFeedback.textContent = '';
                     }
                 });
-            });
 
-            const cpfInput = document.getElementById('in-cpf');
-            const msgFeedback = document.getElementById('msg-cpf-feedback');
+                async function buscarDadosAnteriores(cpfFormatado) {
+                    if (!msgFeedback) return;
+                    msgFeedback.textContent = '⏳ Buscando histórico...';
+                    msgFeedback.style.color = 'var(--text-muted)';
 
-            cpfInput.addEventListener('input', async (e) => {
-                let val = e.target.value.replace(/\D/g, ''); 
-                
-                val = val.replace(/(\d{3})(\d)/, '$1.$2');
-                val = val.replace(/(\d{3})(\d)/, '$1.$2');
-                val = val.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-                e.target.value = val;
+                    try {
+                        const { data, error } = await supabase
+                            .from('atendimentos')
+                            .select('nome, rg, data_nascimento, telefone')
+                            .eq('cpf', cpfFormatado)
+                            .order('created_at', { ascending: false })
+                            .limit(1);
 
-                if (e.target.value.length === 14) {
-                    buscarDadosAnteriores(e.target.value);
-                } else {
-                    msgFeedback.textContent = ''; 
-                }
-            });
+                        if (error) throw error;
 
-            async function buscarDadosAnteriores(cpfFormatado) {
-                msgFeedback.textContent = '⏳ Buscando histórico...';
-                msgFeedback.style.color = 'var(--text-muted)';
-                
-                try {
-                    const { data, error } = await supabase
-                        .from('atendimentos')
-                        .select('nome, rg, data_nascimento, telefone')
-                        .eq('cpf', cpfFormatado)
-                        .order('created_at', { ascending: false })
-                        .limit(1);
-                        
-                    if (error) throw error;
-                    
-                    if (data && data.length > 0) {
-                        const pac = data[0];
-                        
-                        function formatarDataParaInput(dataBanco) {
-                            if (!dataBanco) return '';
-                            if (dataBanco.includes('/')) {
-                                const [dia, mes, ano] = dataBanco.split('/');
-                                return `${ano}-${mes}-${dia}`;
-                            }
-                            return dataBanco; 
+                        if (data && data.length > 0) {
+                            const pac = data[0];
+                            if (pac.nome) document.getElementById('in-nome').value = pac.nome;
+                            if (pac.rg) document.getElementById('in-rg').value = pac.rg;
+                            if (pac.data_nascimento) document.getElementById('in-dn').value = formatarDataISO(pac.data_nascimento);
+                            if (pac.telefone) document.getElementById('in-telefone').value = pac.telefone;
+
+                            atualizarEspelhamento();
+                            msgFeedback.textContent = '✅ Dados carregados do último cadastro.';
+                            msgFeedback.style.color = '#10b981';
+                            document.getElementById('in-nome')?.focus();
+                        } else {
+                            msgFeedback.textContent = 'ℹ️ Novo colaborador. Nenhum registro anterior encontrado.';
+                            msgFeedback.style.color = '#3b82f6';
                         }
-                        
-                        if(pac.nome) { document.getElementById('in-nome').value = pac.nome; }
-                        if(pac.rg) { document.getElementById('in-rg').value = pac.rg; }
-                        if(pac.data_nascimento) { document.getElementById('in-dn').value = formatarDataParaInput(pac.data_nascimento); }
-                        if(pac.telefone) { document.getElementById('in-telefone').value = pac.telefone; }
-                        
-                        atualizarEspelhamento();
-                        
-                        msgFeedback.textContent = '✅ Dados carregados do último cadastro.';
-                        msgFeedback.style.color = '#10b981'; 
-                        
-                        document.getElementById('in-nome').focus();
-                    } else {
-                        msgFeedback.textContent = 'ℹ️ Novo colaborador. Nenhum registro anterior encontrado.';
-                        msgFeedback.style.color = '#3b82f6'; 
+                    } catch (err) {
+                        console.error('Erro na consulta do CPF:', err);
+                        msgFeedback.textContent = '❌ Erro ao consultar o banco de dados.';
+                        msgFeedback.style.color = '#ef4444';
                     }
-                } catch (err) {
-                    console.error('Erro na consulta do CPF:', err);
-                    msgFeedback.textContent = '❌ Erro ao consultar o banco de dados.';
-                    msgFeedback.style.color = '#ef4444'; 
                 }
-            }
 
-            document.getElementById('in-telefone').addEventListener('input', (e) => {
-                let val = e.target.value.replace(/\D/g, '');
-                val = val.replace(/^(\d{2})(\d)/g, '($1) $2');
-                val = val.replace(/(\d)(\d{4})$/, '$1-$2');
-                e.target.value = val;
+                document.getElementById('in-telefone')?.addEventListener('input', (e) => {
+                    let val = e.target.value.replace(/\D/g, '').slice(0, 11);
+                    val = val.replace(/^(\d{2})(\d)/, '($1) $2');
+                    val = val.replace(/(\d)(\d{4})$/, '$1-$2');
+                    e.target.value = val;
+                });
+
+                atualizarEspelhamento();
             });
-        });
+        })();
     </script>
 </body>
 </html>

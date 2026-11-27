@@ -6,143 +6,229 @@
     <title>Login Interno - Clínica Monad</title>
     <link rel="stylesheet" href="styles/styles.css">
     <script>
-        // GATEKEEPER E LEITURA DO MODO ESCURO
-        if (localStorage.getItem('monad_theme') === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
+        (() => {
+            if (localStorage.getItem('monad_theme') === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+
+            const token = localStorage.getItem('monad_token');
+            const setor = localStorage.getItem('monad_setor');
+            const rotasPorSetor = {
+                recepcao: 'index.html',
+                todos: 'checkin.html',
+                admin: 'admin.html'
+            };
+
+            if (token && setor) {
+                window.location.replace(rotasPorSetor[setor] || 'setor.html');
+            }
+        })();
     </script>
     <style>
-        .login-container { max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 4px solid #004080; }
-        .form-login { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-        .form-login label { font-weight: bold; color: #475569; font-size: 14px; }
-        .form-login input { padding: 10px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 16px; background-color: #f8fafc; }
-        .form-login input:focus { border-color: #2563eb; outline: none; background-color: white; }
-        .btn-login { background-color: #004080; color: white; border: none; padding: 12px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
-        .btn-login:hover { background-color: #002d62; }
-        .btn-login:disabled { background-color: #94a3b8; cursor: not-allowed; }
-        .msg-erro { color: #dc2626; font-weight: bold; font-size: 14px; text-align: center; display: none; background: #fee2e2; padding: 8px; border-radius: 4px; border: 1px solid #fca5a5; }
-
-        /* REGRAS DO DARK MODE APENAS PARA O LOGIN */
-        [data-theme="dark"] body { background-color: #0f172a; }
-        [data-theme="dark"] .login-container { background: #1e293b; border-color: #334155; box-shadow: none; border-top: 4px solid #3b82f6;}
-        [data-theme="dark"] .login-container h3 { color: #60a5fa !important; }
-        [data-theme="dark"] .form-login label { color: #cbd5e1; }
-        [data-theme="dark"] .form-login input { background-color: #0f172a; border-color: #334155; color: #f8fafc; }
-        [data-theme="dark"] .btn-login { background-color: #2563eb; }
-        [data-theme="dark"] .btn-login:hover { background-color: #1d4ed8; }
+        .login-container {
+            max-width: 420px;
+            margin: 64px auto;
+            padding: 32px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--accent);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-hover);
+            box-sizing: border-box;
+        }
+        .form-login {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 22px;
+        }
+        .form-login label {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 13.5px;
+        }
+        .form-login input {
+            padding: 11px 13px;
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            font-size: 14.5px;
+            font-family: inherit;
+            background-color: var(--surface-muted);
+            color: var(--text-strong);
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+        .form-login input:hover {
+            border-color: var(--border-hover);
+        }
+        .form-login input:focus {
+            border-color: var(--accent);
+            background-color: var(--surface);
+            box-shadow: 0 0 0 4px var(--accent-ring);
+            outline: none;
+        }
+        .btn-login {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: var(--shadow-btn);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 8px;
+        }
+        .btn-login:hover:not(:disabled) {
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+        }
+        .btn-login:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        .btn-login:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+        .msg-erro {
+            color: var(--danger);
+            font-weight: 600;
+            font-size: 13.5px;
+            text-align: center;
+            display: none;
+            background: var(--danger-soft);
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(220, 38, 38, 0.35);
+            margin-top: 14px;
+        }
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 36px 14px;
+                padding: 24px 18px;
+            }
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>Sistema de Gestão Interna</h1>
         <h2>Clínica Monad Ocupacional - Oriximiná</h2>
-        <div style="float: right; margin-top: 10px; display: flex; align-items: center; gap: 15px;" class="no-print">
-            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
+        <div class="header-controls">
+            <button type="button" id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
         </div>
     </header>
 
     <main>
         <div class="login-container">
-            <h3 style="margin:0; text-align:center; color:#004080; font-size:20px;">Autenticação de Setor</h3>
-            <div class="msg-erro" id="erro-box"></div>
-            
+            <h3 style="margin: 0; text-align: center; color: var(--accent); font-size: 20px;">Autenticação de Setor</h3>
+            <div class="msg-erro" id="erro-box" role="alert"></div>
+
             <form id="loginForm" class="form-login">
-                <label>Usuário do Setor:
+                <label for="username">Usuário do Setor:
                     <input type="text" id="username" required autocomplete="username" placeholder="Ex: raiox, lab, fono...">
                 </label>
-                
-                <label>Senha de Acesso:
+
+                <label for="password">Senha de Acesso:
                     <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••">
                 </label>
-                
+
                 <button type="submit" class="btn-login" id="submitBtn">Entrar no Painel</button>
             </form>
         </div>
     </main>
 
-    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
-
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const btn = document.getElementById('submitBtn');
-            const erroBox = document.getElementById('erro-box');
-            
-            // Pega os dados digitados (passando o usuário para minúsculo para evitar erros)
-            const user = document.getElementById('username').value.trim().toLowerCase();
-            const senha = document.getElementById('password').value.trim();
-            
-            erroBox.style.display = "none";
-            btn.disabled = true;
-            btn.textContent = "Autenticando...";
-            
-            try {
-                // ==========================================================
-                // CONSULTA DIRETA AO BANCO SUPABASE
-                // ==========================================================
-                const { data, error } = await supabase
-                    .from('usuarios')
-                    .select('setor')
-                    .eq('usuario', user)
-                    .eq('senha', senha)
-                    .single(); // O .single() garante que se a senha estiver errada, caia no catch
+        (() => {
+            const ROTAS_SETOR = {
+                recepcao: 'index.html',
+                todos: 'checkin.html',
+                admin: 'admin.html'
+            };
 
-                if (error || !data) {
-                    throw new Error("Usuário ou senha incorretos.");
-                }
+            function configurarTema() {
+                const btnTheme = document.getElementById('btn-theme-toggle');
+                if (!btnTheme) return;
 
-                // ==========================================================
-                // SUCESSO: SALVA OS DADOS E REDIRECIONA
-                // ==========================================================
-                localStorage.setItem('monad_token', 'autenticado_supabase'); // Token simbólico
-                localStorage.setItem('monad_setor', data.setor);
-                
-                // Mantida a sua lógica original de redirecionamento por setor
-                if (data.setor === "recepcao") {
-                    window.location.href = "index.html";
-                } else if (data.setor === "todos") {
-                    window.location.href = "checkin.html";
-                } else if (data.setor === "admin") {
-                    window.location.href = "admin.html";
-                } else {
-                    window.location.href = "setor.html";
-                }
+                const atualizarIcone = () => {
+                    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    btnTheme.textContent = isDark ? '☀️' : '🌙';
+                };
 
-            } catch (err) {
-                // Tratamento de erro (senha errada ou sem internet)
-                erroBox.textContent = err.message === "JSON object requested, multiple (or no) rows returned" 
-                                      ? "Usuário ou senha incorretos." 
-                                      : err.message || "Erro ao conectar com o servidor.";
-                erroBox.style.display = "block";
-                btn.disabled = false;
-                btn.textContent = "Entrar no Painel";
-            }
-        });
-    </script>
-    <!-- FIM DA ADAPTAÇÃO -->
+                atualizarIcone();
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnTheme = document.getElementById('btn-theme-toggle');
-            if (btnTheme) {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                btnTheme.textContent = isDark ? '☀️' : '🌙';
                 btnTheme.addEventListener('click', () => {
-                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    if (isDark) {
                         document.documentElement.removeAttribute('data-theme');
                         localStorage.setItem('monad_theme', 'light');
-                        btnTheme.textContent = '🌙';
                     } else {
                         document.documentElement.setAttribute('data-theme', 'dark');
                         localStorage.setItem('monad_theme', 'dark');
-                        btnTheme.textContent = '☀️';
                     }
+                    atualizarIcone();
                 });
             }
-        });
+
+            function exibirErro(mensagem) {
+                const erroBox = document.getElementById('erro-box');
+                if (!erroBox) return;
+                erroBox.textContent = mensagem;
+                erroBox.style.display = 'block';
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                configurarTema();
+
+                const form = document.getElementById('loginForm');
+                const btn = document.getElementById('submitBtn');
+                const erroBox = document.getElementById('erro-box');
+
+                form?.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const user = document.getElementById('username').value.trim().toLowerCase();
+                    const senha = document.getElementById('password').value.trim();
+
+                    if (erroBox) erroBox.style.display = 'none';
+                    btn.disabled = true;
+                    btn.textContent = 'Autenticando...';
+
+                    try {
+                        const { data, error } = await supabase
+                            .from('usuarios')
+                            .select('setor')
+                            .eq('usuario', user)
+                            .eq('senha', senha)
+                            .maybeSingle();
+
+                        if (error) {
+                            throw new Error('Erro ao conectar com o servidor.');
+                        }
+
+                        if (!data || !data.setor) {
+                            throw new Error('Usuário ou senha incorretos.');
+                        }
+
+                        localStorage.setItem('monad_token', 'autenticado_supabase');
+                        localStorage.setItem('monad_setor', data.setor);
+
+                        window.location.href = ROTAS_SETOR[data.setor] || 'setor.html';
+                    } catch (err) {
+                        exibirErro(err.message || 'Erro ao conectar com o servidor.');
+                        btn.disabled = false;
+                        btn.textContent = 'Entrar no Painel';
+                    }
+                });
+            });
+        })();
     </script>
 </body>
 </html>

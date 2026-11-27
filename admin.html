@@ -17,82 +17,232 @@
         }
     </script>
     <style>
-        /* Classes de Toolbar para Responsividade */
-        .toolbar-geral { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-        .toolbar-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; justify-content: flex-end; }
-        
-        .botoes-filtro { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        
-        .input-moderno { padding: 9px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong); font-family: inherit; font-size: 13px; }
-        .btn-acao { color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); font-family: inherit; font-size: 13px; transition: opacity 0.2s; white-space: nowrap; }
-        .btn-acao:hover { opacity: 0.9; }
-        .input-pesquisa { width: 230px; }
+        .painel-admin-card {
+            border: 1px solid rgba(220, 38, 38, 0.35);
+            border-top: 4px solid var(--danger);
+        }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .modal-box { background: var(--surface); padding: 25px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .modal-box h3 { color: var(--danger); margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid var(--border-strong); padding-bottom: 10px; }
-        .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .edit-grid label { font-size: 13px; font-weight: bold; color: var(--text-muted); display: flex; flex-direction: column; gap: 5px; }
+        .toolbar-geral {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            flex: 1;
+            justify-content: flex-end;
+        }
+
+        .botoes-filtro {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .input-moderno {
+            padding: 10px 14px;
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            background: var(--surface-muted);
+            color: var(--text-strong);
+            font-family: inherit;
+            font-size: 13.5px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        .input-moderno:hover {
+            border-color: var(--border-hover);
+        }
+
+        .input-moderno:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 4px var(--accent-ring);
+        }
+
+        .btn-acao {
+            color: #ffffff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: var(--shadow-btn);
+            font-family: inherit;
+            font-size: 13.5px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+
+        .btn-acao:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .btn-acao:active {
+            transform: translateY(0);
+        }
+
+        .input-pesquisa {
+            width: 240px;
+        }
+
+        .btn-editar {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 7px 11px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11.5px;
+            transition: all 0.18s ease;
+        }
+
+        .btn-editar:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+        }
+
+        .btn-apagar {
+            background: linear-gradient(135deg, var(--danger) 0%, #b91c1c 100%);
+            color: #ffffff;
+            border: none;
+            padding: 7px 11px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11.5px;
+            transition: all 0.18s ease;
+        }
+
+        .btn-apagar:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.68);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            padding: 26px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--danger);
+            width: 100%;
+            max-width: 620px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-hover);
+            box-sizing: border-box;
+        }
+
+        .modal-box h3 {
+            color: var(--danger);
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .edit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .edit-grid label {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
         .edit-grid input[type="text"],
-        .edit-grid input[type="date"] { padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; font-size: 14px; background: var(--surface-muted); color: var(--text-strong); font-family: inherit; }
-        .edit-full { grid-column: span 2; }
+        .edit-grid input[type="date"] {
+            padding: 9px 12px;
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--surface-muted);
+            color: var(--text-strong);
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
 
-        /* REGRAS EXCLUSIVAS PARA CELULAR */
+        .edit-grid input[type="text"]:focus,
+        .edit-grid input[type="date"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px var(--accent-ring);
+        }
+
+        .edit-full {
+            grid-column: span 2;
+        }
+
         @media (max-width: 768px) {
             .toolbar-geral { flex-direction: column; align-items: stretch; }
             .toolbar-group { flex-direction: column; align-items: stretch; width: 100%; justify-content: center; }
-            .botoes-filtro { flex-direction: column; align-items: stretch; width: 100%; } 
+            .botoes-filtro { flex-direction: column; align-items: stretch; width: 100%; }
             .input-moderno, .btn-acao, .input-pesquisa { width: 100%; }
             .edit-grid { grid-template-columns: 1fr; }
             .edit-full { grid-column: span 1; }
+            .modal-box { padding: 20px 16px; }
         }
     </style>
 </head>
 <body>
     <header class="no-print">
-        <h1 style="color: var(--danger);">Acesso Administrativo</h1>
-        <h2 style="color: var(--text-muted);">Supervisão, Edição e Exclusão de Registos</h2>
+        <h1 style="color: #fca5a5;">Acesso Administrativo</h1>
+        <h2 style="color: #dbeafe;">Supervisão, Edição e Exclusão de Registros</h2>
         <div class="header-controls">
-            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
+            <button type="button" id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
+            <button type="button" id="btn-sair-sistema" class="btn-header-danger">Sair</button>
         </div>
         <nav style="margin-top: 15px;">
             <ul>
                 <li><a href="index.html">Recepção</a></li>
                 <li><a href="checkin.html">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
-                <li id="menu-documentos" style="display: none;"><a href="documentos.html">Gerar ASO</a></li>
-                <li id="menu-cadastros" style="display: none;"><a href="cadastros.html">Base Dados</a></li>
-                <li><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
-                <li id="menu-financeiro" style="display: none;"><a href="financeiro.html">Financeiro</a></li>
+                <li><a href="documentos.html">Gerar ASO</a></li>
+                <li><a href="cadastros.html">Base Dados</a></li>
+                <li><a href="admin.html" style="background-color: var(--danger) !important; color: #ffffff !important;">Painel Admin</a></li>
+                <li><a href="financeiro.html">Financeiro</a></li>
             </ul>
         </nav>
-        <script>
-            // Adicionado suporte para mostrar o menu de ASO e Base de dados ao Admin e Todos
-            const setorNav = localStorage.getItem('monad_setor');
-            if (setorNav === 'admin' || setorNav === 'todos') {
-                const elDoc = document.getElementById('menu-documentos');
-                const elCad = document.getElementById('menu-cadastros');
-                if (elDoc) elDoc.style.display = 'inline-block';
-                if (elCad) elCad.style.display = 'inline-block';
-            
-            }
-            if (setorNav === 'admin') {
-                const elAdmin = document.getElementById('menu-admin');
-                if (elAdmin) elAdmin.style.display = 'inline-block';
-            }
-            if (setorNav === 'admin') {
-    const elFin = document.getElementById('menu-financeiro');
-    if (elFin) elFin.style.display = 'inline-block';
-}
-        </script>
     </header>
-    
+
     <main>
-        <div class="painel-recepcao" style="border: 2px solid var(--danger);">
+        <div class="painel-recepcao painel-admin-card">
             <div class="toolbar-geral">
                 <h2 style="margin: 0; color: var(--text-strong); font-size: 22px;">Gestão de Fila e Exclusão</h2>
-                
+
                 <div class="toolbar-group">
                     <div class="botoes-filtro">
                         <select id="tipo-busca-admin" class="input-moderno" title="Selecione o campo de busca">
@@ -102,8 +252,8 @@
                             <option value="data_cadastro">Buscar por: Data de Cadastro</option>
                         </select>
                         <input type="text" id="pesquisa-paciente" placeholder="Digite o Nome do colaborador..." class="input-moderno input-pesquisa">
-                        <button id="btn-executar-busca" class="btn-acao" style="background-color: var(--warning); color: #0f172a;">🔎 Buscar</button>
-                        <button id="btn-hoje" class="btn-acao" style="background-color: var(--danger);">📅 Fila de Hoje</button>
+                        <button type="button" id="btn-executar-busca" class="btn-acao" style="background: linear-gradient(135deg, var(--warning) 0%, #b45309 100%); color: #ffffff;">🔎 Buscar</button>
+                        <button type="button" id="btn-hoje" class="btn-acao" style="background: linear-gradient(135deg, var(--danger) 0%, #b91c1c 100%);">📅 Fila de Hoje</button>
                     </div>
                 </div>
             </div>
@@ -126,7 +276,7 @@
                     <tbody id="lista-liberacao"></tbody>
                 </table>
             </div>
-            <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-top: 10px;">
+            <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--surface-muted); border-radius: 12px; border: 1px dashed var(--border-strong); margin-top: 14px;">
                 <strong>Nenhum paciente encontrado.</strong>
             </div>
         </div>
@@ -138,48 +288,64 @@
             <h3>✏️ Editar Dados do Paciente</h3>
             <div class="edit-grid">
                 <input type="hidden" id="edit-id-unico">
-                
+
                 <label>Nome: <input type="text" id="edit-nome"></label>
                 <label>Data de Atendimento: <input type="date" id="edit-data-atendimento"></label>
                 <label>Empresa: <input type="text" id="edit-empresa"></label>
                 <label>Tipo de Exame: <input type="text" id="edit-tipo" placeholder="Ex: (PERIÓDICO)"></label>
                 <label>Função: <input type="text" id="edit-funcao"></label>
                 <label>Nascimento: <input type="text" id="edit-dn" placeholder="DD/MM/AAAA" maxlength="10"></label>
-                <label>CPF: 
+                <label>CPF:
                     <input type="text" id="edit-cpf" placeholder="000.000.000-00" maxlength="14">
                     <span id="status-cpf-modal" style="font-size: 11px; font-weight: 600; min-height: 14px;"></span>
                 </label>
                 <label>RG: <input type="text" id="edit-rg"></label>
                 <label class="edit-full">Telefone: <input type="text" id="edit-tel" placeholder="(00) 00000-0000" maxlength="15"></label>
-                
-                <div class="edit-full"><hr style="border: 0; border-top: 1px dashed var(--border-strong); margin: 10px 0;"></div>
-                
+
+                <div class="edit-full"><hr style="border: 0; border-top: 1px dashed var(--border-strong); margin: 8px 0;"></div>
+
                 <label class="edit-full">Exames Clínicos: <input type="text" id="edit-ex-clinico"></label>
                 <label class="edit-full">Exames Raio-X: <input type="text" id="edit-ex-raiox"></label>
                 <label class="edit-full">Exames Lab: <input type="text" id="edit-ex-lab"></label>
                 <label class="edit-full">Exames Extras (separados por vírgula): <input type="text" id="edit-ex-extras" placeholder="Ex: Exame 1, Exame 2"></label>
-                
-                <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-fono" style="transform: scale(1.3);"> Tem Fonoaudiologia?</label>
-                <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-consulta" style="transform: scale(1.3);"> Tem Consulta Médica?</label>
-                <label class="edit-full" style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-psico" style="transform: scale(1.3);"> Tem Avaliação Psicossocial?</label>
+
+                <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-fono" style="transform: scale(1.25);"> Tem Fonoaudiologia?</label>
+                <label style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-consulta" style="transform: scale(1.25);"> Tem Consulta Médica?</label>
+                <label class="edit-full" style="flex-direction: row; align-items: center; color: var(--warning);"><input type="checkbox" id="edit-tem-psico" style="transform: scale(1.25);"> Tem Avaliação Psicossocial?</label>
             </div>
-            <div style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">
-                <button onclick="fecharModal()" style="padding:10px 15px; border-radius:5px; border:1px solid var(--border-strong); background:var(--surface-muted); color: var(--text-strong); cursor:pointer; font-weight:bold;">Cancelar</button>
-                <button id="btn-salvar-edicao" style="padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Salvar Alterações</button>
+            <div style="margin-top:24px; display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" id="btn-cancelar-edicao" style="padding:10px 16px; border-radius:10px; border:1px solid var(--border-strong); background:var(--surface-muted); color: var(--text-strong); cursor:pointer; font-weight:600;">Cancelar</button>
+                <button type="button" id="btn-salvar-edicao" style="padding:10px 22px; background:linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%); color:#ffffff; border:none; border-radius:10px; cursor:pointer; font-weight:600; box-shadow:var(--shadow-btn);">Salvar Alterações</button>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const tabela = document.getElementById('lista-liberacao');
-            const selectTipoBusca = document.getElementById('tipo-busca-admin');
-            const inputPesq = document.getElementById('pesquisa-paciente');
-            let databaseAdmin = [];
-            let modoBuscaPersonalizada = false;
+        (() => {
+            const COL_MAP = {
+                clinico: 'liberado_clinico',
+                raiox: 'liberado_raiox',
+                fono: 'liberado_fono',
+                lab: 'liberado_lab',
+                consulta: 'liberado_consulta'
+            };
+
+            const temExameValido = (val) => Boolean(val && String(val).trim() !== '' && val !== 'Nenhum');
+
+            const extrairFlags = (pac) => {
+                const clinico = temExameValido(pac.exames_clinicos);
+                const raiox = temExameValido(pac.exames_raiox);
+                const lab = temExameValido(pac.exames_lab);
+                const extras = temExameValido(pac.exames_extras);
+                const fono = pac.audiometria === true;
+                const consultaMedica = pac.consulta_clinica === true;
+                const psicossocial = pac.avaliacao_psicossocial === true;
+                const consulta = consultaMedica || psicossocial;
+                const valido = clinico || raiox || lab || extras || fono || consulta;
+                return { clinico, raiox, lab, extras, fono, consultaMedica, psicossocial, consulta, valido };
+            };
 
             function getDataHojeISO() {
                 const hoje = new Date();
@@ -188,23 +354,24 @@
 
             function formatarDataBR(data) {
                 if (!data) return '-';
-                if (data.includes('/')) return data;
-                const partes = String(data).split('T')[0].split('-');
-                if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
-                return data;
+                const limpo = String(data).trim();
+                if (limpo.includes('/')) return limpo;
+                const partes = limpo.split('T')[0].split('-');
+                return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : limpo;
             }
 
             function formatarDataParaInput(data) {
                 if (!data) return getDataHojeISO();
-                if (data.includes('/')) {
-                    const partes = data.split('/');
+                const limpo = String(data).trim();
+                if (limpo.includes('/')) {
+                    const partes = limpo.split('/');
                     if (partes.length === 3) return `${partes[2]}-${partes[1]}-${partes[0]}`;
                 }
-                return String(data).split('T')[0];
+                return limpo.split('T')[0];
             }
 
             function converterDataParaISO(valor) {
-                const limpo = valor.trim();
+                const limpo = String(valor || '').trim();
                 if (/^\d{4}-\d{2}-\d{2}$/.test(limpo)) return limpo;
                 if (/^\d{2}\/\d{2}\/\d{4}$/.test(limpo)) {
                     const [dia, mes, ano] = limpo.split('/');
@@ -213,16 +380,15 @@
                 return null;
             }
 
-            // Funções de Máscara
             function aplicarMascaraDataBR(valor) {
-                let v = String(valor || '').replace(/\D/g, '').slice(0, 8);
+                const v = String(valor || '').replace(/\D/g, '').slice(0, 8);
                 if (v.length >= 5) return `${v.slice(0, 2)}/${v.slice(2, 4)}/${v.slice(4)}`;
                 if (v.length >= 3) return `${v.slice(0, 2)}/${v.slice(2)}`;
                 return v;
             }
 
             function aplicarMascaraCPF(valor) {
-                let v = String(valor || '').replace(/\D/g, '').slice(0, 11);
+                const v = String(valor || '').replace(/\D/g, '').slice(0, 11);
                 if (v.length > 9) return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6, 9)}-${v.slice(9)}`;
                 if (v.length > 6) return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6)}`;
                 if (v.length > 3) return `${v.slice(0, 3)}.${v.slice(3)}`;
@@ -230,7 +396,7 @@
             }
 
             function aplicarMascaraTelefone(valor) {
-                let v = String(valor || '').replace(/\D/g, '').slice(0, 11);
+                const v = String(valor || '').replace(/\D/g, '').slice(0, 11);
                 if (v.length > 10) return `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
                 if (v.length > 6) return `(${v.slice(0, 2)}) ${v.slice(2, 6)}-${v.slice(6)}`;
                 if (v.length > 2) return `(${v.slice(0, 2)}) ${v.slice(2)}`;
@@ -239,351 +405,363 @@
             }
 
             function validarCPF(cpf) {
-                cpf = cpf.replace(/[^\d]+/g,'');
-                if (cpf === '' || cpf.length !== 11) return false;
-                if (/^(\d)\1{10}$/.test(cpf)) return false;
+                const limpo = String(cpf || '').replace(/\D/g, '');
+                if (limpo.length !== 11 || /^(\d)\1{10}$/.test(limpo)) return false;
+
                 let add = 0;
-                for (let i = 0; i < 9; i++) add += parseInt(cpf.charAt(i)) * (10 - i);
+                for (let i = 0; i < 9; i++) add += parseInt(limpo.charAt(i), 10) * (10 - i);
                 let rev = 11 - (add % 11);
                 if (rev === 10 || rev === 11) rev = 0;
-                if (rev !== parseInt(cpf.charAt(9))) return false;
+                if (rev !== parseInt(limpo.charAt(9), 10)) return false;
+
                 add = 0;
-                for (let i = 0; i < 10; i++) add += parseInt(cpf.charAt(i)) * (11 - i);
+                for (let i = 0; i < 10; i++) add += parseInt(limpo.charAt(i), 10) * (11 - i);
                 rev = 11 - (add % 11);
                 if (rev === 10 || rev === 11) rev = 0;
-                if (rev !== parseInt(cpf.charAt(10))) return false;
-                return true;
+                return rev === parseInt(limpo.charAt(10), 10);
             }
 
-            function atualizarFeedbackCPFModal() {
-                const inputCpf = document.getElementById('edit-cpf');
-                const statusCpf = document.getElementById('status-cpf-modal');
-                const digitos = inputCpf.value.replace(/\D/g, '');
+            function configurarHeader() {
+                const btnTheme = document.getElementById('btn-theme-toggle');
+                if (btnTheme) {
+                    const atualizarIcone = () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        btnTheme.textContent = isDark ? '☀️' : '🌙';
+                    };
+                    atualizarIcone();
 
-                if (digitos.length === 0) {
-                    statusCpf.textContent = '';
-                    inputCpf.style.borderColor = 'var(--border-strong)';
-                    return;
-                }
-
-                if (digitos.length < 11) {
-                    statusCpf.textContent = `Faltam ${11 - digitos.length} dígito(s)`;
-                    statusCpf.style.color = 'var(--text-muted)';
-                    inputCpf.style.borderColor = 'var(--border-strong)';
-                    return;
-                }
-
-                if (validarCPF(inputCpf.value)) {
-                    statusCpf.textContent = '✓ CPF válido';
-                    statusCpf.style.color = 'var(--success)';
-                    inputCpf.style.borderColor = 'var(--success)';
-                } else {
-                    statusCpf.textContent = '✕ CPF inválido';
-                    statusCpf.style.color = 'var(--danger)';
-                    inputCpf.style.borderColor = 'var(--danger)';
-                }
-            }
-
-            // Listeners de máscara nos campos do modal
-            document.getElementById('edit-dn').addEventListener('input', function(e) {
-                e.target.value = aplicarMascaraDataBR(e.target.value);
-            });
-
-            document.getElementById('edit-cpf').addEventListener('input', function(e) {
-                e.target.value = aplicarMascaraCPF(e.target.value);
-                atualizarFeedbackCPFModal();
-            });
-
-            document.getElementById('edit-tel').addEventListener('input', function(e) {
-                e.target.value = aplicarMascaraTelefone(e.target.value);
-            });
-
-            selectTipoBusca.addEventListener('change', function() {
-                const tipo = this.value;
-                inputPesq.value = '';
-                if (tipo === 'data_cadastro') {
-                    inputPesq.type = 'date';
-                    inputPesq.value = getDataHojeISO();
-                } else {
-                    inputPesq.type = 'text';
-                    if (tipo === 'nome') inputPesq.placeholder = 'Digite o Nome do colaborador...';
-                    if (tipo === 'cpf') inputPesq.placeholder = 'Digite o CPF do colaborador...';
-                    if (tipo === 'empresa') inputPesq.placeholder = 'Digite o nome da Empresa...';
-                }
-            });
-
-            const colMap = {
-                'clinico': 'liberado_clinico',
-                'raiox': 'liberado_raiox',
-                'fono': 'liberado_fono',
-                'lab': 'liberado_lab',
-                'consulta': 'liberado_consulta'
-            };
-
-            async function buscarDados(usarFiltroBarra = false) {
-                modoBuscaPersonalizada = usarFiltroBarra;
-                
-                document.getElementById('msg-carregando').style.display = "block";
-                tabela.innerHTML = "";
-                document.getElementById('msg-vazio').style.display = "none";
-
-                try {
-                    let query = supabase
-                        .from('atendimentos')
-                        .select('*')
-                        .order('created_at', { ascending: false })
-                        .order('id', { ascending: false });
-                    
-                    if (!usarFiltroBarra) {
-                        query = query.eq('data_exame', getDataHojeISO());
-                    } else {
-                        const tipo = selectTipoBusca.value;
-                        const termo = inputPesq.value.trim();
-
-                        if (!termo) {
-                            alert("Digite ou selecione um valor para pesquisar.");
-                            document.getElementById('msg-carregando').style.display = "none";
-                            return;
+                    btnTheme.addEventListener('click', () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        if (isDark) {
+                            document.documentElement.removeAttribute('data-theme');
+                            localStorage.setItem('monad_theme', 'light');
+                        } else {
+                            document.documentElement.setAttribute('data-theme', 'dark');
+                            localStorage.setItem('monad_theme', 'dark');
                         }
+                        atualizarIcone();
+                    });
+                }
 
-                        if (tipo === 'data_cadastro') {
-                            const dataISO = converterDataParaISO(termo);
-                            if (!dataISO) {
-                                alert("Formato de data inválido. Use DD/MM/AAAA ou selecione no calendário.");
-                                document.getElementById('msg-carregando').style.display = "none";
+                document.getElementById('btn-sair-sistema')?.addEventListener('click', () => {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', async () => {
+                configurarHeader();
+
+                const tabela = document.getElementById('lista-liberacao');
+                const selectTipoBusca = document.getElementById('tipo-busca-admin');
+                const inputPesq = document.getElementById('pesquisa-paciente');
+                const msgCarregando = document.getElementById('msg-carregando');
+                const msgVazio = document.getElementById('msg-vazio');
+                const modalEditar = document.getElementById('modal-editar');
+
+                let databaseAdmin = [];
+                let modoBuscaPersonalizada = false;
+
+                function atualizarFeedbackCPFModal() {
+                    const inputCpf = document.getElementById('edit-cpf');
+                    const statusCpf = document.getElementById('status-cpf-modal');
+                    const digitos = inputCpf.value.replace(/\D/g, '');
+
+                    if (digitos.length === 0) {
+                        statusCpf.textContent = '';
+                        inputCpf.style.borderColor = 'var(--border-strong)';
+                        return;
+                    }
+
+                    if (digitos.length < 11) {
+                        statusCpf.textContent = `Faltam ${11 - digitos.length} dígito(s)`;
+                        statusCpf.style.color = 'var(--text-muted)';
+                        inputCpf.style.borderColor = 'var(--border-strong)';
+                        return;
+                    }
+
+                    if (validarCPF(inputCpf.value)) {
+                        statusCpf.textContent = '✓ CPF válido';
+                        statusCpf.style.color = 'var(--success)';
+                        inputCpf.style.borderColor = 'var(--success)';
+                    } else {
+                        statusCpf.textContent = '✕ CPF inválido';
+                        statusCpf.style.color = 'var(--danger)';
+                        inputCpf.style.borderColor = 'var(--danger)';
+                    }
+                }
+
+                document.getElementById('edit-dn').addEventListener('input', (e) => {
+                    e.target.value = aplicarMascaraDataBR(e.target.value);
+                });
+
+                document.getElementById('edit-cpf').addEventListener('input', (e) => {
+                    e.target.value = aplicarMascaraCPF(e.target.value);
+                    atualizarFeedbackCPFModal();
+                });
+
+                document.getElementById('edit-tel').addEventListener('input', (e) => {
+                    e.target.value = aplicarMascaraTelefone(e.target.value);
+                });
+
+                selectTipoBusca.addEventListener('change', function() {
+                    const tipo = this.value;
+                    inputPesq.value = '';
+                    if (tipo === 'data_cadastro') {
+                        inputPesq.type = 'date';
+                        inputPesq.value = getDataHojeISO();
+                    } else {
+                        inputPesq.type = 'text';
+                        if (tipo === 'nome') inputPesq.placeholder = 'Digite o Nome do colaborador...';
+                        if (tipo === 'cpf') inputPesq.placeholder = 'Digite o CPF do colaborador...';
+                        if (tipo === 'empresa') inputPesq.placeholder = 'Digite o nome da Empresa...';
+                    }
+                });
+
+                async function buscarDados(usarFiltroBarra = false) {
+                    modoBuscaPersonalizada = usarFiltroBarra;
+                    msgCarregando.style.display = 'block';
+                    tabela.innerHTML = '';
+                    msgVazio.style.display = 'none';
+
+                    try {
+                        let query = supabase
+                            .from('atendimentos')
+                            .select('*')
+                            .order('created_at', { ascending: false })
+                            .order('id', { ascending: false });
+
+                        if (!usarFiltroBarra) {
+                            query = query.eq('data_exame', getDataHojeISO());
+                        } else {
+                            const tipo = selectTipoBusca.value;
+                            const termo = inputPesq.value.trim();
+
+                            if (!termo) {
+                                alert('Digite ou selecione um valor para pesquisar.');
                                 return;
                             }
-                            const inicioDia = `${dataISO}T00:00:00`;
-                            const fimDia = `${dataISO}T23:59:59.999`;
-                            query = query.gte('created_at', inicioDia).lte('created_at', fimDia);
-                        } else if (tipo === 'nome') {
-                            query = query.ilike('nome', `%${termo}%`).limit(500);
-                        } else if (tipo === 'cpf') {
-                            query = query.ilike('cpf', `%${termo}%`).limit(500);
-                        } else if (tipo === 'empresa') {
-                            query = query.ilike('empresa', `%${termo}%`).limit(500);
+
+                            if (tipo === 'data_cadastro') {
+                                const dataISO = converterDataParaISO(termo);
+                                if (!dataISO) {
+                                    alert('Formato de data inválido. Use DD/MM/AAAA ou selecione no calendário.');
+                                    return;
+                                }
+                                query = query.gte('created_at', `${dataISO}T00:00:00`).lte('created_at', `${dataISO}T23:59:59.999`);
+                            } else if (tipo === 'nome') {
+                                query = query.ilike('nome', `%${termo}%`).limit(500);
+                            } else if (tipo === 'cpf') {
+                                query = query.ilike('cpf', `%${termo}%`).limit(500);
+                            } else if (tipo === 'empresa') {
+                                query = query.ilike('empresa', `%${termo}%`).limit(500);
+                            }
                         }
-                    }
 
-                    const { data, error } = await query;
-                    
-                    document.getElementById('msg-carregando').style.display = "none";
-                    if (error) throw error;
+                        const { data, error } = await query;
+                        if (error) throw error;
 
-                    if (data && data.length > 0) {
-                        databaseAdmin = data;
+                        databaseAdmin = data || [];
                         renderizarTabela(databaseAdmin);
-                    } else { 
-                        databaseAdmin = [];
-                        tabela.innerHTML = ""; 
-                        document.getElementById('msg-vazio').style.display = "block"; 
+                    } catch (err) {
+                        console.error('Erro na busca:', err);
+                    } finally {
+                        msgCarregando.style.display = 'none';
                     }
-                } catch (err) {
-                    console.error("Erro na busca:", err);
-                    document.getElementById('msg-carregando').style.display = "none";
                 }
-            }
 
-            setInterval(async () => {
-                if (document.hidden || modoBuscaPersonalizada) return;
-                if (document.getElementById('modal-editar').style.display !== 'none') return;
-                
-                try {
-                    const { data, error } = await supabase
-                        .from('atendimentos')
-                        .select('*')
-                        .eq('data_exame', getDataHojeISO())
-                        .order('created_at', { ascending: false })
-                        .order('id', { ascending: false });
+                async function atualizacaoSilenciosa() {
+                    if (document.hidden || modoBuscaPersonalizada) return;
+                    if (modalEditar.style.display !== 'none') return;
 
-                    if (error) throw error;
+                    try {
+                        const { data, error } = await supabase
+                            .from('atendimentos')
+                            .select('*')
+                            .eq('data_exame', getDataHojeISO())
+                            .order('created_at', { ascending: false })
+                            .order('id', { ascending: false });
 
-                    if (data) {
-                        const pacValidos = data.filter(p => 
-                            (p.exames_clinicos && p.exames_clinicos !== 'Nenhum') || 
-                            (p.exames_raiox && p.exames_raiox !== 'Nenhum') || 
-                            (p.exames_lab && p.exames_lab !== 'Nenhum') || 
-                            (p.exames_extras && p.exames_extras !== 'Nenhum') ||
-                            p.audiometria || p.consulta_clinica || p.avaliacao_psicossocial
-                        );
-                        
-                        if (pacValidos.length !== document.querySelectorAll('.linha-paciente').length) {
+                        if (error || !data) return;
+
+                        const pacValidos = data.filter(p => extrairFlags(p).valido);
+                        if (pacValidos.length !== tabela.querySelectorAll('.linha-paciente').length) {
                             databaseAdmin = data;
                             renderizarTabela(databaseAdmin);
                             return;
                         }
-                        
+
                         data.forEach(pac => {
                             const idx = databaseAdmin.findIndex(item => String(item.id) === String(pac.id));
                             if (idx !== -1) databaseAdmin[idx] = pac;
 
-                            const l = document.querySelector(`tr[data-id="${pac.id}"]`);
-                            if (l) {
-                                const updateCheck = (setor, valor) => {
-                                    const cb = l.querySelector(`.check-setor-admin[data-setor="${setor}"]`);
-                                    if(cb && cb.checked !== valor && !cb.disabled) cb.checked = valor;
-                                };
-                                
-                                updateCheck('clinico', pac.liberado_clinico);
-                                updateCheck('raiox', pac.liberado_raiox);
-                                updateCheck('fono', pac.liberado_fono);
-                                updateCheck('lab', pac.liberado_lab);
-                                updateCheck('consulta', pac.liberado_consulta);
-                                
-                                const obs = l.querySelector('.obs-input-admin'); 
-                                if(obs && document.activeElement !== obs && obs.value !== (pac.observacao || '') && !obs.disabled) {
-                                    obs.value = pac.observacao || '';
-                                }
+                            const l = tabela.querySelector(`tr[data-id="${pac.id}"]`);
+                            if (!l) return;
+
+                            const updateCheck = (setor, valor) => {
+                                const cb = l.querySelector(`.check-setor-admin[data-setor="${setor}"]`);
+                                if (cb && cb.checked !== Boolean(valor) && !cb.disabled) cb.checked = Boolean(valor);
+                            };
+
+                            updateCheck('clinico', pac.liberado_clinico);
+                            updateCheck('raiox', pac.liberado_raiox);
+                            updateCheck('fono', pac.liberado_fono);
+                            updateCheck('lab', pac.liberado_lab);
+                            updateCheck('consulta', pac.liberado_consulta);
+
+                            const obs = l.querySelector('.obs-input-admin');
+                            const obsValor = pac.observacao || '';
+                            if (obs && document.activeElement !== obs && obs.value !== obsValor && !obs.disabled) {
+                                obs.value = obsValor;
                             }
                         });
+                    } catch (err) {
+                        console.error('Erro no polling Admin:', err);
                     }
-                } catch (err) { console.error("Erro no polling Admin:", err); }
-            }, 1000);
+                }
 
-            function renderizarTabela(pacientes) {
-                tabela.innerHTML = "";
-                let exibidos = 0;
-
-                pacientes.forEach((pac) => {
-                    const temClinico = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
-                    const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
-                    const temFono = pac.audiometria === true;
-                    const temLab = pac.exames_lab && pac.exames_lab !== 'Nenhum';
-                    const temExtras = pac.exames_extras && pac.exames_extras !== 'Nenhum';
-                    const temConsultaMedica = pac.consulta_clinica === true;
-                    const temPsicossocial = pac.avaliacao_psicossocial === true;
-                    const temConsulta = temConsultaMedica || temPsicossocial;
-
-                    if (!temClinico && !temRaiox && !temLab && !temFono && !temConsulta && !temExtras) return;
-
-                    let itensConsulta = [];
-                    if (temConsultaMedica) itensConsulta.push("Médico do Trabalho");
-                    if (temPsicossocial) itensConsulta.push("Avaliação Psicossocial");
-                    const textoConsulta = itensConsulta.join(", ");
-
-                    exibidos++;
-
-                    const cell = (exame, checked, setor) => `
-                        <div class="celula-exame">
-                            <input type="checkbox" class="check-setor-admin" data-setor="${setor}" ${checked ? 'checked' : ''} style="cursor:pointer; transform: scale(1.3);">
-                            <div class="detalhe-exame" style="margin-top:4px;">${exame}</div>
-                        </div>
-                    `;
-                    const cellLab = (exame, checked, obs) => `
-                        <div class="celula-exame">
-                            <input type="checkbox" class="check-setor-admin" data-setor="lab" ${checked ? 'checked' : ''} style="cursor:pointer; transform: scale(1.3);">
-                            <div class="detalhe-exame" style="margin-top:4px;">${exame}</div>
-                            <textarea class="obs-input-admin" rows="2">${obs || ''}</textarea>
-                        </div>
-                    `;
-
-                    const tdC = temClinico ? cell(pac.exames_clinicos, pac.liberado_clinico, 'clinico') : `<span class="text-na">—</span>`;
-                    const tdR = temRaiox ? cell(pac.exames_raiox, pac.liberado_raiox, 'raiox') : `<span class="text-na">—</span>`;
-                    const tdF = temFono ? cell("Audiometria", pac.liberado_fono, 'fono') : `<span class="text-na">—</span>`;
-                    const tdL = temLab ? cellLab(pac.exames_lab, pac.liberado_lab, pac.observacao) : `<span class="text-na">—</span>`;
-                    const tdM = temConsulta ? cell(textoConsulta, pac.liberado_consulta, 'consulta') : `<span class="text-na">—</span>`;
-
-                    const tipoStr = pac.tipo_exame ? (pac.tipo_exame.includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
-                    const dataExameBR = formatarDataBR(pac.data_exame);
-                    
-                    const listaExtrasFormatada = temExtras
-                        ? pac.exames_extras.split(',').map(item => item.trim()).filter(Boolean).join(', ')
-                        : '';
-                    const htmlExtrasColuna = temExtras
-                        ? `<div style="font-size:11px; color:var(--warning); font-weight: 600; margin-top: 3px;">➕ Extras: ${listaExtrasFormatada}</div>`
+                function criarCelula(exame, checked, setor, obs = null) {
+                    const blocoObs = obs !== null
+                        ? `<textarea class="obs-input-admin" rows="2">${obs || ''}</textarea>`
                         : '';
 
-                    const tr = document.createElement('tr');
-                    tr.className = 'linha-paciente';
-                    tr.dataset.id = pac.id;
-
-                    tr.innerHTML = `
-                        <td>
-                            <div style="font-weight:bold; color:var(--text-strong);" class="col-nome">${pac.nome}</div>
-                            <div style="font-size:12px; color:var(--accent); font-weight: 600;">📅 Atendimento: ${dataExameBR}</div>
-                            <div style="font-size:11px; color:var(--text-muted);">Empresa: ${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></div>
-                            <div style="font-size:11px; color:var(--text-muted);">CPF: ${pac.cpf}</div>
-                            ${htmlExtrasColuna}
-                        </td>
-                        <td style="text-align: center; background:var(--surface-muted);">${tdC}</td>
-                        <td style="text-align: center;">${tdR}</td>
-                        <td style="text-align: center; background:var(--surface-muted);">${tdF}</td>
-                        <td style="text-align: center;">${tdL}</td>
-                        <td style="text-align: center; background:var(--surface-muted);">${tdM}</td>
-                        <td style="text-align: center;">
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <button class="btn-editar" data-id="${pac.id}" style="background:var(--accent); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">✏️ Editar Dados</button>
-                                <button class="btn-apagar" data-id="${pac.id}" style="background:var(--danger); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">🗑️ Excluir</button>
-                            </div>
-                        </td>
+                    return `
+                        <div class="celula-exame">
+                            <input type="checkbox" class="check-setor-admin" data-setor="${setor}" ${checked ? 'checked' : ''} style="cursor:pointer; transform: scale(1.25);">
+                            <div class="detalhe-exame" style="margin-top:4px;">${exame}</div>
+                            ${blocoObs}
+                        </div>
                     `;
-                    tabela.appendChild(tr);
+                }
+
+                function renderizarTabela(pacientes) {
+                    tabela.innerHTML = '';
+                    let exibidos = 0;
+
+                    pacientes.forEach(pac => {
+                        const f = extrairFlags(pac);
+                        if (!f.valido) return;
+
+                        const itensConsulta = [];
+                        if (f.consultaMedica) itensConsulta.push('Médico do Trabalho');
+                        if (f.psicossocial) itensConsulta.push('Avaliação Psicossocial');
+
+                        exibidos++;
+
+                        const tdC = f.clinico ? criarCelula(pac.exames_clinicos, pac.liberado_clinico, 'clinico') : `<span class="text-na">—</span>`;
+                        const tdR = f.raiox ? criarCelula(pac.exames_raiox, pac.liberado_raiox, 'raiox') : `<span class="text-na">—</span>`;
+                        const tdF = f.fono ? criarCelula('Audiometria', pac.liberado_fono, 'fono') : `<span class="text-na">—</span>`;
+                        const tdL = f.lab ? criarCelula(pac.exames_lab, pac.liberado_lab, 'lab', pac.observacao) : `<span class="text-na">—</span>`;
+                        const tdM = f.consulta ? criarCelula(itensConsulta.join(', '), pac.liberado_consulta, 'consulta') : `<span class="text-na">—</span>`;
+
+                        const tipoStr = pac.tipo_exame ? (String(pac.tipo_exame).includes('(') ? pac.tipo_exame : `(${pac.tipo_exame})`) : '';
+                        const dataExameBR = formatarDataBR(pac.data_exame);
+                        const listaExtrasFormatada = f.extras
+                            ? String(pac.exames_extras).split(',').map(item => item.trim()).filter(Boolean).join(', ')
+                            : '';
+                        const htmlExtrasColuna = f.extras
+                            ? `<div style="font-size:11px; color:var(--warning); font-weight: 600; margin-top: 3px;">➕ Extras: ${listaExtrasFormatada}</div>`
+                            : '';
+
+                        const tr = document.createElement('tr');
+                        tr.className = 'linha-paciente';
+                        tr.dataset.id = pac.id;
+
+                        tr.innerHTML = `
+                            <td>
+                                <div style="font-weight:bold; color:var(--text-strong);" class="col-nome">${pac.nome}</div>
+                                <div style="font-size:12px; color:var(--accent); font-weight: 600;">📅 Atendimento: ${dataExameBR}</div>
+                                <div style="font-size:11px; color:var(--text-muted);">Empresa: ${pac.empresa} <span style="color:var(--accent);">${tipoStr}</span></div>
+                                <div style="font-size:11px; color:var(--text-muted);">CPF: ${pac.cpf}</div>
+                                ${htmlExtrasColuna}
+                            </td>
+                            <td style="text-align: center; background:var(--surface-muted);">${tdC}</td>
+                            <td style="text-align: center;">${tdR}</td>
+                            <td style="text-align: center; background:var(--surface-muted);">${tdF}</td>
+                            <td style="text-align: center;">${tdL}</td>
+                            <td style="text-align: center; background:var(--surface-muted);">${tdM}</td>
+                            <td style="text-align: center;">
+                                <div style="display: flex; flex-direction: column; gap: 6px;">
+                                    <button type="button" class="btn-editar" data-id="${pac.id}">✏️ Editar Dados</button>
+                                    <button type="button" class="btn-apagar" data-id="${pac.id}">🗑️ Excluir</button>
+                                </div>
+                            </td>
+                        `;
+                        tabela.appendChild(tr);
+                    });
+
+                    msgVazio.style.display = exibidos === 0 ? 'block' : 'none';
+                }
+
+                tabela.addEventListener('change', async (e) => {
+                    const tr = e.target.closest('tr');
+                    if (!tr) return;
+                    const idUnico = tr.dataset.id;
+
+                    if (e.target.classList.contains('check-setor-admin')) {
+                        const cb = e.target;
+                        const setor = cb.dataset.setor;
+                        const liberado = cb.checked;
+
+                        cb.disabled = true;
+                        cb.style.opacity = '0.4';
+
+                        try {
+                            const colunaAlvo = COL_MAP[setor];
+                            const { error } = await supabase
+                                .from('atendimentos')
+                                .update({ [colunaAlvo]: liberado })
+                                .eq('id', idUnico);
+                            if (error) throw error;
+
+                            cb.style.opacity = '1';
+                            cb.disabled = false;
+                        } catch (err) {
+                            alert('Erro ao forçar atualização.');
+                            cb.checked = !liberado;
+                            cb.style.opacity = '1';
+                            cb.disabled = false;
+                        }
+                    }
+
+                    if (e.target.classList.contains('obs-input-admin')) {
+                        const obsInput = e.target;
+                        obsInput.disabled = true;
+                        obsInput.style.opacity = '0.4';
+
+                        try {
+                            const { error } = await supabase
+                                .from('atendimentos')
+                                .update({ observacao: obsInput.value })
+                                .eq('id', idUnico);
+                            if (error) throw error;
+
+                            obsInput.style.opacity = '1';
+                            obsInput.style.borderColor = 'var(--success)';
+                            obsInput.disabled = false;
+                            setTimeout(() => {
+                                obsInput.style.borderColor = 'var(--border-strong)';
+                            }, 2000);
+                        } catch (err) {
+                            alert('Erro ao guardar observação.');
+                            obsInput.style.opacity = '1';
+                            obsInput.disabled = false;
+                        }
+                    }
                 });
 
-                document.getElementById('msg-vazio').style.display = exibidos === 0 ? 'block' : 'none';
-            }
+                tabela.addEventListener('click', async (e) => {
+                    const btnApagar = e.target.closest('.btn-apagar');
+                    if (btnApagar) {
+                        const tr = btnApagar.closest('tr');
+                        const nome = tr?.querySelector('.col-nome')?.textContent || '';
+                        const idUnico = btnApagar.dataset.id || tr?.dataset.id;
 
-            tabela.addEventListener('change', async function(e) {
-                const tr = e.target.closest('tr');
-                if (!tr) return;
-                const idUnico = tr.dataset.id;
+                        if (!confirm(`TEM A CERTEZA ABSOLUTA?\n\nDeseja excluir permanentemente o registo de:\n${nome}\n\nEsta ação não pode ser desfeita.`)) {
+                            return;
+                        }
 
-                if (e.target.classList.contains('check-setor-admin')) {
-                    const cb = e.target;
-                    const setor = cb.dataset.setor;
-                    const liberado = cb.checked;
-                    
-                    cb.disabled = true;
-                    cb.style.opacity = "0.4";
-
-                    try {
-                        const colunaAlvo = colMap[setor];
-                        const updateObj = {};
-                        updateObj[colunaAlvo] = liberado;
-
-                        const { error } = await supabase.from('atendimentos').update(updateObj).eq('id', idUnico);
-                        if (error) throw error;
-
-                        cb.style.opacity = "1";
-                        cb.disabled = false;
-                    } catch (err) {
-                        alert("Erro ao forçar atualização."); 
-                        cb.checked = !liberado; 
-                        cb.style.opacity = "1"; 
-                        cb.disabled = false;
-                    }
-                }
-
-                if (e.target.classList.contains('obs-input-admin')) {
-                    const obsInput = e.target;
-                    obsInput.disabled = true;
-                    obsInput.style.opacity = "0.4";
-                    
-                    try {
-                        const { error } = await supabase.from('atendimentos').update({ observacao: obsInput.value }).eq('id', idUnico);
-                        if (error) throw error;
-
-                        obsInput.style.opacity = "1"; 
-                        obsInput.style.borderColor = "var(--success)";
-                        obsInput.disabled = false;
-                        setTimeout(() => obsInput.style.borderColor = "var(--border-strong)", 2000);
-                    } catch (err) {
-                        alert("Erro ao guardar observação."); 
-                        obsInput.style.opacity = "1"; 
-                        obsInput.disabled = false;
-                    }
-                }
-            });
-
-            tabela.addEventListener('click', async function(e) {
-                const btnApagar = e.target.closest('.btn-apagar');
-                if (btnApagar) {
-                    const tr = btnApagar.closest('tr');
-                    const nome = tr.querySelector('.col-nome').textContent;
-                    const idUnico = btnApagar.dataset.id || tr.dataset.id;
-                    
-                    if (confirm(`TEM A CERTEZA ABSOLUTA?\n\nDeseja excluir permanentemente o registo de:\n${nome}\n\nEsta ação não pode ser desfeita.`)) {
-                        btnApagar.textContent = "Apagando...";
+                        btnApagar.textContent = 'Apagando...';
                         btnApagar.disabled = true;
 
                         try {
@@ -591,172 +769,152 @@
                                 .from('atendimentos')
                                 .delete()
                                 .eq('id', idUnico);
-                                
                             if (error) throw error;
+
                             databaseAdmin = databaseAdmin.filter(p => String(p.id) !== String(idUnico));
-                            tr.remove();
-                            if (document.querySelectorAll('.linha-paciente').length === 0) {
-                                document.getElementById('msg-vazio').style.display = 'block';
+                            tr?.remove();
+                            if (tabela.querySelectorAll('.linha-paciente').length === 0) {
+                                msgVazio.style.display = 'block';
                             }
                         } catch (err) {
-                            alert("Falha na exclusão: " + err.message); 
-                            btnApagar.textContent = "🗑️ Excluir"; 
-                            btnApagar.disabled = false; 
+                            alert('Falha na exclusão: ' + err.message);
+                            btnApagar.textContent = '🗑️ Excluir';
+                            btnApagar.disabled = false;
                         }
-                    }
-                }
-
-                const btnEditar = e.target.closest('.btn-editar');
-                if (btnEditar) {
-                    const tr = btnEditar.closest('tr');
-                    const idUnico = btnEditar.dataset.id || tr.dataset.id;
-                    const pac = databaseAdmin.find(p => String(p.id) === String(idUnico));
-                    if (pac) {
-                        abrirModalEdicao(pac);
-                    } else {
-                        alert("Erro ao localizar o registro selecionado. Atualize a página e tente novamente.");
-                    }
-                }
-            });
-
-            window.abrirModalEdicao = function(pac) {
-                document.getElementById('edit-id-unico').value = pac.id;
-                
-                document.getElementById('edit-nome').value = pac.nome || "";
-                document.getElementById('edit-data-atendimento').value = formatarDataParaInput(pac.data_exame);
-                document.getElementById('edit-empresa').value = pac.empresa || "";
-                document.getElementById('edit-tipo').value = pac.tipo_exame || "";
-                document.getElementById('edit-funcao').value = pac.funcao || "";
-                
-                // Formata data de nascimento para DD/MM/AAAA
-                const dnFormatada = pac.data_nascimento ? formatarDataBR(pac.data_nascimento) : "";
-                document.getElementById('edit-dn').value = dnFormatada === '-' ? "" : dnFormatada;
-                
-                document.getElementById('edit-rg').value = pac.rg || "";
-                document.getElementById('edit-cpf').value = pac.cpf ? aplicarMascaraCPF(pac.cpf) : "";
-                document.getElementById('edit-tel').value = pac.telefone ? aplicarMascaraTelefone(pac.telefone) : "";
-                atualizarFeedbackCPFModal();
-                
-                document.getElementById('edit-ex-clinico').value = (!pac.exames_clinicos || pac.exames_clinicos === "Nenhum") ? "" : pac.exames_clinicos;
-                document.getElementById('edit-ex-raiox').value = (!pac.exames_raiox || pac.exames_raiox === "Nenhum") ? "" : pac.exames_raiox;
-                document.getElementById('edit-ex-lab').value = (!pac.exames_lab || pac.exames_lab === "Nenhum") ? "" : pac.exames_lab;
-                document.getElementById('edit-ex-extras').value = (!pac.exames_extras || pac.exames_extras === "Nenhum") ? "" : pac.exames_extras;
-                
-                document.getElementById('edit-tem-fono').checked = pac.audiometria;
-                document.getElementById('edit-tem-consulta').checked = pac.consulta_clinica;
-                document.getElementById('edit-tem-psico').checked = Boolean(pac.avaliacao_psicossocial);
-
-                document.getElementById('modal-editar').style.display = 'flex';
-            };
-
-            window.fecharModal = function() {
-                document.getElementById('modal-editar').style.display = 'none';
-            };
-
-            document.getElementById('btn-salvar-edicao').addEventListener('click', async function(e) {
-                const btn = e.target;
-                
-                const cpfNovo = document.getElementById('edit-cpf').value.trim();
-                if (cpfNovo && !validarCPF(cpfNovo)) {
-                    alert("AÇÃO BLOQUEADA: O CPF digitado é inválido. Por favor, corrija antes de salvar as alterações.");
-                    return;
-                }
-
-                const dataAtendimentoNova = document.getElementById('edit-data-atendimento').value;
-                if (!dataAtendimentoNova) {
-                    alert("Por favor, selecione uma Data de Atendimento válida.");
-                    return;
-                }
-
-                const dnDigitada = document.getElementById('edit-dn').value.trim();
-                let dnParaSalvar = "";
-                if (dnDigitada) {
-                    const dnISO = converterDataParaISO(dnDigitada);
-                    if (!dnISO) {
-                        alert("Data de Nascimento inválida. Utilize o formato DD/MM/AAAA.");
                         return;
                     }
-                    dnParaSalvar = dnISO;
-                }
 
-                const idUnico = document.getElementById('edit-id-unico').value;
-                const extrasRaw = document.getElementById('edit-ex-extras').value;
-                const extrasFormatado = extrasRaw
-                    ? extrasRaw.split(',').map(item => item.trim()).filter(Boolean).join(', ')
-                    : "";
-                
-                const dadosEdicao = {
-                    nome: document.getElementById('edit-nome').value,
-                    data_exame: dataAtendimentoNova,
-                    empresa: document.getElementById('edit-empresa').value,
-                    tipo_exame: document.getElementById('edit-tipo').value,
-                    funcao: document.getElementById('edit-funcao').value,
-                    data_nascimento: dnParaSalvar || null,
-                    rg: document.getElementById('edit-rg').value,
-                    cpf: cpfNovo,
-                    telefone: document.getElementById('edit-tel').value.trim(),
-                    exames_clinicos: document.getElementById('edit-ex-clinico').value || "Nenhum",
-                    exames_raiox: document.getElementById('edit-ex-raiox').value || "Nenhum",
-                    exames_lab: document.getElementById('edit-ex-lab').value || "Nenhum",
-                    exames_extras: extrasFormatado || "Nenhum",
-                    audiometria: document.getElementById('edit-tem-fono').checked,
-                    consulta_clinica: document.getElementById('edit-tem-consulta').checked,
-                    avaliacao_psicossocial: document.getElementById('edit-tem-psico').checked
-                };
-
-                btn.textContent = "A gravar...";
-                btn.disabled = true;
-
-                try {
-                    const { error } = await supabase
-                        .from('atendimentos')
-                        .update(dadosEdicao)
-                        .eq('id', idUnico);
-
-                    if (error) throw error;
-
-                    btn.textContent = "Salvar Alterações";
-                    btn.disabled = false;
-                    fecharModal();
-                    buscarDados(modoBuscaPersonalizada); 
-
-                } catch (err) {
-                    alert("Falha Crítica ao tentar editar: " + err.message); 
-                    btn.textContent = "Salvar Alterações";
-                    btn.disabled = false;
-                }
-            });
-
-            document.getElementById('btn-executar-busca').addEventListener('click', () => buscarDados(true));
-            document.getElementById('btn-hoje').addEventListener('click', () => {
-                inputPesq.value = '';
-                buscarDados(false);
-            });
-            inputPesq.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') buscarDados(true);
-            });
-
-            buscarDados(false);
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnTheme = document.getElementById('btn-theme-toggle');
-            if (btnTheme) {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                btnTheme.textContent = isDark ? '☀️' : '🌙';
-                btnTheme.addEventListener('click', () => {
-                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                        document.documentElement.removeAttribute('data-theme');
-                        localStorage.setItem('monad_theme', 'light');
-                        btnTheme.textContent = '🌙';
-                    } else {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                        localStorage.setItem('monad_theme', 'dark');
-                        btnTheme.textContent = '☀️';
+                    const btnEditar = e.target.closest('.btn-editar');
+                    if (btnEditar) {
+                        const tr = btnEditar.closest('tr');
+                        const idUnico = btnEditar.dataset.id || tr?.dataset.id;
+                        const pac = databaseAdmin.find(p => String(p.id) === String(idUnico));
+                        if (pac) {
+                            abrirModalEdicao(pac);
+                        } else {
+                            alert('Erro ao localizar o registro selecionado. Atualize a página e tente novamente.');
+                        }
                     }
                 });
-            }
-        });
+
+                function abrirModalEdicao(pac) {
+                    document.getElementById('edit-id-unico').value = pac.id;
+                    document.getElementById('edit-nome').value = pac.nome || '';
+                    document.getElementById('edit-data-atendimento').value = formatarDataParaInput(pac.data_exame);
+                    document.getElementById('edit-empresa').value = pac.empresa || '';
+                    document.getElementById('edit-tipo').value = pac.tipo_exame || '';
+                    document.getElementById('edit-funcao').value = pac.funcao || '';
+
+                    const dnFormatada = pac.data_nascimento ? formatarDataBR(pac.data_nascimento) : '';
+                    document.getElementById('edit-dn').value = dnFormatada === '-' ? '' : dnFormatada;
+
+                    document.getElementById('edit-rg').value = pac.rg || '';
+                    document.getElementById('edit-cpf').value = pac.cpf ? aplicarMascaraCPF(pac.cpf) : '';
+                    document.getElementById('edit-tel').value = pac.telefone ? aplicarMascaraTelefone(pac.telefone) : '';
+                    atualizarFeedbackCPFModal();
+
+                    document.getElementById('edit-ex-clinico').value = temExameValido(pac.exames_clinicos) ? pac.exames_clinicos : '';
+                    document.getElementById('edit-ex-raiox').value = temExameValido(pac.exames_raiox) ? pac.exames_raiox : '';
+                    document.getElementById('edit-ex-lab').value = temExameValido(pac.exames_lab) ? pac.exames_lab : '';
+                    document.getElementById('edit-ex-extras').value = temExameValido(pac.exames_extras) ? pac.exames_extras : '';
+
+                    document.getElementById('edit-tem-fono').checked = Boolean(pac.audiometria);
+                    document.getElementById('edit-tem-consulta').checked = Boolean(pac.consulta_clinica);
+                    document.getElementById('edit-tem-psico').checked = Boolean(pac.avaliacao_psicossocial);
+
+                    modalEditar.style.display = 'flex';
+                }
+
+                function fecharModal() {
+                    modalEditar.style.display = 'none';
+                }
+
+                document.getElementById('btn-cancelar-edicao')?.addEventListener('click', fecharModal);
+
+                document.getElementById('btn-salvar-edicao')?.addEventListener('click', async (e) => {
+                    const btn = e.target;
+
+                    const cpfNovo = document.getElementById('edit-cpf').value.trim();
+                    if (cpfNovo && !validarCPF(cpfNovo)) {
+                        alert('AÇÃO BLOQUEADA: O CPF digitado é inválido. Por favor, corrija antes de salvar as alterações.');
+                        return;
+                    }
+
+                    const dataAtendimentoNova = document.getElementById('edit-data-atendimento').value;
+                    if (!dataAtendimentoNova) {
+                        alert('Por favor, selecione uma Data de Atendimento válida.');
+                        return;
+                    }
+
+                    const dnDigitada = document.getElementById('edit-dn').value.trim();
+                    let dnParaSalvar = null;
+                    if (dnDigitada) {
+                        const dnISO = converterDataParaISO(dnDigitada);
+                        if (!dnISO) {
+                            alert('Data de Nascimento inválida. Utilize o formato DD/MM/AAAA.');
+                            return;
+                        }
+                        dnParaSalvar = dnISO;
+                    }
+
+                    const idUnico = document.getElementById('edit-id-unico').value;
+                    const extrasRaw = document.getElementById('edit-ex-extras').value;
+                    const extrasFormatado = extrasRaw
+                        ? extrasRaw.split(',').map(item => item.trim()).filter(Boolean).join(', ')
+                        : '';
+
+                    const dadosEdicao = {
+                        nome: document.getElementById('edit-nome').value,
+                        data_exame: dataAtendimentoNova,
+                        empresa: document.getElementById('edit-empresa').value,
+                        tipo_exame: document.getElementById('edit-tipo').value,
+                        funcao: document.getElementById('edit-funcao').value,
+                        data_nascimento: dnParaSalvar,
+                        rg: document.getElementById('edit-rg').value,
+                        cpf: cpfNovo,
+                        telefone: document.getElementById('edit-tel').value.trim(),
+                        exames_clinicos: document.getElementById('edit-ex-clinico').value || 'Nenhum',
+                        exames_raiox: document.getElementById('edit-ex-raiox').value || 'Nenhum',
+                        exames_lab: document.getElementById('edit-ex-lab').value || 'Nenhum',
+                        exames_extras: extrasFormatado || 'Nenhum',
+                        audiometria: document.getElementById('edit-tem-fono').checked,
+                        consulta_clinica: document.getElementById('edit-tem-consulta').checked,
+                        avaliacao_psicossocial: document.getElementById('edit-tem-psico').checked
+                    };
+
+                    btn.textContent = 'A gravar...';
+                    btn.disabled = true;
+
+                    try {
+                        const { error } = await supabase
+                            .from('atendimentos')
+                            .update(dadosEdicao)
+                            .eq('id', idUnico);
+                        if (error) throw error;
+
+                        fecharModal();
+                        await buscarDados(modoBuscaPersonalizada);
+                    } catch (err) {
+                        alert('Falha Crítica ao tentar editar: ' + err.message);
+                    } finally {
+                        btn.textContent = 'Salvar Alterações';
+                        btn.disabled = false;
+                    }
+                });
+
+                document.getElementById('btn-executar-busca')?.addEventListener('click', () => buscarDados(true));
+                document.getElementById('btn-hoje')?.addEventListener('click', () => {
+                    inputPesq.value = '';
+                    buscarDados(false);
+                });
+                inputPesq?.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') buscarDados(true);
+                });
+
+                await buscarDados(false);
+                setInterval(atualizacaoSilenciosa, 3000);
+            });
+        })();
     </script>
 </body>
 </html>

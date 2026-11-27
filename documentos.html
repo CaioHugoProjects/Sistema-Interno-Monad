@@ -46,7 +46,7 @@
             .tabela-exames-interna tr:first-child td { border-top: none !important; }
             .tabela-exames-interna tr:last-child td { border-bottom: none !important; }
             .tabela-exames-interna td:nth-child(1),
-            .tabela-exames-interna td:nth-child(4) { border-right: 1px solid #000 !important; }
+            .tabela-exames-interna td:nth-child(4) { border-right: none !important; }
             .tabela-exames-interna td:nth-child(3) { border-right: 1.5px solid #000 !important; }
             .header-bg { background-color: #c8c8c8 !important; color: #000 !important; font-weight: bold; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .cb-padrao { display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 3px; vertical-align: middle; }
@@ -62,18 +62,238 @@
         }
 
         .area-documentos { display: none; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .modal-box { background: var(--surface); padding: 25px; border-radius: 8px; width: 95%; max-width: 850px; max-height: 95vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 2px solid var(--accent); }
-        .modal-box h3 { color: var(--accent); margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid var(--border-strong); padding-bottom: 10px; }
-        .grid-docs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .grid-docs label { font-size: 13px; font-weight: bold; color: var(--text-strong); display: flex; flex-direction: column; gap: 5px; }
-        .grid-docs input, .grid-docs select { padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; font-size: 14px; background: var(--surface-muted); color: var(--text-strong); }
-        .secao-modal { background: var(--surface-muted); padding: 15px; border-radius: 6px; border: 1px solid var(--border-strong); margin-bottom: 15px; }
-        .secao-titulo { font-size: 14px; font-weight: bold; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase; }
-        .nr-linha-modal { display: flex; gap: 10px; align-items: center; background: var(--surface); padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; margin-bottom: 8px; }
-        
+
+        .painel-docs-card {
+            border: 1px solid var(--border, var(--border-strong));
+            border-top: 4px solid var(--accent);
+        }
+
+        .titulo-secao-docs {
+            margin: 0 0 18px 0;
+            color: var(--text-strong);
+            font-size: 22px;
+            border-bottom: 1px solid var(--border, var(--border-strong));
+            padding-bottom: 12px;
+        }
+
+        .filtro-box-docs {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+            align-items: flex-end;
+            background: var(--surface-muted);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border, var(--border-strong));
+        }
+
+        .filtro-campo-docs {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filtro-campo-docs label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary, var(--text-muted));
+        }
+
+        .filtro-linha-input {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .input-doc-moderno {
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-strong);
+            background: var(--surface);
+            color: var(--text-strong);
+            font-family: inherit;
+            font-size: 13.5px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        .input-doc-moderno:hover {
+            border-color: var(--border-hover, var(--accent));
+        }
+
+        .input-doc-moderno:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-ring, rgba(59, 130, 246, 0.2));
+        }
+
+        .btn-doc-acao {
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13.5px;
+            font-family: inherit;
+            box-shadow: var(--shadow-btn, 0 2px 6px rgba(0, 0, 0, 0.12));
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+
+        .btn-doc-acao:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .btn-doc-acao:active {
+            transform: translateY(0);
+        }
+
+        .btn-gerar-docs {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong, #003366) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12.5px;
+            font-family: inherit;
+            box-shadow: var(--shadow-btn, 0 2px 6px rgba(0, 0, 0, 0.12));
+            transition: all 0.18s ease;
+        }
+
+        .btn-gerar-docs:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+        }
+
+        .estado-vazio-docs {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            display: none;
+            background: var(--bg-slate, var(--surface-muted));
+            border-radius: 12px;
+            border: 1px dashed var(--border-strong);
+            margin-top: 14px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.68);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            padding: 26px;
+            border-radius: var(--radius-lg, 14px);
+            width: 100%;
+            max-width: 860px;
+            max-height: 95vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-hover, 0 14px 34px rgba(0, 0, 0, 0.25));
+            border: 1px solid var(--border, var(--border-strong));
+            border-top: 4px solid var(--accent);
+            box-sizing: border-box;
+        }
+
+        .modal-box h3 {
+            color: var(--accent);
+            margin-top: 0;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border, var(--border-strong));
+            padding-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .grid-docs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .grid-docs label {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-secondary, var(--text-strong));
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .grid-docs input, .grid-docs select {
+            padding: 9px 12px;
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            font-size: 13.5px;
+            background: var(--surface-muted);
+            color: var(--text-strong);
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        .grid-docs input:focus, .grid-docs select:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px var(--accent-ring, rgba(59, 130, 246, 0.2));
+        }
+
+        .secao-modal {
+            background: var(--surface-muted);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border, var(--border-strong));
+            margin-bottom: 16px;
+        }
+
+        .secao-titulo {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-strong);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .nr-linha-modal {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: var(--surface);
+            padding: 10px;
+            border: 1px solid var(--border, var(--border-strong));
+            border-radius: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nr-linha-modal input, .nr-linha-modal select {
+            padding: 8px 10px;
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            background: var(--surface-muted);
+            color: var(--text-strong);
+            font-family: inherit;
+            font-size: 13px;
+        }
+
         @media (max-width: 650px) {
+            .grid-docs { grid-template-columns: 1fr; }
             .esocial-linha { flex-direction: column; align-items: stretch !important; }
+            .filtro-linha-input { flex-direction: column; align-items: stretch; }
+            .modal-box { padding: 20px 16px; }
         }
     </style>
 </head>
@@ -106,7 +326,6 @@
                 const elCad = document.getElementById('menu-cadastros');
                 if (elDoc) elDoc.style.display = 'inline-block';
                 if (elCad) elCad.style.display = 'inline-block';
-            
             }
             if (setorNav === 'admin') {
                 const elAdmin = document.getElementById('menu-admin');
@@ -120,23 +339,23 @@
     </header>
     
     <main class="no-print">
-        <div class="painel-recepcao">
-            <h2 style="margin: 0 0 15px 0; color: var(--text-strong);">Buscar Colaborador para Gerar ASO</h2>
+        <div class="painel-recepcao painel-docs-card">
+            <h2 class="titulo-secao-docs">Buscar Colaborador para Gerar ASO</h2>
             
-            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-end; background: var(--surface); padding: 15px; border-radius: 8px; border: 1px solid var(--border-strong);">
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label for="filtro-data" style="font-size: 12px; font-weight: bold; color: var(--text-muted);">📅 Ver por Data:</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="date" id="filtro-data" style="padding: 8px; border-radius: 5px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong);">
-                        <button onclick="executarBusca('data')" style="background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Carregar</button>
+            <div class="filtro-box-docs">
+                <div class="filtro-campo-docs">
+                    <label for="filtro-data">📅 Ver por Data:</label>
+                    <div class="filtro-linha-input">
+                        <input type="date" id="filtro-data" class="input-doc-moderno">
+                        <button onclick="executarBusca('data')" class="btn-doc-acao" style="background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong, #003366) 100%); color: #ffffff;">Carregar</button>
                     </div>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
-                    <label for="pesquisa-paciente" style="font-size: 12px; font-weight: bold; color: var(--text-muted);">🌍 Buscar em TODO o Histórico (Qualquer Data):</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="text" id="pesquisa-paciente" placeholder="Digite Nome ou CPF e aperte Enter..." style="padding: 8px; border-radius: 5px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong); flex: 1;">
-                        <button onclick="executarBusca('texto')" style="background: var(--warning); color: #0f172a; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">🔎 Buscar</button>
+                <div class="filtro-campo-docs" style="flex: 1; min-width: 240px;">
+                    <label for="pesquisa-paciente">🌍 Buscar em TODO o Histórico (Qualquer Data):</label>
+                    <div class="filtro-linha-input">
+                        <input type="text" id="pesquisa-paciente" placeholder="Digite Nome ou CPF e aperte Enter..." class="input-doc-moderno" style="flex: 1;">
+                        <button onclick="executarBusca('texto')" class="btn-doc-acao" style="background: linear-gradient(135deg, var(--warning) 0%, #b45309 100%); color: #0f172a;">🔎 Buscar</button>
                     </div>
                 </div>
             </div>
@@ -149,7 +368,7 @@
                     <tbody id="lista-pacientes"></tbody>
                 </table>
             </div>
-             <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-top: 10px;">
+            <div id="msg-vazio" class="estado-vazio-docs">
                 <strong>Nenhum paciente encontrado.</strong>
             </div>
         </div>
@@ -159,7 +378,7 @@
     <div id="modal-docs" class="modal-overlay no-print" style="display:none;">
         <div class="modal-box">
             <h3>📝 Completar Dados do ASO</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin-top: -15px; margin-bottom: 15px;">Dados consultados diretamente da base de dados. Altere o que precisar.</p>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: -12px; margin-bottom: 16px;">Dados consultados diretamente da base de dados. Altere o que precisar.</p>
             
             <div class="secao-modal">
                 <div class="secao-titulo">1. Dados da Empresa e Paciente</div>
@@ -172,15 +391,15 @@
                     <label for="in-setor">Setor de Trabalho: <input type="text" id="in-setor" placeholder="Ex: Manutenção"></label>
                     <label for="in-data-aso">Data de Realização do ASO: <input type="date" id="in-data-aso"></label>
                     <label for="in-medico-pcmso" style="grid-column: span 2;">Médico(a) Coordenador(a) PCMSO: <input type="text" id="in-medico-pcmso" value="Dra. Morganna Bárbara Lopes Dantas CRM -16.560/PA"></label>
-                    <div style="display: flex; gap: 15px; grid-column: span 2;">
-                        <label for="in-sexo" style="flex: 1;">Sexo: 
+                    <div style="display: flex; gap: 15px; grid-column: span 2; flex-wrap: wrap;">
+                        <label for="in-sexo" style="flex: 1; min-width: 140px;">Sexo: 
                             <select id="in-sexo">
                                 <option value="☑ Masc. ☐ Fem.">Masculino</option>
                                 <option value="☐ Masc. ☑ Fem.">Feminino</option>
                             </select>
                         </label>
-                        <label for="in-est-civil" style="flex: 1;">Estado Civil: <input type="text" id="in-est-civil" placeholder="Ex: Solteiro"></label>
-                        <label for="in-filhos" style="flex: 1;">Nº Filhos: <input type="number" id="in-filhos"></label>
+                        <label for="in-est-civil" style="flex: 1; min-width: 140px;">Estado Civil: <input type="text" id="in-est-civil" placeholder="Ex: Solteiro"></label>
+                        <label for="in-filhos" style="flex: 1; min-width: 120px;">Nº Filhos: <input type="number" id="in-filhos"></label>
                     </div>
                 </div>
             </div>
@@ -207,21 +426,21 @@
                             <option value="sem_marcar">Sem marcar</option>
                         </select>
                     </label>
-                    <div style="font-size: 13px; font-weight: bold; color: var(--text-strong); display: flex; flex-direction: column; gap: 5px;">
+                    <div style="font-size: 12.5px; font-weight: 600; color: var(--text-secondary, var(--text-strong)); display: flex; flex-direction: column; gap: 6px;">
                         Adicionar Normas Regulamentadoras (NRs):
-                        <div id="container-nrs-modal" style="margin-top: 5px;"></div>
-                        <button type="button" onclick="adicionarLinhaNrModal()" style="margin-top: 5px; background: #003366; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: fit-content;">+ Adicionar outra NR</button>
+                        <div id="container-nrs-modal" style="margin-top: 4px;"></div>
+                        <button type="button" onclick="adicionarLinhaNrModal()" class="btn-doc-acao" style="margin-top: 4px; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong, #003366) 100%); color: #ffffff; padding: 7px 14px; font-size: 12px; width: fit-content;">+ Adicionar outra NR</button>
                     </div>
                 </div>
             </div>
 
             <div class="secao-modal">
                 <div class="secao-titulo">4. Validação de Exames, Exames Extras e Datas (e-Social)</div>
-                <p style="font-size: 12px; color: var(--text-muted); margin-top: -5px; margin-bottom: 10px;">Você pode ajustar a data de realização individual, o código e-Social ou incluir exames extras (salvos no cadastro do atendimento).</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: -6px; margin-bottom: 12px;">Você pode ajustar a data de realização individual, o código e-Social ou incluir exames extras (salvos no cadastro do atendimento).</p>
                 
                 <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
-                    <input type="text" id="in-novo-exame-extra" placeholder="Digite o nome do exame extra para incluir no ASO..." style="flex: 1; min-width: 220px; padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); color: var(--text-strong); font-size: 13px;">
-                    <button type="button" id="btn-add-exame-extra-modal" style="background: var(--accent); color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">+ Incluir Exame Extra</button>
+                    <input type="text" id="in-novo-exame-extra" placeholder="Digite o nome do exame extra para incluir no ASO..." style="flex: 1; min-width: 220px; padding: 9px 12px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text-strong); font-size: 13px; font-family: inherit;">
+                    <button type="button" id="btn-add-exame-extra-modal" class="btn-doc-acao" style="background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong, #003366) 100%); color: #ffffff; font-size: 13px;">+ Incluir Exame Extra</button>
                 </div>
 
                 <div id="container-esocial-modal" style="display: flex; flex-direction: column; gap: 8px;">
@@ -231,17 +450,17 @@
 
             <div class="secao-modal">
                 <div class="secao-titulo">5. Opções de Impressão</div>
-                <div style="background: var(--surface); padding: 10px 15px; border: 1px solid var(--border-strong); border-radius: 4px;">
+                <div style="background: var(--surface); padding: 12px 15px; border: 1px solid var(--border, var(--border-strong)); border-radius: 10px;">
                     <label for="chk-imprimir-psico" style="display: flex; flex-direction: row; align-items: center; gap: 10px; cursor: pointer; margin: 0;">
                         <input type="checkbox" id="chk-imprimir-psico" style="width: 18px; height: 18px; cursor: pointer;">
-                        <span style="font-size: 14px; color: var(--text-strong);">Imprimir formulário de Avaliação Psicossocial (Folha Única com Parecer Médico)</span>
+                        <span style="font-size: 13.5px; font-weight: 600; color: var(--text-strong);">Imprimir formulário de Avaliação Psicossocial (Folha Única com Parecer Médico)</span>
                     </label>
                 </div>
             </div>
 
-            <div style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">
-                <button onclick="fecharModalDocs()" style="padding:10px 15px; border-radius:5px; border:1px solid var(--border-strong); background:var(--surface-muted); color: var(--text-strong); cursor:pointer; font-weight:bold;">Cancelar</button>
-                <button id="btn-confirmar-impressao" style="padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size: 15px;">🖨️ Salvar e Imprimir Documentos</button>
+            <div style="margin-top:22px; display:flex; justify-content:flex-end; gap:10px; flex-wrap: wrap;">
+                <button onclick="fecharModalDocs()" style="padding:10px 16px; border-radius:10px; border:1px solid var(--border-strong); background:var(--surface-muted); color: var(--text-strong); cursor:pointer; font-weight:600; font-family:inherit;">Cancelar</button>
+                <button id="btn-confirmar-impressao" class="btn-doc-acao" style="background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong, #003366) 100%); color: #ffffff; padding:10px 22px; font-size: 14px;">🖨️ Salvar e Imprimir Documentos</button>
             </div>
         </div>
     </div>
@@ -427,7 +646,6 @@
                 <tr><td>Doença da Pele</td><td></td><td></td><td>Foi submetido a alguma cirurgia? Qual?</td><td></td><td></td></tr>
                 <tr><td>Covid-19</td><td></td><td></td><td>Toma algum medicamento? Qual?</td><td></td><td></td></tr>
                 
-
                 <!-- SEPARADOR INTERNO: 3 – ANTECEDENTES FAMILIARES (APENAS SIM / NÃO) -->
                 <tr>
                     <td colspan="6" class="titulo-secao" style="text-align: left; padding: 3px 6px;">
@@ -464,7 +682,7 @@
                     <td colspan="4" class="titulo-secao" style="text-align: left; padding: 3px 6px;">
                         4 – ANTECEDENTES OCUPACIONAIS (marque Sim ou Não)
                         <th style="text-align: center;">Sim</th>
-                    <th style="text-align: center;">Não</th>
+                        <th style="text-align: center;">Não</th>
                     </td>
                 </tr>
                 <tr>
@@ -481,11 +699,10 @@
             <table class="tabela-word" style="font-size: 11pt; margin-top: 8px;" height="150px">
                 <tr><td style="height: 36px; vertical-align: top;"><p style="margin: 0;">Observação:</p></td></tr>
             </table>
-            <p style="text-align: justify; font-size: 11pt; margin-top: 14px;" margin-bottom="14px" >Declaro que as informações por mim prestadas são verdadeiras e completas.</p>
+            <p style="text-align: justify; font-size: 11pt; margin-top: 14px;" margin-bottom="14px">Declaro que as informações por mim prestadas são verdadeiras e completas.</p>
             <table class="tabela-sem-borda" style="width: 100%; margin-top: 38px; font-size: 11pt;">
                 <tr><td style="width: 40%;">Data ______ / ______ / ______</td><td style="width: 60%;"><div class="linha-ass">Assinatura do funcionário</div></td></tr>
             </table>
-            
         </div>
 
         <!-- PÁGINA 4: AVALIAÇÃO PSICOSSOCIAL COMPLETA (FOLHA ÚNICA: PACIENTE + MÉDICO) -->
@@ -596,7 +813,7 @@
                     <option value="apto" ${status === 'apto' ? 'selected' : ''}>Apto</option>
                     <option value="inapto" ${status === 'inapto' ? 'selected' : ''}>Inapto</option>
                 </select>
-                <button type="button" onclick="this.parentElement.remove()" style="background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer;">✕</button>
+                <button type="button" onclick="this.parentElement.remove()" style="background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer;">✕</button>
             `;
             container.appendChild(novaLinha);
         }
@@ -741,15 +958,15 @@
             }
 
             function criarHtmlLinhaExame(exameNome, selectOptions, dataISO, isExtra = false) {
-                const badgeExtra = isExtra ? `<span style="background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; white-space: nowrap;">EXTRA</span>` : '';
-                const btnRemover = isExtra ? `<button type="button" onclick="this.closest('.esocial-linha').remove()" title="Remover exame extra" style="background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>` : '';
+                const badgeExtra = isExtra ? `<span style="background: var(--accent-soft, rgba(59,130,246,0.12)); color: var(--accent); border: 1px solid var(--accent); font-size: 10px; font-weight: bold; padding: 2px 7px; border-radius: 999px; white-space: nowrap;">EXTRA</span>` : '';
+                const btnRemover = isExtra ? `<button type="button" onclick="this.closest('.esocial-linha').remove()" title="Remover exame extra" style="background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-weight: bold;">✕</button>` : '';
 
                 return `
-                    <div class="esocial-linha" data-extra="${isExtra}" style="display: flex; gap: 8px; align-items: center; background: var(--surface); padding: 8px; border: 1px solid var(--border-strong); border-radius: 4px; flex-wrap: wrap;">
+                    <div class="esocial-linha" data-extra="${isExtra}" style="display: flex; gap: 8px; align-items: center; background: var(--surface); padding: 9px 10px; border: 1px solid var(--border, var(--border-strong)); border-radius: 8px; flex-wrap: wrap;">
                         ${badgeExtra}
-                        <input type="text" class="eso-nome-print" value="${exameNome}" style="flex: 2; min-width: 150px; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: ${isExtra ? 'var(--surface)' : 'var(--surface-muted)'}; color: var(--text-strong);" ${isExtra ? '' : 'readonly'}>
-                        <input type="date" class="eso-data-print" value="${dataISO}" title="Data de realização deste exame" style="flex: 1; min-width: 130px; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); color: var(--text-strong);">
-                        <select class="eso-codigo-print" style="flex: 2; min-width: 180px; padding: 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); color: var(--text-strong);">
+                        <input type="text" class="eso-nome-print" value="${exameNome}" style="flex: 2; min-width: 150px; padding: 7px 10px; border: 1px solid var(--border-strong); border-radius: 8px; background: ${isExtra ? 'var(--surface)' : 'var(--surface-muted)'}; color: var(--text-strong); font-family: inherit;" ${isExtra ? '' : 'readonly'}>
+                        <input type="date" class="eso-data-print" value="${dataISO}" title="Data de realização deste exame" style="flex: 1; min-width: 130px; padding: 7px 10px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text-strong); font-family: inherit;">
+                        <select class="eso-codigo-print" style="flex: 2; min-width: 180px; padding: 7px 10px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text-strong); font-family: inherit;">
                             ${selectOptions}
                         </select>
                         ${btnRemover}
@@ -824,11 +1041,11 @@
                 pacientes.forEach((pac) => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td><div style="font-size: 11px; font-weight:bold; color:var(--accent); margin-bottom:4px;">📅 ${formatarDataBR(pac.data_exame)}</div><span style="font-size: 13px;">${pac.empresa}</span></td>
+                        <td><div style="font-size: 11px; font-weight:700; color:var(--accent); margin-bottom:4px;">📅 ${formatarDataBR(pac.data_exame)}</div><span style="font-size: 13px;">${pac.empresa}</span></td>
                         <td><strong>${pac.nome}</strong></td>
                         <td>${pac.cpf || '-'}</td>
                         <td>${pac.funcao || '-'}</td>
-                        <td style="text-align: center;"><button class="btn-gerar-docs" data-id="${pac.id}" style="background-color: #003366; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold;">📄 Gerar Documentos</button></td>
+                        <td style="text-align: center;"><button class="btn-gerar-docs" data-id="${pac.id}">📄 Gerar Documentos</button></td>
                     `;
                     tabela.appendChild(tr);
                 });
@@ -1179,3 +1396,4 @@
     </script>
 </body>
 </html>
+```[cite: 11, 12]

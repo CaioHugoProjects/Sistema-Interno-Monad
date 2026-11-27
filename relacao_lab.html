@@ -17,98 +17,352 @@
         }
     </script>
     <style>
-        .tabela-relacao { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-float); border: none; }
-        .tabela-relacao th, .tabela-relacao td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-strong); color: var(--text-strong); font-size: 14px;}
-        .tabela-relacao th { background: var(--surface-muted); color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 12px; }
+        .painel-lab-card {
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--accent);
+        }
+
+        .tabela-relacao {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-float);
+            border: 1px solid var(--border);
+        }
+        .tabela-relacao th, .tabela-relacao td {
+            padding: 13px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-strong);
+            font-size: 13.5px;
+        }
+        .tabela-relacao th {
+            background: var(--surface-muted);
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11.5px;
+            letter-spacing: 0.4px;
+        }
+        .tabela-relacao tbody tr {
+            transition: background-color 0.15s ease;
+        }
+        .tabela-relacao tbody tr:hover {
+            background: var(--surface-muted);
+        }
         .tabela-relacao tr:last-child td { border-bottom: none; }
-        
+
         .painel-filtros-exames {
-            background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-md); 
-            padding: 20px; margin-bottom: 25px; box-shadow: inset 0 2px 4px rgba(15,23,42,0.02); display: none;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 14px -6px rgba(15, 23, 42, 0.08);
+            display: none;
         }
         .exame-filtro-label {
-            font-size: 13px; font-weight: 500; color: var(--text-main); display: flex; align-items: center; gap: 8px;
-            padding: 8px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
-            background-color: var(--surface-muted); cursor: pointer; transition: all 0.2s; user-select: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 13px;
+            border: 1px solid var(--border-strong);
+            border-radius: 9px;
+            background-color: var(--surface-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
         }
-        .exame-filtro-label:hover { border-color: var(--accent); background-color: var(--surface); }
-        .exame-filtro-label input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; margin: 0; }
-        
-        [data-theme="dark"] .painel-filtros-exames { background-color: #0f172a; border-color: #334155; }
-        [data-theme="dark"] .exame-filtro-label { background-color: #1e293b; border-color: #334155; color: #cbd5e1; }
-        [data-theme="dark"] .exame-filtro-label:hover { border-color: #3b82f6; background-color: #0f172a; }
+        .exame-filtro-label:hover {
+            border-color: var(--accent);
+            background-color: var(--surface);
+            transform: translateY(-1px);
+        }
+        .exame-filtro-label input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            margin: 0;
+        }
 
-        .btn-mini { background: transparent; border: 1px solid var(--border-strong); color: var(--text-muted); padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold;}
-        .btn-mini:hover { background: var(--surface-strong); color: var(--text-strong); }
+        .btn-mini {
+            background: var(--surface-muted);
+            border: 1px solid var(--border-strong);
+            color: var(--text-secondary);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.18s ease;
+        }
+        .btn-mini:hover {
+            background: var(--surface);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
 
         .btn-remover-paciente {
-            background-color: var(--danger); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 15px; font-weight: bold;
-            display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; line-height: 1; transition: transform 0.2s, background-color 0.2s; flex-shrink: 0;
+            background: linear-gradient(135deg, var(--danger) 0%, #b91c1c 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 15px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+            transition: transform 0.18s ease, filter 0.18s ease;
+            flex-shrink: 0;
         }
-        .btn-remover-paciente:hover { transform: scale(1.15); background-color: #b91c1c; }
-        .cpf-label { margin-left: 30px; }
+        .btn-remover-paciente:hover {
+            transform: scale(1.12);
+            filter: brightness(1.08);
+        }
+        .cpf-label { margin-left: 32px; }
 
         .tag-exame-paciente {
-            background: var(--surface-muted); border: 1px solid var(--border-strong); border-radius: 4px; padding: 4px 8px; font-size: 11px; 
-            display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text-main);
+            background: var(--surface-muted);
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            padding: 5px 9px;
+            font-size: 11.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-weight: 600;
+            color: var(--text-main);
         }
-        [data-theme="dark"] .tag-exame-paciente { background: #0f172a; border-color: #334155; color: #cbd5e1; }
-        
-        .btn-remover-exame { background: transparent; color: var(--danger); border: none; cursor: pointer; padding: 0; font-size: 14px; line-height: 1; display: flex; align-items: center; }
-        .btn-remover-exame:hover { color: #b91c1c; transform: scale(1.2); }
+
+        .btn-remover-exame {
+            background: transparent;
+            color: var(--danger);
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            transition: transform 0.15s ease;
+        }
+        .btn-remover-exame:hover {
+            color: #b91c1c;
+            transform: scale(1.2);
+        }
 
         .btn-add-exame-pac {
-            background: var(--accent-soft); color: var(--accent); border: 1px dashed var(--accent); border-radius: 4px; padding: 4px 8px; 
-            font-size: 11px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; transition: background 0.2s;
+            background: var(--accent-soft);
+            color: var(--accent);
+            border: 1px dashed var(--accent);
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 11.5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.18s ease;
         }
-        .btn-add-exame-pac:hover { background: var(--accent); color: white; }
-        
-        .justificativa-label { display: block; font-size: 12px; color: var(--danger); font-style: italic; font-weight: bold; margin-top: 4px; }
+        .btn-add-exame-pac:hover {
+            background: var(--accent);
+            color: #ffffff;
+        }
 
-        /* MODAIS - Busca Global */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .modal-box { background: var(--surface); padding: 25px; border-radius: 8px; width: 95%; max-width: 600px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 2px solid var(--accent); }
-        .modal-box h3 { color: var(--text-strong); margin-top: 0; margin-bottom: 15px; border-bottom: 2px solid var(--border-strong); padding-bottom: 10px; }
-        
-        .tabela-busca-global { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; min-width: 400px;}
-        .tabela-busca-global th, .tabela-busca-global td { padding: 8px; border-bottom: 1px solid var(--border-strong); color: var(--text-strong); text-align: left; }
-        .tabela-busca-global th { background-color: var(--surface-muted); font-weight: bold; }
+        .justificativa-label {
+            display: block;
+            font-size: 11.5px;
+            color: var(--danger);
+            font-style: italic;
+            font-weight: 600;
+            margin-top: 4px;
+        }
 
+        .estado-vazio-lab {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            display: none;
+            background: var(--surface-muted);
+            border-radius: 12px;
+            border: 1px dashed var(--border-strong);
+            margin-bottom: 40px;
+        }
 
-        /* CLASSES PARA RESPONSIVIDADE (MOBILE FIRST) */
-        .toolbar-relacao { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-        .toolbar-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .divisor-esq { border-left: 2px solid var(--border-strong); padding-left: 15px; }
-        
-        .input-moderno { padding: 9px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong); font-size: 13px; font-family: inherit; }
-        .btn-acao { background-color: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); font-size: 13px; font-family: inherit; transition: opacity 0.2s;}
-        .btn-acao:hover { opacity: 0.9; }
-        .btn-warning { background-color: var(--warning); color: #0f172a; }
-        .btn-imprimir-relacao { background-color: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 15px; box-shadow: var(--shadow-btn); display: flex; gap: 8px; align-items: center; font-family: inherit; transition: opacity 0.2s; justify-content: center;}
-        .btn-imprimir-relacao:hover { opacity: 0.9; }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.68);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .modal-box {
+            background: var(--surface);
+            padding: 26px;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 620px;
+            box-shadow: var(--shadow-hover);
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--accent);
+            box-sizing: border-box;
+        }
+        .modal-box h3 {
+            color: var(--text-strong);
+            margin-top: 0;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            font-size: 18px;
+        }
 
-/* Ajuste responsivo para transformar tabela em blocos no celular */
+        .tabela-busca-global {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 420px;
+        }
+        .tabela-busca-global th, .tabela-busca-global td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-strong);
+            text-align: left;
+        }
+        .tabela-busca-global th {
+            background-color: var(--surface-muted);
+            font-weight: 700;
+            font-size: 11.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .toolbar-relacao {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .divisor-esq {
+            border-left: 1px solid var(--border-strong);
+            padding-left: 16px;
+        }
+
+        .input-moderno {
+            padding: 10px 12px;
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            background: var(--surface-muted);
+            color: var(--text-strong);
+            font-size: 13.5px;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+        .input-moderno:hover {
+            border-color: var(--border-hover);
+        }
+        .input-moderno:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 4px var(--accent-ring);
+        }
+
+        .btn-acao {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13.5px;
+            box-shadow: var(--shadow-btn);
+            font-family: inherit;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+        .btn-acao:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+        }
+        .btn-acao:active {
+            transform: translateY(0);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #b45309 100%);
+            color: #ffffff;
+        }
+
+        .btn-imprimir-relacao {
+            background: linear-gradient(135deg, var(--success) 0%, #047857 100%);
+            color: #ffffff;
+            border: none;
+            padding: 11px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: var(--shadow-btn);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-family: inherit;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            justify-content: center;
+            white-space: nowrap;
+        }
+        .btn-imprimir-relacao:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+        }
+        .btn-imprimir-relacao:active {
+            transform: translateY(0);
+        }
+
         .table-responsive-wrapper { width: 100%; }
+        .print-only { display: none; }
 
         @media (max-width: 768px) {
-            /* Esconde o cabeçalho tradicional da tabela no celular */
             .tabela-relacao thead { display: none; }
-            
             .tabela-relacao, .tabela-relacao tbody, .tabela-relacao tr, .tabela-relacao td {
                 display: block;
                 width: 100%;
             }
-
-            /* Transforma cada linha (tr) em um cartão separado */
             .tabela-relacao tr {
                 background: var(--surface);
-                border: 1px solid var(--border-strong);
+                border: 1px solid var(--border);
                 border-radius: var(--radius-md);
                 margin-bottom: 15px;
                 padding: 15px;
                 box-shadow: var(--shadow-float);
+                box-sizing: border-box;
             }
-
             .tabela-relacao td {
                 display: flex;
                 justify-content: space-between;
@@ -117,23 +371,16 @@
                 border-bottom: 1px solid var(--border-light);
                 text-align: right !important;
             }
-
-            .tabela-relacao td:last-child {
-                border-bottom: none;
-            }
-
-            /* Cria rótulos automáticos baseados no atributo data-label */
+            .tabela-relacao td:last-child { border-bottom: none; }
             .tabela-relacao td::before {
                 content: attr(data-label);
-                font-weight: bold;
+                font-weight: 700;
                 text-transform: uppercase;
                 font-size: 11px;
                 color: var(--text-muted);
                 text-align: left;
             }
-
-            /* Ajuste específico para o conteúdo do paciente/exames no card mobile */
-            .tabela-relacao td.celula-paciente, 
+            .tabela-relacao td.celula-paciente,
             .tabela-relacao td.celula-exames {
                 display: block;
                 text-align: left !important;
@@ -143,87 +390,68 @@
                 display: block;
                 margin-bottom: 4px;
             }
-        }        
-        @media (max-width: 768px) {
             .toolbar-relacao { flex-direction: column; align-items: stretch; }
             .toolbar-group { flex-direction: column; align-items: stretch; width: 100%; border-left: none; padding-left: 0; }
             .divisor-esq { border-top: 1px dashed var(--border-strong); padding-top: 15px; margin-top: 5px; }
             .input-moderno, .btn-acao { width: 100%; }
-            .btn-imprimir-relacao { width: 100%; margin-top: 15px; }
+            .btn-imprimir-relacao { width: 100%; margin-top: 10px; }
             .hide-mobile { display: none; }
-            
-            .modal-box { padding: 15px; width: 100%; margin: 15px; }
+            .modal-box { padding: 18px 14px; }
             .tabela-busca-global { font-size: 12px; }
-            .tabela-busca-global th, .tabela-busca-global td { padding: 6px; }
+            .tabela-busca-global th, .tabela-busca-global td { padding: 8px 6px; }
         }
 
-        .print-only { display: none; }
-
-        /* REGRAS DE IMPRESSÃO - Mantém o formato tabular original e limpo */
-       /* REGRAS DE IMPRESSÃO - Modelo Clássico Original */
-        /* REGRAS DE IMPRESSÃO - Correção Definitiva do Layout Tabular */
-        /* REGRAS DE IMPRESSÃO - Correção definitiva dos títulos internos */
-       /* REGRAS DE IMPRESSÃO - Exibe os títulos das colunas corretamente */
-        /* REGRAS DE IMPRESSÃO - Alinhamento de colunas e remoção da última coluna */
-        /* REGRAS DE IMPRESSÃO - Alinhamento perfeito de colunas sem a última */
-        /* REGRAS DE IMPRESSÃO - Formato Exato da Imagem de Referência */
-       /* REGRAS DE IMPRESSÃO - Alinhamento Perfeito e Formato Clássico */
-       /* REGRAS DE IMPRESSÃO - Correção de Alinhamento (Reset do TBODY) */
         @media print {
             @page { size: A4 portrait; margin: 10mm; }
             body, [data-theme="dark"] body { background: white !important; color: black !important; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            
-            .cpf-label { margin-left: 0 !important; color: #333 !important; font-size: 10px !important; } 
-            .justificativa-label { color: black !important; font-size: 10px !important; margin-left: 0 !important;}
+
+            .cpf-label { margin-left: 0 !important; color: #333 !important; font-size: 10px !important; }
+            .justificativa-label { color: black !important; font-size: 10px !important; margin-left: 0 !important; }
 
             #area-relacao { display: block !important; width: 100% !important; }
             .table-responsive-wrapper { display: block !important; width: 100% !important; overflow: visible !important; border: none !important; padding: 0 !important; margin: 0 !important; }
 
-            /* RESTAURAÇÃO ESTRUTURAL COMPLETA DA TABELA */
-            .tabela-relacao { 
-                display: table !important; 
-                width: 100% !important; 
+            .tabela-relacao {
+                display: table !important;
+                width: 100% !important;
                 max-width: 100% !important;
-                border-collapse: collapse !important; 
-                table-layout: fixed !important; 
-                border: 1px solid black !important; 
+                border-collapse: collapse !important;
+                table-layout: fixed !important;
+                border: 1px solid black !important;
+                box-shadow: none !important;
             }
             .tabela-relacao thead { display: table-header-group !important; }
-            .tabela-relacao tbody { display: table-row-group !important; } /* ← A SOLUÇÃO ESTÁ AQUI */
+            .tabela-relacao tbody { display: table-row-group !important; }
             .tabela-relacao tr { display: table-row !important; page-break-inside: avoid !important; }
-            
-            .tabela-relacao th, .tabela-relacao td { 
-                display: table-cell !important; 
-                border: 1px solid black !important; 
-                padding: 6px !important; 
-                color: black !important; 
-                font-size: 11px !important; 
-                text-align: left !important; 
-                vertical-align: middle !important; 
-                word-wrap: break-word !important; 
+
+            .tabela-relacao th, .tabela-relacao td {
+                display: table-cell !important;
+                border: 1px solid black !important;
+                padding: 6px !important;
+                color: black !important;
+                font-size: 11px !important;
+                text-align: left !important;
+                vertical-align: middle !important;
+                word-wrap: break-word !important;
             }
             .tabela-relacao th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-weight: bold !important; }
-            
-            /* LARGURAS EXATAS */
-            .tabela-relacao th:nth-child(1), .tabela-relacao td:nth-child(1) { width: 5% !important; text-align: center !important; } /* Nº */
-            .tabela-relacao th:nth-child(2), .tabela-relacao td:nth-child(2) { width: 28% !important; } /* PACIENTE / CPF */
-            .tabela-relacao th:nth-child(3), .tabela-relacao td:nth-child(3) { width: 13% !important; } /* NASCIMENTO */
-            .tabela-relacao th:nth-child(4), .tabela-relacao td:nth-child(4) { width: 15% !important; } /* EMPRESA */
-            .tabela-relacao th:nth-child(5), .tabela-relacao td:nth-child(5) { width: 31% !important; } /* EXAMES */
-            .tabela-relacao th:nth-child(6), .tabela-relacao td:nth-child(6) { width: 8% !important; }  /* VISTO VAZIO */
 
-            /* Força a remoção de textos e botões injetados pela versão mobile */
+            .tabela-relacao th:nth-child(1), .tabela-relacao td:nth-child(1) { width: 5% !important; text-align: center !important; }
+            .tabela-relacao th:nth-child(2), .tabela-relacao td:nth-child(2) { width: 28% !important; }
+            .tabela-relacao th:nth-child(3), .tabela-relacao td:nth-child(3) { width: 13% !important; }
+            .tabela-relacao th:nth-child(4), .tabela-relacao td:nth-child(4) { width: 15% !important; }
+            .tabela-relacao th:nth-child(5), .tabela-relacao td:nth-child(5) { width: 31% !important; }
+            .tabela-relacao th:nth-child(6), .tabela-relacao td:nth-child(6) { width: 8% !important; }
+
             .tabela-relacao td::before { content: none !important; display: none !important; }
             .btn-add-exame-pac, .btn-remover-exame, .btn-remover-paciente { display: none !important; }
 
-            /* Converte visual de tag para texto corrido com vírgulas */
-            .tag-exame-paciente { display: inline !important; border: none !important; background: transparent !important; padding: 0 !important; color: black !important; font-size: 11px !important; font-weight: normal !important;}
+            .tag-exame-paciente { display: inline !important; border: none !important; background: transparent !important; padding: 0 !important; color: black !important; font-size: 11px !important; font-weight: normal !important; }
             .tag-exame-paciente::after { content: ", "; }
             .tag-exame-paciente:last-of-type::after { content: ""; }
 
-            /* Bloco de assinaturas final */
             .assinaturas { display: flex !important; justify-content: space-between !important; margin-top: 40px !important; width: 100% !important; page-break-inside: avoid !important; }
             .box-assinatura { text-align: center; width: 45%; }
             .linha-ass { border-top: 1px solid black; margin-bottom: 5px; }
@@ -235,49 +463,49 @@
         <h1 style="color: var(--text-strong);">Relação de Envio - Laboratório</h1>
         <h2>Cadeia de Custódia de Amostras</h2>
         <div class="header-controls">
-            <button onclick="window.location.href='setor.html'" class="btn-header-outline">Voltar ao Painel</button>
-            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
+            <button type="button" id="btn-voltar-setor" class="btn-header-outline">Voltar ao Painel</button>
+            <button type="button" id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
+            <button type="button" id="btn-sair-sistema" class="btn-header-danger">Sair</button>
         </div>
     </header>
-    
+
     <main>
-        <div class="painel-recepcao no-print" style="margin-bottom: 20px;">
+        <div class="painel-recepcao painel-lab-card no-print" style="margin-bottom: 20px;">
             <div class="toolbar-relacao">
                 <div class="toolbar-group">
-                    <label style="font-weight: bold; color: var(--text-strong);">Data da Coleta:</label>
+                    <label for="filtro-data" style="font-weight: 600; color: var(--text-strong);">Data da Coleta:</label>
                     <input type="date" id="filtro-data" class="input-moderno">
-                    <button id="btn-buscar-data" class="btn-acao">Puxar Amostras</button>
+                    <button type="button" id="btn-buscar-data" class="btn-acao">Puxar Amostras</button>
                 </div>
-                
+
                 <div class="toolbar-group divisor-esq">
-                    <label style="font-weight: bold; color: var(--text-strong);" class="hide-mobile">Inserir Atrasado:</label>
+                    <label for="input-busca-global" style="font-weight: 600; color: var(--text-strong);" class="hide-mobile">Inserir Atrasado:</label>
                     <select id="tipo-busca-global" class="input-moderno">
                         <option value="nome">Nome</option>
                         <option value="cpf">CPF</option>
                     </select>
                     <input type="text" id="input-busca-global" placeholder="Digite o nome..." class="input-moderno" style="flex: 1; min-width: 150px;">
-                    <button onclick="buscarPacienteGlobal()" class="btn-acao btn-warning">🔍 Buscar</button>
+                    <button type="button" id="btn-buscar-global" class="btn-acao btn-warning">🔍 Buscar</button>
                 </div>
 
-                <button onclick="window.print()" class="btn-imprimir-relacao">🖨️ Imprimir Relação</button>
+                <button type="button" id="btn-imprimir-relacao" class="btn-imprimir-relacao">🖨️ Imprimir Relação</button>
             </div>
-            
+
             <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ Extraindo exames...</div>
         </div>
 
         <div id="painel-filtros-exames" class="painel-filtros-exames no-print">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px dashed var(--border-strong); padding-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-light); padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
                 <h3 style="margin: 0; font-size: 14px; color: var(--text-strong);">Filtrar Exames Globais para Envio:</h3>
                 <div style="display: flex; gap: 8px;">
-                    <button class="btn-mini" onclick="alternarTodosExames(true)">Marcar Todos</button>
-                    <button class="btn-mini" onclick="alternarTodosExames(false)">Desmarcar Todos</button>
+                    <button type="button" class="btn-mini" id="btn-marcar-todos">Marcar Todos</button>
+                    <button type="button" class="btn-mini" id="btn-desmarcar-todos">Desmarcar Todos</button>
                 </div>
             </div>
             <div id="lista-checkboxes-exames" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
         </div>
 
-        <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-bottom: 40px;">
+        <div id="msg-vazio" class="estado-vazio-lab">
             <strong>Nenhum paciente ou exame selecionado para esta data.</strong>
         </div>
 
@@ -291,17 +519,16 @@
                 </div>
             </div>
 
-            <!-- ENVOLVENDO A TABELA PARA CELULAR -->
             <div class="table-responsive-wrapper">
                 <table class="tabela-relacao">
                     <thead>
                         <tr>
                             <th style="width: 5%;">Nº</th>
-                            <th style="color: black; min-width: 250px;">Paciente / CPF</th>
+                            <th style="color: var(--text-strong); min-width: 250px;">Paciente / CPF</th>
                             <th style="min-width: 120px;">Nascimento</th>
                             <th style="min-width: 150px;">Empresa</th>
                             <th style="min-width: 300px;">Exames a Enviar</th>
-                            <th style="width: 8%; text-align: center;" title="Para marcação com caneta do laboratório parceiro">          </th>
+                            <th style="width: 8%; text-align: center;" title="Para marcação com caneta do laboratório parceiro"></th>
                         </tr>
                     </thead>
                     <tbody id="lista-amostras"></tbody>
@@ -323,346 +550,338 @@
         </div>
     </main>
 
-    <!-- MODAL DE RESULTADO DA BUSCA GLOBAL -->
     <div id="modal-busca-global" class="modal-overlay no-print" style="display: none;">
         <div class="modal-box">
             <h3>Resultados da Busca</h3>
-            <div id="msg-busca-modal" style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;"></div>
-            
-            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border-strong); border-radius: 6px;">
+            <div id="msg-busca-modal" style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;"></div>
+
+            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px;">
                 <table class="tabela-busca-global">
                     <thead><tr><th>Data Ori.</th><th>Paciente</th><th>CPF</th><th>Ação</th></tr></thead>
                     <tbody id="tb-busca-global"></tbody>
                 </table>
             </div>
 
-            <div style="margin-top:20px; text-align: right;">
-                <button onclick="document.getElementById('modal-busca-global').style.display='none'" style="padding:10px 20px; border-radius:5px; border:1px solid var(--border-strong); background:var(--surface-muted); color: var(--text-strong); cursor:pointer; font-weight: bold;">Fechar</button>
+            <div style="margin-top: 20px; text-align: right;">
+                <button type="button" id="btn-fechar-modal" style="padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong); cursor: pointer; font-weight: 600; font-family: inherit;">Fechar</button>
             </div>
         </div>
     </div>
 
-    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
-
     <script>
-        let pacientesLaboratorioOriginais = []; 
-        let pacientesIncluidosAvulsos = []; 
-        
-        let cpfsRemovidosDaRelacao = []; 
-        let adicoesManuais = {}; 
-        let remocoesManuais = {}; 
+        (() => {
+            let pacientesLaboratorioOriginais = [];
+            let pacientesIncluidosAvulsos = [];
+            let idsRemovidosDaRelacao = new Set();
+            let adicoesManuais = {};
+            let remocoesManuais = {};
 
-        const tabela = document.getElementById('lista-amostras');
-        const inputData = document.getElementById('filtro-data');
-        const btnBuscar = document.getElementById('btn-buscar-data');
-        const msgCarregando = document.getElementById('msg-carregando');
-        const msgVazio = document.getElementById('msg-vazio');
-        const areaRelacao = document.getElementById('area-relacao');
-        const painelFiltrosExames = document.getElementById('painel-filtros-exames');
-        const listaCheckboxesExames = document.getElementById('lista-checkboxes-exames');
-        
-        const selectTipoBusca = document.getElementById('tipo-busca-global');
-        const inputBuscaGlobal = document.getElementById('input-busca-global');
+            const tabela = document.getElementById('lista-amostras');
+            const inputData = document.getElementById('filtro-data');
+            const btnBuscar = document.getElementById('btn-buscar-data');
+            const msgCarregando = document.getElementById('msg-carregando');
+            const msgVazio = document.getElementById('msg-vazio');
+            const areaRelacao = document.getElementById('area-relacao');
+            const painelFiltrosExames = document.getElementById('painel-filtros-exames');
+            const listaCheckboxesExames = document.getElementById('lista-checkboxes-exames');
+            const selectTipoBusca = document.getElementById('tipo-busca-global');
+            const inputBuscaGlobal = document.getElementById('input-busca-global');
 
-        function formatarDataBR(dataIso) {
-            if (!dataIso) return '-';
-            if (dataIso.includes('/')) return dataIso;
-            const p = dataIso.split('T')[0].split('-');
-            return `${p[2]}/${p[1]}/${p[0]}`;
-        }
+            const temExameLab = (pac) => Boolean(pac && pac.exames_lab && pac.exames_lab.trim() !== '' && pac.exames_lab.trim() !== 'Nenhum');
+            const quebrarExamesLab = (str) => (!str ? [] : String(str).split(',').map(e => e.trim()).filter(Boolean));
 
-        const hoje = new Date();
-        inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-
-        selectTipoBusca.addEventListener('change', (e) => {
-            inputBuscaGlobal.value = ''; 
-            if (e.target.value === 'cpf') {
-                inputBuscaGlobal.placeholder = '000.000.000-00';
-                inputBuscaGlobal.maxLength = 14;
-            } else {
-                inputBuscaGlobal.placeholder = 'Digite o nome...';
-                inputBuscaGlobal.removeAttribute('maxLength');
-            }
-        });
-
-        inputBuscaGlobal.addEventListener('input', (e) => {
-            if (selectTipoBusca.value === 'cpf') {
-                let val = e.target.value.replace(/\D/g, ''); 
-                val = val.replace(/(\d{3})(\d)/, '$1.$2');
-                val = val.replace(/(\d{3})(\d)/, '$1.$2');
-                val = val.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-                e.target.value = val;
-            }
-        });
-
-        inputBuscaGlobal.addEventListener('keypress', function(e) { 
-            if (e.key === 'Enter') window.buscarPacienteGlobal(); 
-        });
-
-        window.buscarPacienteGlobal = async function() {
-            const tipoBusca = selectTipoBusca.value;
-            const termo = inputBuscaGlobal.value.trim();
-            
-            if(!termo) { 
-                alert(`Digite o ${tipoBusca === 'nome' ? 'nome' : 'CPF'} para buscar.`); 
-                return; 
+            function formatarDataBR(dataIso) {
+                if (!dataIso) return '-';
+                const limpo = String(dataIso).trim();
+                if (limpo.includes('/')) return limpo;
+                const partes = limpo.split('T')[0].split('-');
+                return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : limpo;
             }
 
-            const tbBusca = document.getElementById('tb-busca-global');
-            const msgBusca = document.getElementById('msg-busca-modal');
-            
-            document.getElementById('modal-busca-global').style.display = 'flex';
-            tbBusca.innerHTML = '';
-            msgBusca.textContent = '⏳ Buscando no banco de dados...';
+            function configurarHeader() {
+                document.getElementById('btn-voltar-setor')?.addEventListener('click', () => {
+                    window.location.href = 'setor.html';
+                });
 
-            try {
-                let query = supabase.from('atendimentos').select('*').order('created_at', { ascending: false }).limit(15);
-                
-                if (tipoBusca === 'nome') {
-                    query = query.ilike('nome', `%${termo}%`);
+                document.getElementById('btn-sair-sistema')?.addEventListener('click', () => {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                });
+
+                const btnTheme = document.getElementById('btn-theme-toggle');
+                if (btnTheme) {
+                    const atualizarIcone = () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        btnTheme.textContent = isDark ? '☀️' : '🌙';
+                    };
+                    atualizarIcone();
+
+                    btnTheme.addEventListener('click', () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        if (isDark) {
+                            document.documentElement.removeAttribute('data-theme');
+                            localStorage.setItem('monad_theme', 'light');
+                        } else {
+                            document.documentElement.setAttribute('data-theme', 'dark');
+                            localStorage.setItem('monad_theme', 'dark');
+                        }
+                        atualizarIcone();
+                    });
+                }
+            }
+
+            const hoje = new Date();
+            inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+
+            selectTipoBusca.addEventListener('change', (e) => {
+                inputBuscaGlobal.value = '';
+                if (e.target.value === 'cpf') {
+                    inputBuscaGlobal.placeholder = '000.000.000-00';
+                    inputBuscaGlobal.maxLength = 14;
                 } else {
-                    query = query.eq('cpf', termo); 
+                    inputBuscaGlobal.placeholder = 'Digite o nome...';
+                    inputBuscaGlobal.removeAttribute('maxLength');
+                }
+            });
+
+            inputBuscaGlobal.addEventListener('input', (e) => {
+                if (selectTipoBusca.value === 'cpf') {
+                    let val = e.target.value.replace(/\D/g, '').slice(0, 11);
+                    val = val.replace(/(\d{3})(\d)/, '$1.$2');
+                    val = val.replace(/(\d{3})(\d)/, '$1.$2');
+                    val = val.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                    e.target.value = val;
+                }
+            });
+
+            inputBuscaGlobal.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') buscarPacienteGlobal();
+            });
+
+            async function buscarPacienteGlobal() {
+                const tipoBusca = selectTipoBusca.value;
+                const termo = inputBuscaGlobal.value.trim();
+
+                if (!termo) {
+                    alert(`Digite o ${tipoBusca === 'nome' ? 'nome' : 'CPF'} para buscar.`);
+                    return;
                 }
 
-                const { data, error } = await query;
+                const tbBusca = document.getElementById('tb-busca-global');
+                const msgBusca = document.getElementById('msg-busca-modal');
+                const modal = document.getElementById('modal-busca-global');
 
-                if (error) throw error;
+                modal.style.display = 'flex';
+                tbBusca.innerHTML = '';
+                msgBusca.textContent = '⏳ Buscando no banco de dados...';
 
-                if (data && data.length > 0) {
-                    const dadosFiltrados = data.filter(p => p.exames_lab && p.exames_lab.trim() !== "Nenhum" && p.exames_lab.trim() !== "");
-                    
-                    if(dadosFiltrados.length === 0) {
-                        msgBusca.textContent = 'Nenhum exame laboratorial registrado para o paciente encontrado.';
+                try {
+                    let query = supabase
+                        .from('atendimentos')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                        .limit(15);
+
+                    query = tipoBusca === 'nome'
+                        ? query.ilike('nome', `%${termo}%`)
+                        : query.eq('cpf', termo);
+
+                    const { data, error } = await query;
+                    if (error) throw error;
+
+                    const dadosFiltrados = (data || []).filter(temExameLab);
+                    if (dadosFiltrados.length === 0) {
+                        msgBusca.textContent = (data && data.length > 0)
+                            ? 'Nenhum exame laboratorial registrado para o paciente encontrado.'
+                            : 'Nenhum paciente encontrado.';
                         return;
                     }
 
                     msgBusca.textContent = `Foram encontrados ${dadosFiltrados.length} registros com coleta de laboratório.`;
-                    
+
                     dadosFiltrados.forEach(pac => {
                         const tr = document.createElement('tr');
-                        const btnId = `btn-add-${pac.id}`;
-                        
                         tr.innerHTML = `
                             <td>${formatarDataBR(pac.data_exame)}</td>
                             <td style="font-weight:bold;">${pac.nome}</td>
                             <td>${pac.cpf || '-'}</td>
                             <td>
-                                <button id="${btnId}" style="background:var(--accent); color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px;">+ Incluir</button>
+                                <button type="button" class="btn-incluir-avulso" data-id="${pac.id}" style="background:linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%); color:#ffffff; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-weight:600; font-size:12px; font-family:inherit;">+ Incluir</button>
                             </td>
                         `;
-                        tbBusca.appendChild(tr);
 
-                        document.getElementById(btnId).addEventListener('click', () => {
-                            if(pacientesIncluidosAvulsos.find(p => p.id === pac.id) || pacientesLaboratorioOriginais.find(p => p.id === pac.id)) {
-                                alert("Este paciente/registro já está na lista atual!");
+                        tr.querySelector('.btn-incluir-avulso').addEventListener('click', () => {
+                            const jaExiste = pacientesIncluidosAvulsos.some(p => String(p.id) === String(pac.id))
+                                || pacientesLaboratorioOriginais.some(p => String(p.id) === String(pac.id));
+
+                            if (jaExiste) {
+                                alert('Este paciente/registro já está na lista atual!');
                                 return;
                             }
 
-                            const motivo = prompt("Qual o motivo da inclusão desta amostra na relação de hoje? (Deixe em branco se não houver motivo)");
-                            
-                            if(motivo !== null) {
-                                let pacCopia = JSON.parse(JSON.stringify(pac));
-                                
-                                if (motivo.trim() !== "") {
-                                    pacCopia.justificativa_atraso = `Paciente inserido da data ${formatarDataBR(pac.data_exame)} por motivo: ${motivo.toUpperCase()}`;
-                                } else {
-                                    pacCopia.justificativa_atraso = `Paciente inserido da data ${formatarDataBR(pac.data_exame)}`;
-                                }
-                                
-                                pacientesIncluidosAvulsos.push(pacCopia);
-                                
-                                alert(`Paciente ${pac.nome} incluído na relação!`);
-                                document.getElementById('modal-busca-global').style.display = 'none';
-                                inputBuscaGlobal.value = '';
-                                
-                                gerarCheckboxesGlobais();
-                                renderizarTabela();
-                            }
+                            const motivo = prompt('Qual o motivo da inclusão desta amostra na relação de hoje? (Deixe em branco se não houver motivo)');
+                            if (motivo === null) return;
+
+                            const dataOri = formatarDataBR(pac.data_exame);
+                            const justificativa = motivo.trim() !== ''
+                                ? `Paciente inserido da data ${dataOri} por motivo: ${motivo.trim().toUpperCase()}`
+                                : `Paciente inserido da data ${dataOri}`;
+
+                            pacientesIncluidosAvulsos.push({
+                                ...pac,
+                                justificativa_atraso: justificativa
+                            });
+
+                            alert(`Paciente ${pac.nome} incluído na relação!`);
+                            modal.style.display = 'none';
+                            inputBuscaGlobal.value = '';
+                            gerarCheckboxesGlobais();
+                            renderizarTabela();
                         });
+
+                        tbBusca.appendChild(tr);
                     });
-                } else {
-                    msgBusca.textContent = 'Nenhum paciente encontrado.';
+                } catch (err) {
+                    console.error(err);
+                    msgBusca.textContent = 'Erro ao consultar banco de dados.';
                 }
-            } catch (err) {
-                console.error(err);
-                msgBusca.textContent = 'Erro ao consultar banco de dados.';
             }
-        }
 
-        async function buscar() {
-            if(!inputData.value) return;
-            
-            cpfsRemovidosDaRelacao = [];
-            adicoesManuais = {};
-            remocoesManuais = {};
-            pacientesIncluidosAvulsos = []; 
-            
-            msgCarregando.style.display = "block";
-            msgVazio.style.display = "none";
-            areaRelacao.style.display = "none";
-            painelFiltrosExames.style.display = "none";
-            tabela.innerHTML = "";
+            async function buscar() {
+                if (!inputData.value) return;
 
-            const dataPartes = inputData.value.split('-');
-            document.getElementById('out-data-coleta').textContent = `${dataPartes[2]}/${dataPartes[1]}/${dataPartes[0]}`;
-            
-            const dataAtual = new Date();
-            document.getElementById('out-data-geracao').textContent = `${String(dataAtual.getDate()).padStart(2, '0')}/${String(dataAtual.getMonth() + 1).padStart(2, '0')}/${dataAtual.getFullYear()} às ${String(dataAtual.getHours()).padStart(2, '0')}:${String(dataAtual.getMinutes()).padStart(2, '0')}`;
+                idsRemovidosDaRelacao = new Set();
+                adicoesManuais = {};
+                remocoesManuais = {};
+                pacientesIncluidosAvulsos = [];
 
-            try {
-                const { data, error } = await supabase
-                    .from('atendimentos')
-                    .select('*')
-                    .eq('data_exame', inputData.value);
+                msgCarregando.style.display = 'block';
+                msgVazio.style.display = 'none';
+                areaRelacao.style.display = 'none';
+                painelFiltrosExames.style.display = 'none';
+                tabela.innerHTML = '';
 
-                msgCarregando.style.display = "none";
-                if (error) throw error;
+                document.getElementById('out-data-coleta').textContent = formatarDataBR(inputData.value);
 
-                if (data && data.length > 0) {
-                    pacientesLaboratorioOriginais = data.filter(p => p.exames_lab && p.exames_lab.trim() !== "Nenhum" && p.exames_lab.trim() !== "");
-                    
-                    if(pacientesLaboratorioOriginais.length > 0) {
+                const agora = new Date();
+                const dataGeracao = `${String(agora.getDate()).padStart(2, '0')}/${String(agora.getMonth() + 1).padStart(2, '0')}/${agora.getFullYear()}`;
+                const horaGeracao = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
+                document.getElementById('out-data-geracao').textContent = `${dataGeracao} às ${horaGeracao}`;
+
+                try {
+                    const { data, error } = await supabase
+                        .from('atendimentos')
+                        .select('*')
+                        .eq('data_exame', inputData.value);
+
+                    if (error) throw error;
+
+                    pacientesLaboratorioOriginais = (data || []).filter(temExameLab);
+
+                    if (pacientesLaboratorioOriginais.length > 0) {
                         gerarCheckboxesGlobais();
                         renderizarTabela();
-                        painelFiltrosExames.style.display = "block";
+                        painelFiltrosExames.style.display = 'block';
                     } else {
-                        msgVazio.style.display = "block";
+                        msgVazio.style.display = 'block';
                     }
-                } else {
-                    msgVazio.style.display = "block";
+                } catch (err) {
+                    alert('Erro ao buscar dados. Tente novamente.');
+                    console.error('Erro na busca:', err.message);
+                } finally {
+                    msgCarregando.style.display = 'none';
                 }
-            } catch (err) {
-                msgCarregando.style.display = "none";
-                alert("Erro ao buscar dados. Tente novamente."); 
-                console.error("Erro na busca: ", err.message);
             }
-        }
 
-        function gerarCheckboxesGlobais() {
-            listaCheckboxesExames.innerHTML = '';
-            let conjuntoExames = new Set(); 
+            function gerarCheckboxesGlobais() {
+                listaCheckboxesExames.innerHTML = '';
+                const conjuntoExames = new Set();
+                const todosPacientes = [...pacientesLaboratorioOriginais, ...pacientesIncluidosAvulsos];
 
-            let todosPacientes = [...pacientesLaboratorioOriginais, ...pacientesIncluidosAvulsos];
+                todosPacientes.forEach(pac => {
+                    quebrarExamesLab(pac.exames_lab).forEach(exame => conjuntoExames.add(exame));
+                });
 
-            todosPacientes.forEach(pac => {
-                let examesSeparados = pac.exames_lab.split(',').map(e => e.trim()).filter(e => e !== "");
-                examesSeparados.forEach(exame => conjuntoExames.add(exame));
-            });
+                Array.from(conjuntoExames).sort().forEach(exame => {
+                    const label = document.createElement('label');
+                    label.className = 'exame-filtro-label';
 
-            const examesOrdenados = Array.from(conjuntoExames).sort();
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = exame;
+                    checkbox.checked = true;
+                    checkbox.className = 'cb-filtro-exame';
+                    checkbox.addEventListener('change', renderizarTabela);
 
-            examesOrdenados.forEach(exame => {
-                const label = document.createElement('label');
-                label.className = 'exame-filtro-label';
-                
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = exame;
-                checkbox.checked = true; 
-                checkbox.className = 'cb-filtro-exame';
-                
-                checkbox.addEventListener('change', renderizarTabela);
-
-                label.appendChild(checkbox);
-                label.appendChild(document.createTextNode(exame));
-                listaCheckboxesExames.appendChild(label);
-            });
-        }
-
-        window.alternarTodosExames = function(estado) {
-            document.querySelectorAll('.cb-filtro-exame').forEach(cb => { cb.checked = estado; });
-            renderizarTabela();
-        };
-
-        window.removerPacienteDaRelacao = function(cpf, idUnico) {
-            cpfsRemovidosDaRelacao.push(idUnico);
-            renderizarTabela();
-        };
-
-        window.removerExamePaciente = function(idUnico, exame) {
-            if (!remocoesManuais[idUnico]) remocoesManuais[idUnico] = [];
-            remocoesManuais[idUnico].push(exame);
-            
-            if (adicoesManuais[idUnico]) {
-                adicoesManuais[idUnico] = adicoesManuais[idUnico].filter(e => e !== exame);
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(exame));
+                    listaCheckboxesExames.appendChild(label);
+                });
             }
-            renderizarTabela();
-        };
 
-        window.abrirPromptAddExame = function(idUnico) {
-            let exameNovo = prompt("Digite o nome do exame a adicionar para este paciente:");
-            if (exameNovo && exameNovo.trim() !== "") {
-                exameNovo = exameNovo.trim().toUpperCase(); 
-                if (!adicoesManuais[idUnico]) adicoesManuais[idUnico] = [];
-                
-                if (!adicoesManuais[idUnico].includes(exameNovo)) {
-                    adicoesManuais[idUnico].push(exameNovo);
-                }
-                
-                if (remocoesManuais[idUnico]) {
-                    remocoesManuais[idUnico] = remocoesManuais[idUnico].filter(e => e !== exameNovo);
-                }
+            function alternarTodosExames(estado) {
+                listaCheckboxesExames.querySelectorAll('.cb-filtro-exame').forEach(cb => {
+                    cb.checked = estado;
+                });
                 renderizarTabela();
             }
-        };
 
-        function renderizarTabela() {
-            tabela.innerHTML = '';
-            
-            const examesGlobaisSelecionados = Array.from(document.querySelectorAll('.cb-filtro-exame:checked')).map(cb => cb.value);
+            function renderizarTabela() {
+                tabela.innerHTML = '';
 
-            let contador = 1;
-            
-            let todosPacientes = [...pacientesLaboratorioOriginais, ...pacientesIncluidosAvulsos];
-            let pacientesCopia = JSON.parse(JSON.stringify(todosPacientes));
-            
-            pacientesCopia.sort((a, b) => a.nome.localeCompare(b.nome));
+                const examesGlobaisSelecionados = new Set(
+                    Array.from(listaCheckboxesExames.querySelectorAll('.cb-filtro-exame:checked')).map(cb => cb.value)
+                );
 
-            pacientesCopia.forEach(pac => {
-                if (cpfsRemovidosDaRelacao.includes(pac.id)) return; 
+                const todosOrdenados = [...pacientesLaboratorioOriginais, ...pacientesIncluidosAvulsos]
+                    .sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
 
-                let examesDoPaciente = pac.exames_lab.split(',').map(e => e.trim()).filter(e => e !== "");
-                let examesAtivos = examesDoPaciente.filter(exame => examesGlobaisSelecionados.includes(exame));
+                let contador = 1;
 
-                if (adicoesManuais[pac.id]) {
-                    adicoesManuais[pac.id].forEach(e => {
+                todosOrdenados.forEach(pac => {
+                    if (idsRemovidosDaRelacao.has(String(pac.id))) return;
+
+                    let examesAtivos = quebrarExamesLab(pac.exames_lab)
+                        .filter(exame => examesGlobaisSelecionados.has(exame));
+
+                    const extrasAdicionados = adicoesManuais[pac.id] || [];
+                    extrasAdicionados.forEach(e => {
                         if (!examesAtivos.includes(e)) examesAtivos.push(e);
                     });
-                }
-                
-                if (remocoesManuais[pac.id]) {
-                    examesAtivos = examesAtivos.filter(e => !remocoesManuais[pac.id].includes(e));
-                }
 
-                if (examesAtivos.length > 0) {
+                    const removidosManualmente = new Set(remocoesManuais[pac.id] || []);
+                    examesAtivos = examesAtivos.filter(e => !removidosManualmente.has(e));
+
+                    if (examesAtivos.length === 0) return;
+
                     const tr = document.createElement('tr');
-                    
+                    tr.dataset.id = pac.id;
+
                     const tagsHTML = examesAtivos.map(exame => `
                         <span class="tag-exame-paciente">
                             ${exame}
-                            <button class="no-print btn-remover-exame" onclick="removerExamePaciente('${pac.id}', '${exame}')" title="Remover exame">&times;</button>
+                            <button type="button" class="no-print btn-remover-exame" data-id="${pac.id}" data-exame="${encodeURIComponent(exame)}" title="Remover exame">&times;</button>
                         </span>
                     `).join('');
-                    
-                    const btnAddHTML = `<button class="no-print btn-add-exame-pac" onclick="abrirPromptAddExame('${pac.id}')">+ Adicionar</button>`;
-                    
-                    const justificativaHTML = pac.justificativa_atraso 
-                        ? `<span class="justificativa-label">${pac.justificativa_atraso}</span>` 
+
+                    const btnAddHTML = `<button type="button" class="no-print btn-add-exame-pac" data-id="${pac.id}">+ Adicionar</button>`;
+                    const justificativaHTML = pac.justificativa_atraso
+                        ? `<span class="justificativa-label">${pac.justificativa_atraso}</span>`
                         : '';
 
                     tr.innerHTML = `
                         <td style="text-align: center; font-weight: bold; color: var(--text-muted);" data-label="Nº">${contador}</td>
                         <td class="celula-paciente" data-label="Paciente / CPF">
                             <div style="font-weight:bold; color: var(--text-strong); display: flex; align-items: center; gap: 8px;">
-                                <button onclick="removerPacienteDaRelacao('${pac.cpf}', '${pac.id}')" class="btn-remover-paciente no-print" title="Remover da relação">-</button>
+                                <button type="button" data-id="${pac.id}" class="btn-remover-paciente no-print" title="Remover da relação">-</button>
                                 <span>${pac.nome}</span>
                             </div>
                             <div class="cpf-label" style="font-size:11px; color:var(--text-muted);">CPF: ${pac.cpf}</div>
                             ${justificativaHTML}
                         </td>
-                        <td data-label="Nascimento" style="font-size: 13px; color: var(--text-main);">${formatarDataBR(pac.data_nascimento) || '-'}</td>
+                        <td data-label="Nascimento" style="font-size: 13px; color: var(--text-main);">${formatarDataBR(pac.data_nascimento)}</td>
                         <td data-label="Empresa">${pac.empresa || '-'}</td>
                         <td class="celula-exames" data-label="Exames a Enviar" style="line-height: 1.6;">
                             <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
@@ -672,42 +891,69 @@
                         </td>
                         <td data-label="Visto / Confirmação" style="text-align: center;"><div style="width: 15px; height: 15px; margin: 0 auto; display: inline-block;"></div></td>
                     `;
+
                     tabela.appendChild(tr);
                     contador++;
+                });
+
+                const temLinhas = contador > 1;
+                areaRelacao.style.display = temLinhas ? 'block' : 'none';
+                msgVazio.style.display = temLinhas ? 'none' : 'block';
+                if (temLinhas) painelFiltrosExames.style.display = 'block';
+            }
+
+            tabela.addEventListener('click', (e) => {
+                const btnRemoverPac = e.target.closest('.btn-remover-paciente');
+                if (btnRemoverPac) {
+                    idsRemovidosDaRelacao.add(String(btnRemoverPac.dataset.id));
+                    renderizarTabela();
+                    return;
+                }
+
+                const btnRemoverExame = e.target.closest('.btn-remover-exame');
+                if (btnRemoverExame) {
+                    const idUnico = btnRemoverExame.dataset.id;
+                    const exame = decodeURIComponent(btnRemoverExame.dataset.exame || '');
+                    if (!remocoesManuais[idUnico]) remocoesManuais[idUnico] = [];
+                    if (!remocoesManuais[idUnico].includes(exame)) remocoesManuais[idUnico].push(exame);
+                    if (adicoesManuais[idUnico]) {
+                        adicoesManuais[idUnico] = adicoesManuais[idUnico].filter(item => item !== exame);
+                    }
+                    renderizarTabela();
+                    return;
+                }
+
+                const btnAddExame = e.target.closest('.btn-add-exame-pac');
+                if (btnAddExame) {
+                    const idUnico = btnAddExame.dataset.id;
+                    const digitado = prompt('Digite o nome do exame a adicionar para este paciente:');
+                    if (!digitado || !digitado.trim()) return;
+
+                    const exameNovo = digitado.trim().toUpperCase();
+                    if (!adicoesManuais[idUnico]) adicoesManuais[idUnico] = [];
+                    if (!adicoesManuais[idUnico].includes(exameNovo)) {
+                        adicoesManuais[idUnico].push(exameNovo);
+                    }
+                    if (remocoesManuais[idUnico]) {
+                        remocoesManuais[idUnico] = remocoesManuais[idUnico].filter(item => item !== exameNovo);
+                    }
+                    renderizarTabela();
                 }
             });
 
-            if (contador === 1) {
-                areaRelacao.style.display = "none";
-                msgVazio.style.display = "block";
-            } else {
-                areaRelacao.style.display = "block";
-                msgVazio.style.display = "none";
-                painelFiltrosExames.style.display = "block";
-            }
-        }
-
-        btnBuscar.addEventListener('click', buscar);
-        buscar(); 
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnTheme = document.getElementById('btn-theme-toggle');
-            if (btnTheme) {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                btnTheme.textContent = isDark ? '☀️' : '🌙';
-                btnTheme.addEventListener('click', () => {
-                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                        document.documentElement.removeAttribute('data-theme');
-                        localStorage.setItem('monad_theme', 'light');
-                        btnTheme.textContent = '🌙';
-                    } else {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                        localStorage.setItem('monad_theme', 'dark');
-                        btnTheme.textContent = '☀️';
-                    }
+            document.addEventListener('DOMContentLoaded', () => {
+                configurarHeader();
+                btnBuscar.addEventListener('click', buscar);
+                document.getElementById('btn-buscar-global')?.addEventListener('click', buscarPacienteGlobal);
+                document.getElementById('btn-imprimir-relacao')?.addEventListener('click', () => window.print());
+                document.getElementById('btn-marcar-todos')?.addEventListener('click', () => alternarTodosExames(true));
+                document.getElementById('btn-desmarcar-todos')?.addEventListener('click', () => alternarTodosExames(false));
+                document.getElementById('btn-fechar-modal')?.addEventListener('click', () => {
+                    document.getElementById('modal-busca-global').style.display = 'none';
                 });
-            }
-        });
+                buscar();
+            });
+        })();
     </script>
 </body>
 </html>

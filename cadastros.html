@@ -9,55 +9,242 @@
     <script>
         const tokenAtivo = localStorage.getItem('monad_token');
         const setorLogado = localStorage.getItem('monad_setor');
-        
+
         if (!tokenAtivo || !setorLogado || (setorLogado !== "admin" && setorLogado !== "todos")) {
             window.location.href = "login.html";
         }
-        
+
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
     <style>
-        .tabs-container { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border-strong); padding-bottom: 10px; }
-        .tab-btn { background: var(--surface-muted); color: var(--text-strong); border: 1px solid var(--border-strong); padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s; }
-        .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-        .tab-btn:hover:not(.active) { background: var(--surface); }
-        
+        .painel-cadastros-card {
+            border: 1px solid rgba(220, 38, 38, 0.35);
+            border-top: 4px solid var(--danger);
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 22px;
+            background: var(--surface-muted);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 6px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            padding: 10px 18px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13.5px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit;
+        }
+
+        .tab-btn.active {
+            background: var(--surface);
+            color: var(--accent);
+            border-color: var(--border);
+            box-shadow: 0 4px 12px -3px rgba(15, 23, 42, 0.12);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: var(--surface);
+            color: var(--text-primary);
+            border-color: var(--border);
+        }
+
+        .btn-cancelar-modal {
+            background: var(--surface-muted);
+            color: var(--text-strong);
+            border: 1px solid var(--border-strong);
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13.5px;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-cancelar-modal:hover {
+            background: var(--surface-strong);
+        }
+
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        
-        .toolbar-cadastros { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .btn-novo { background: var(--success, #10b981); color: white; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; box-shadow: var(--shadow-btn); }
-        
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .modal-box { background: var(--surface); padding: 25px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .modal-box h3 { color: var(--accent); margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid var(--border-strong); padding-bottom: 10px; }
-        
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .form-grid label { font-size: 13px; font-weight: bold; color: var(--text-muted); display: flex; flex-direction: column; gap: 5px; }
-        .form-grid input, .form-grid select { padding: 9px; border: 1px solid var(--border-strong); border-radius: 4px; font-size: 14px; background: var(--surface-muted); color: var(--text-strong); }
+
+        .toolbar-cadastros {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn-novo {
+            background: linear-gradient(135deg, var(--success) 0%, #047857 100%);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13.5px;
+            cursor: pointer;
+            box-shadow: 0 6px 16px -4px rgba(5, 150, 105, 0.35);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit;
+        }
+
+        .btn-novo:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .btn-novo:active {
+            transform: translateY(0);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.68);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            padding: 26px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--accent);
+            width: 100%;
+            max-width: 620px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-hover);
+            box-sizing: border-box;
+        }
+
+        .modal-box h3 {
+            color: var(--accent);
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-grid label {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-grid input, .form-grid select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--surface-muted);
+            color: var(--text-strong);
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        .form-grid input:focus, .form-grid select:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px var(--accent-ring);
+        }
+
         .full-width { grid-column: span 2; }
 
-        .filtros-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: thin; }
-        .filtros-scroll::-webkit-scrollbar { height: 6px; }
-        .filtros-scroll::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
-        .btn-filtro { white-space: nowrap; padding: 6px 15px; border-radius: 20px; background: var(--surface-muted); color: var(--text-strong); border: 1px solid var(--border-strong); cursor: pointer; font-size: 13px; font-weight: bold; transition: all 0.2s; }
-        .btn-filtro.active { background: var(--accent); color: white; border-color: var(--accent); }
-        .btn-filtro:hover:not(.active) { background: var(--surface); }
+        .filtros-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+            scrollbar-width: thin;
+        }
 
-        #btn-add-nome-func:hover { background: var(--surface-muted) !important; border-color: var(--accent) !important; color: var(--accent) !important; }
+        .filtros-scroll::-webkit-scrollbar { height: 6px; }
+        .filtros-scroll::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 999px; }
+
+        .btn-filtro {
+            white-space: nowrap;
+            padding: 7px 15px;
+            border-radius: 999px;
+            background: var(--surface-muted);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-strong);
+            cursor: pointer;
+            font-size: 12.5px;
+            font-weight: 600;
+            transition: all 0.18s ease;
+            font-family: inherit;
+        }
+
+        .btn-filtro.active {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+            color: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 10px -3px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-filtro:hover:not(.active) {
+            background: var(--surface);
+            color: var(--text-primary);
+            border-color: var(--accent);
+        }
+
+        #btn-add-nome-func:hover {
+            background: var(--surface) !important;
+            border-color: var(--accent) !important;
+            color: var(--accent) !important;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+            .modal-box { padding: 20px 16px; }
+        }
     </style>
 </head>
 <body>
     <datalist id="lista-empresas-sugestoes"></datalist>
 
     <header class="no-print">
-        <h1 style="color: var(--danger);">Gestão de Cadastros Base</h1>
-        <h2 style="color: var(--text-muted);">Dicionários de Automação (Empresas, Funções e e-Social)</h2>
+        <h1 style="color: #fca5a5;">Gestão de Cadastros Base</h1>
+        <h2 style="color: #dbeafe;">Dicionários de Automação (Empresas, Funções e e-Social)</h2>
         <div class="header-controls">
-            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
+            <button type="button" id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
+            <button type="button" id="btn-sair-sistema" class="btn-header-danger">Sair</button>
         </div>
         <nav style="margin-top: 15px;">
             <ul>
@@ -65,38 +252,37 @@
                 <li><a href="checkin.html">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
                 <li id="menu-documentos" style="display: none;"><a href="documentos.html">Gerar ASO</a></li>
-                <li id="menu-cadastros" style="display: none;"><a href="cadastros.html" style="background-color: var(--danger) !important; color: white !important;">Base Dados</a></li>
-                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
+                <li id="menu-cadastros" style="display: none;"><a href="cadastros.html" style="background-color: var(--danger) !important; color: #ffffff !important;">Base Dados</a></li>
+                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: #ffffff !important;">Painel Admin</a></li>
                 <li id="menu-financeiro" style="display: none;"><a href="financeiro.html">Financeiro</a></li>
             </ul>
         </nav>
         <script>
-            // Adicionado suporte para mostrar o menu de ASO e Base de dados ao Admin e Todos
-            const setorNav = localStorage.getItem('monad_setor');
-            if (setorNav === 'admin' || setorNav === 'todos') {
-                const elDoc = document.getElementById('menu-documentos');
-                const elCad = document.getElementById('menu-cadastros');
-                if (elDoc) elDoc.style.display = 'inline-block';
-                if (elCad) elCad.style.display = 'inline-block';
-            
-            }
-            if (setorNav === 'admin') {
-                const elAdmin = document.getElementById('menu-admin');
-                if (elAdmin) elAdmin.style.display = 'inline-block';
-            }
-            if (setorNav === 'admin') {
-    const elFin = document.getElementById('menu-financeiro');
-    if (elFin) elFin.style.display = 'inline-block';
-}
+            (() => {
+                const setorNav = localStorage.getItem('monad_setor');
+                const mostrar = (id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'inline-block';
+                };
+
+                if (setorNav === 'admin' || setorNav === 'todos') {
+                    mostrar('menu-documentos');
+                    mostrar('menu-cadastros');
+                }
+                if (setorNav === 'admin') {
+                    mostrar('menu-admin');
+                    mostrar('menu-financeiro');
+                }
+            })();
         </script>
     </header>
-    
+
     <main>
-        <div class="painel-recepcao" style="border: 2px solid var(--danger);">
-            <div class="tabs-container">
-                <button class="tab-btn active" onclick="mudarAba('empresas', this)">🏢 Empresas</button>
-                <button class="tab-btn" onclick="mudarAba('funcoes', this)">👷 Funções e Riscos</button>
-                <button class="tab-btn" onclick="mudarAba('esocial', this)">📋 Códigos e-Social</button>
+        <div class="painel-recepcao painel-cadastros-card">
+            <div class="tabs-container" id="tabs-cadastros">
+                <button type="button" class="tab-btn active" data-aba="empresas">🏢 Empresas</button>
+                <button type="button" class="tab-btn" data-aba="funcoes">👷 Funções e Riscos</button>
+                <button type="button" class="tab-btn" data-aba="esocial">📋 Códigos e-Social</button>
             </div>
 
             <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ A sincronizar com o banco de dados...</div>
@@ -105,39 +291,45 @@
             <div id="tab-empresas" class="tab-content active">
                 <div class="toolbar-cadastros">
                     <h3 style="margin:0; color: var(--text-strong);">Empresas Cadastradas</h3>
-                    <button class="btn-novo" onclick="abrirModal('modal-empresa')">+ Nova Empresa</button>
+                    <button type="button" class="btn-novo" data-abrir-modal="modal-empresa">+ Nova Empresa</button>
                 </div>
-                <table class="tabela-liberacao">
-                    <thead><tr><th>Nome Fantasia (Recepção)</th><th>Razão Social (ASO)</th><th>CNPJ</th><th>Médico Coordenador</th><th style="text-align:center; width: 150px;">Ações</th></tr></thead>
-                    <tbody id="lista-empresas"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="tabela-liberacao">
+                        <thead><tr><th>Nome Fantasia (Recepção)</th><th>Razão Social (ASO)</th><th>CNPJ</th><th>Médico Coordenador</th><th style="text-align:center; width: 150px;">Ações</th></tr></thead>
+                        <tbody id="lista-empresas"></tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- ABA FUNÇÕES -->
             <div id="tab-funcoes" class="tab-content">
                 <div class="toolbar-cadastros">
                     <h3 style="margin:0; color: var(--text-strong);">Padrões de Funções e Riscos</h3>
-                    <button class="btn-novo" onclick="abrirModal('modal-funcao')">+ Novas Funções</button>
+                    <button type="button" class="btn-novo" data-abrir-modal="modal-funcao">+ Novas Funções</button>
                 </div>
-                
+
                 <div id="filtros-funcoes" class="filtros-scroll"></div>
 
-                <table class="tabela-liberacao">
-                    <thead><tr><th>Empresa</th><th>Função (Individual)</th><th>Físico / Químico / Biológico</th><th>Ergonómico / Acidente / Psicossoc.</th><th>NRs Padrão</th><th style="text-align:center; width: 150px;">Ações</th></tr></thead>
-                    <tbody id="lista-funcoes"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="tabela-liberacao">
+                        <thead><tr><th>Empresa</th><th>Função (Individual)</th><th>Físico / Químico / Biológico</th><th>Ergonómico / Acidente / Psicossoc.</th><th>NRs Padrão</th><th style="text-align:center; width: 150px;">Ações</th></tr></thead>
+                        <tbody id="lista-funcoes"></tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- ABA E-SOCIAL -->
             <div id="tab-esocial" class="tab-content">
                 <div class="toolbar-cadastros">
                     <h3 style="margin:0; color: var(--text-strong);">Tabela e-Social de Exames</h3>
-                    <button class="btn-novo" onclick="abrirModal('modal-esocial')">+ Novo Exame</button>
+                    <button type="button" class="btn-novo" data-abrir-modal="modal-esocial">+ Novo Exame</button>
                 </div>
-                <table class="tabela-liberacao">
-                    <thead><tr><th>Nome do Exame (Idêntico à Recepção)</th><th>Código e-Social</th><th style="text-align:center; width: 150px;">Ações</th></tr></thead>
-                    <tbody id="lista-esocial"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="tabela-liberacao">
+                        <thead><tr><th>Nome do Exame (Idêntico à Recepção)</th><th>Código e-Social</th><th style="text-align:center; width: 150px;">Ações</th></tr></thead>
+                        <tbody id="lista-esocial"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
@@ -153,9 +345,9 @@
                 <label class="full-width">Razão Social (Nome Oficial do ASO): <input type="text" id="emp-razao" placeholder="Ex: MANSERV FACILIDADES E SERVIÇOS"></label>
                 <label class="full-width">Médico Coordenador do PCMSO: <input type="text" id="emp-medico" placeholder="Ex: Dra. Nome - CRM 1234/PA"></label>
             </div>
-            <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
-                <button onclick="fecharModal('modal-empresa')" class="tab-btn">Cancelar</button>
-                <button onclick="salvarEmpresa()" class="btn-novo">Guardar</button>
+            <div style="margin-top:22px; display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" data-fechar-modal="modal-empresa" class="btn-cancelar-modal">Cancelar</button>
+                <button type="button" id="btn-salvar-empresa" class="btn-novo">Guardar</button>
             </div>
         </div>
     </div>
@@ -166,53 +358,48 @@
             <h3 id="titulo-modal-funcao">👷 Adicionar Função</h3>
             <input type="hidden" id="func-id">
             <div class="form-grid">
-                <!-- Select obrigatório para vínculo exclusivo com uma empresa -->
-                <label class="full-width">Empresa Vinculada (Obrigatório): 
+                <label class="full-width">Empresa Vinculada (Obrigatório):
                     <select id="func-empresa" required>
                         <option value="">-- Selecione uma empresa --</option>
                     </select>
                 </label>
-                
-                <label class="full-width">Nome(s) da(s) Função(ões): 
-                    <div id="container-nomes-funcao" style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <input type="text" class="input-nome-funcao" placeholder="Ex: AJUDANTE I" style="flex: 1; padding: 9px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface-muted); color: var(--text-strong);">
-                        </div>
-                    </div>
-                    <button type="button" id="btn-add-nome-func" onclick="adicionarCampoFuncao()" style="margin-top: 8px; background: var(--surface-strong); color: var(--text-strong); border: 1px dashed var(--border-strong); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: fit-content; transition: 0.2s;">+ Adicionar variação (Mesmos Riscos/NRs)</button>
+
+                <label class="full-width">Nome(s) da(s) Função(ões):
+                    <div id="container-nomes-funcao" style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;"></div>
+                    <button type="button" id="btn-add-nome-func" style="margin-top: 8px; background: var(--surface-muted); color: var(--text-strong); border: 1px dashed var(--border-strong); padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; width: fit-content; transition: 0.2s;">+ Adicionar variação (Mesmos Riscos/NRs)</button>
                 </label>
 
-                <label>Risco Físico: <input type="text" id="func-rf" value="Ausência de fatores de risco"></label>
-                <label>Risco Químico: <input type="text" id="func-rq" value="Ausência de fatores de risco"></label>
-                <label>Risco Biológico: <input type="text" id="func-rb" value="Ausência de fatores de risco"></label>
-                <label>Risco Ergonómico: <input type="text" id="func-re" value="Ausência de fatores de risco"></label>
-                <label>Risco de Acidente: <input type="text" id="func-ra" value="Ausência de fatores de risco"></label>
-                <label>Risco Psicossocial: <input type="text" id="func-rp" value="Ausência de fatores de risco"></label>
-                
-                <label class="full-width">NRs Aplicáveis (Separe por vírgula): 
+                <label>Risco Físico: <input type="text" id="func-rf"></label>
+                <label>Risco Químico: <input type="text" id="func-rq"></label>
+                <label>Risco Biológico: <input type="text" id="func-rb"></label>
+                <label>Risco Ergonómico: <input type="text" id="func-re"></label>
+                <label>Risco de Acidente: <input type="text" id="func-ra"></label>
+                <label>Risco Psicossocial: <input type="text" id="func-rp"></label>
+
+                <label class="full-width">NRs Aplicáveis (Separe por vírgula):
                     <input type="text" id="func-nrs" placeholder="Ex: NR35, NR33 - Espaço Confinado">
-                    <small style="color:var(--accent); font-weight:normal;">O sistema fará a conversão automática para as caixas de aptidão do ASO.</small>
+                    <small style="color:var(--accent); font-weight:500;">O sistema fará a conversão automática para as caixas de aptidão do ASO.</small>
                 </label>
             </div>
-            <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
-                <button onclick="fecharModal('modal-funcao')" class="tab-btn">Cancelar</button>
-                <button onclick="salvarFuncao()" class="btn-novo">Guardar</button>
+            <div style="margin-top:22px; display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" data-fechar-modal="modal-funcao" class="btn-cancelar-modal">Cancelar</button>
+                <button type="button" id="btn-salvar-funcao" class="btn-novo">Guardar</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL E-SOCIAL -->
     <div id="modal-esocial" class="modal-overlay" style="display:none;">
-        <div class="modal-box" style="max-width: 400px;">
+        <div class="modal-box" style="max-width: 420px;">
             <h3 id="titulo-modal-esocial">📋 Adicionar Código e-Social</h3>
             <input type="hidden" id="eso-id">
             <div class="form-grid" style="grid-template-columns: 1fr;">
                 <label>Nome do Exame (Igual ao da Recepção): <input type="text" id="eso-nome" placeholder="Ex: Hemograma"></label>
                 <label>Código e-Social: <input type="text" id="eso-codigo" placeholder="Ex: 0295"></label>
             </div>
-            <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
-                <button onclick="fecharModal('modal-esocial')" class="tab-btn">Cancelar</button>
-                <button onclick="salvarEsocial()" class="btn-novo">Guardar</button>
+            <div style="margin-top:22px; display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" data-fechar-modal="modal-esocial" class="btn-cancelar-modal">Cancelar</button>
+                <button type="button" id="btn-salvar-esocial" class="btn-novo">Guardar</button>
             </div>
         </div>
     </div>
@@ -220,322 +407,433 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
     <script>
-        let filtroEmpresaAtivo = 'Todas';
+        (() => {
+            const RISCO_PADRAO = 'Ausência de fatores de risco';
+            const CAMPOS_RISCO = ['func-rf', 'func-rq', 'func-rb', 'func-re', 'func-ra', 'func-rp'];
 
-        function mudarAba(aba, btnElement) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(`tab-${aba}`).classList.add('active');
-            btnElement.classList.add('active');
-        }
+            const state = {
+                empresas: [],
+                funcoes: [],
+                esocial: [],
+                filtroEmpresaAtivo: 'Todas'
+            };
 
-        function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
-        
-        function fecharModal(id) { 
-            document.getElementById(id).style.display = 'none'; 
-            limparFormularios();
-        }
+            const msgCarregando = document.getElementById('msg-carregando');
 
-        function adicionarCampoFuncao() {
-            const container = document.getElementById('container-nomes-funcao');
-            const div = document.createElement('div');
-            div.style.cssText = "display: flex; gap: 10px; align-items: center;";
-            div.innerHTML = `
-                <input type="text" class="input-nome-funcao" placeholder="Ex: AJUDANTE II" style="flex: 1; padding: 9px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface-muted); color: var(--text-strong);">
-                <button type="button" onclick="this.parentElement.remove()" style="background: var(--danger); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
-            `;
-            container.appendChild(div);
-        }
-
-        function resetarCamposNomesFuncao() {
-            const container = document.getElementById('container-nomes-funcao');
-            container.innerHTML = `
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="text" class="input-nome-funcao" placeholder="Ex: AJUDANTE I" style="flex: 1; padding: 9px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface-muted); color: var(--text-strong);">
-                </div>
-            `;
-            document.getElementById('btn-add-nome-func').style.display = 'block';
-        }
-
-        function limparFormularios() {
-            document.querySelectorAll('input[type="hidden"], select').forEach(el => el.value = ''); 
-            document.querySelectorAll('input[type="text"]').forEach(el => {
-                if(!el.id.includes('func-r')) el.value = ''; 
-            });
-            document.getElementById('func-rf').value = 'Ausência de fatores de risco';
-            document.getElementById('func-rq').value = 'Ausência de fatores de risco';
-            document.getElementById('func-rb').value = 'Ausência de fatores de risco';
-            document.getElementById('func-re').value = 'Ausência de fatores de risco';
-            document.getElementById('func-ra').value = 'Ausência de fatores de risco';
-            document.getElementById('func-rp').value = 'Ausência de fatores de risco';
-            document.getElementById('titulo-modal-funcao').textContent = "👷 Adicionar Função";
-            
-            resetarCamposNomesFuncao();
-        }
-
-        async function carregarDados() {
-            document.getElementById('msg-carregando').style.display = 'block';
-            try {
-                const [resEmp, resFunc, resEso] = await Promise.all([
-                    supabase.from('empresas_base').select('*').order('nome_fantasia'),
-                    supabase.from('funcoes_base').select('*').order('nome_funcao'),
-                    supabase.from('esocial_exames').select('*').order('exame_nome')
-                ]);
-
-                if (resEmp.data) {
-                    renderEmpresas(resEmp.data);
-                    const selectEmp = document.getElementById('func-empresa');
-                    selectEmp.innerHTML = '<option value="">-- Selecione uma empresa --</option>' + 
-                        resEmp.data.map(e => `<option value="${e.id}">${e.razao_social || e.nome_fantasia}</option>`).join('');
-                }
-                
-                if (resFunc.data) renderFuncoes(resFunc.data);
-                if (resEso.data) renderEsocial(resEso.data);
-            } catch(e) { alert("Erro ao sincronizar base de dados."); console.error(e); }
-            document.getElementById('msg-carregando').style.display = 'none';
-        }
-
-        const btnAcoes = (id, tipo) => `
-            <button onclick="editarRegistro('${id}', '${tipo}')" style="background:var(--accent); color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">✏️</button>
-            <button onclick="apagarRegistro('${id}', '${tipo}')" style="background:var(--danger); color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">🗑️</button>
-        `;
-
-        function renderEmpresas(dados) {
-            window.dbEmpresas = dados;
-            const tbody = document.getElementById('lista-empresas');
-            tbody.innerHTML = dados.map(e => `
-                <tr>
-                    <td><strong>${e.nome_fantasia}</strong></td>
-                    <td>${e.razao_social || '-'}</td>
-                    <td>${e.cnpj || '-'}</td>
-                    <td>${e.medico_coordenador || '-'}</td>
-                    <td style="text-align:center;">${btnAcoes(e.id, 'empresas')}</td>
-                </tr>
-            `).join('');
-        }
-
-        window.filtrarFuncoes = function(empresaNome) {
-            filtroEmpresaAtivo = empresaNome;
-            renderFuncoes(window.dbFuncoes);
-        }
-
-        function renderFuncoes(dados) {
-            window.dbFuncoes = dados;
-            
-            const funcoesCompletas = dados.map(f => {
-                const empInfo = (window.dbEmpresas || []).find(e => String(e.id) === String(f.empresa_id)); 
-                return { 
-                    ...f, 
-                    sem_vinculo: !empInfo,
-                    nome_empresa_visual: empInfo ? (empInfo.razao_social || empInfo.nome_fantasia) : 'Sem empresa vinculada' 
-                };
-            });
-
-            const empresasUnicas = [...new Set(funcoesCompletas.map(f => f.nome_empresa_visual))].sort();
-            const containerFiltros = document.getElementById('filtros-funcoes');
-            
-            let filtrosHtml = `<button class="btn-filtro ${filtroEmpresaAtivo === 'Todas' ? 'active' : ''}" onclick="filtrarFuncoes('Todas')">Todas as Funções</button>`;
-            empresasUnicas.forEach(emp => {
-                filtrosHtml += `<button class="btn-filtro ${filtroEmpresaAtivo === emp ? 'active' : ''}" onclick="filtrarFuncoes('${emp}')">${emp}</button>`;
-            });
-            containerFiltros.innerHTML = filtrosHtml;
-
-            const dadosFiltrados = filtroEmpresaAtivo === 'Todas' ? funcoesCompletas : funcoesCompletas.filter(f => f.nome_empresa_visual === filtroEmpresaAtivo);
-            const tbody = document.getElementById('lista-funcoes');
-            
-            tbody.innerHTML = dadosFiltrados.map(f => {
-                let nrsStr = "-";
+            function formatarNrsTexto(nrsRaw) {
+                if (!nrsRaw) return '-';
                 try {
-                    let nrsObj = typeof f.nrs_aplicaveis === 'string' ? JSON.parse(f.nrs_aplicaveis) : f.nrs_aplicaveis;
-                    if(nrsObj && nrsObj.length > 0) nrsStr = nrsObj.map(n => n.nome).join(', ');
-                } catch(e) {}
-
-                const estiloEmpresa = f.sem_vinculo ? 'color: var(--danger); font-weight: bold;' : 'color: var(--text-muted); font-weight: bold;';
-                
-                return `
-                <tr>
-                    <td style="font-size:11px; ${estiloEmpresa}">${f.nome_empresa_visual}</td>
-                    <td><strong>${f.nome_funcao}</strong></td>
-                    <td style="font-size:11px;">F: ${f.risco_fisico}<br>Q: ${f.risco_quimico}<br>B: ${f.risco_biologico}</td>
-                    <td style="font-size:11px;">E: ${f.risco_ergonomico}<br>A: ${f.risco_acidente}<br>P: ${f.risco_psicossocial || '-'}</td>
-                    <td style="font-size:11px; color:var(--accent); font-weight:bold;">${nrsStr}</td>
-                    <td style="text-align:center;">${btnAcoes(f.id, 'funcoes')}</td>
-                </tr>
-            `}).join('');
-        }
-
-        function renderEsocial(dados) {
-            window.dbEsocial = dados;
-            const tbody = document.getElementById('lista-esocial');
-            tbody.innerHTML = dados.map(e => `
-                <tr>
-                    <td><strong>${e.exame_nome}</strong></td>
-                    <td style="color:var(--warning); font-weight:bold;">${e.codigo}</td>
-                    <td style="text-align:center;">${btnAcoes(e.id, 'esocial')}</td>
-                </tr>
-            `).join('');
-        }
-
-        async function salvarEmpresa() {
-            const id = document.getElementById('emp-id').value;
-            const dados = {
-                nome_fantasia: document.getElementById('emp-fantasia').value,
-                razao_social: document.getElementById('emp-razao').value,
-                cnpj: document.getElementById('emp-cnpj').value,
-                medico_coordenador: document.getElementById('emp-medico').value
-            };
-            if(!dados.nome_fantasia) return alert("O Nome Fantasia é obrigatório.");
-            
-            if(id) await supabase.from('empresas_base').update(dados).eq('id', id);
-            else await supabase.from('empresas_base').insert([dados]);
-            
-            fecharModal('modal-empresa');
-            carregarDados();
-        }
-
-        async function salvarFuncao() {
-            const id = document.getElementById('func-id').value;
-            const valorSelectEmpresa = document.getElementById('func-empresa').value;
-
-            if (!valorSelectEmpresa || valorSelectEmpresa.trim() === "") {
-                alert("AÇÃO BLOQUEADA: Selecione obrigatoriamente uma Empresa vinculada antes de salvar a função.");
-                return;
+                    const obj = typeof nrsRaw === 'string' ? JSON.parse(nrsRaw) : nrsRaw;
+                    if (Array.isArray(obj) && obj.length > 0) {
+                        return obj.map(n => n.nome).filter(Boolean).join(', ') || '-';
+                    }
+                } catch (_) {}
+                return '-';
             }
 
-            const nrsRaw = document.getElementById('func-nrs').value;
-            let jsonNrs = [];
-            
-            if(nrsRaw.trim() !== "") {
-                jsonNrs = nrsRaw.split(',').map(n => ({ nome: n.trim(), status: "" }));
+            function mudarAba(aba, btnElement) {
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('#tabs-cadastros .tab-btn').forEach(el => el.classList.remove('active'));
+                document.getElementById(`tab-${aba}`)?.classList.add('active');
+                btnElement?.classList.add('active');
             }
-            
-            const inputsNomes = document.querySelectorAll('.input-nome-funcao');
-            const nomesValidos = Array.from(inputsNomes).map(inp => inp.value.trim()).filter(val => val !== "");
 
-            if(nomesValidos.length === 0) return alert("Adicione pelo menos um Nome de Função.");
-
-            const baseDados = {
-                empresa_id: valorSelectEmpresa, 
-                risco_fisico: document.getElementById('func-rf').value,
-                risco_quimico: document.getElementById('func-rq').value,
-                risco_biologico: document.getElementById('func-rb').value,
-                risco_ergonomico: document.getElementById('func-re').value,
-                risco_acidente: document.getElementById('func-ra').value,
-                risco_psicossocial: document.getElementById('func-rp').value,
-                nrs_aplicaveis: jsonNrs 
-            };
-            
-            document.getElementById('msg-carregando').style.display = 'block';
-
-            try {
-                if (id) {
-                    await supabase.from('funcoes_base').update({ ...baseDados, nome_funcao: nomesValidos[0] }).eq('id', id);
-                } else {
-                    const arrayInsert = nomesValidos.map(nome => ({ ...baseDados, nome_funcao: nome }));
-                    await supabase.from('funcoes_base').insert(arrayInsert);
-                }
-                fecharModal('modal-funcao');
-                carregarDados();
-            } catch (error) {
-                console.error(error);
-                alert("Erro ao gravar funções.");
-                document.getElementById('msg-carregando').style.display = 'none';
-            }
-        }
-
-        async function salvarEsocial() {
-            const id = document.getElementById('eso-id').value;
-            const dados = {
-                exame_nome: document.getElementById('eso-nome').value,
-                codigo: document.getElementById('eso-codigo').value
-            };
-            if(!dados.exame_nome || !dados.codigo) return alert("Nome e Código são obrigatórios.");
-            
-            if(id) await supabase.from('esocial_exames').update(dados).eq('id', id);
-            else await supabase.from('esocial_exames').insert([dados]);
-            
-            fecharModal('modal-esocial');
-            carregarDados();
-        }
-
-        window.editarRegistro = function(id, tipo) {
-            if (tipo === 'empresas') {
-                const reg = window.dbEmpresas.find(e => String(e.id) === String(id));
-                document.getElementById('emp-id').value = reg.id;
-                document.getElementById('emp-fantasia').value = reg.nome_fantasia;
-                document.getElementById('emp-razao').value = reg.razao_social;
-                document.getElementById('emp-cnpj').value = reg.cnpj;
-                document.getElementById('emp-medico').value = reg.medico_coordenador;
-                document.getElementById('titulo-modal-empresa').textContent = "✏️ Editar Empresa";
-                abrirModal('modal-empresa');
-            } else if (tipo === 'funcoes') {
-                const reg = window.dbFuncoes.find(f => String(f.id) === String(id));
-                document.getElementById('func-id').value = reg.id;
-                document.getElementById('func-empresa').value = reg.empresa_id || ''; 
-                
+            function resetarCamposNomesFuncao(valorInicial = '', mostrarBotaoAdd = true) {
                 const container = document.getElementById('container-nomes-funcao');
                 container.innerHTML = `
                     <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="text" class="input-nome-funcao" value="${reg.nome_funcao}" style="flex: 1; padding: 9px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface-muted); color: var(--text-strong);">
+                        <input type="text" class="input-nome-funcao" value="${valorInicial}" placeholder="Ex: AJUDANTE I" style="flex: 1; padding: 9px 12px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface-muted); color: var(--text-strong);">
                     </div>
                 `;
-                document.getElementById('btn-add-nome-func').style.display = 'none';
-
-                document.getElementById('func-rf').value = reg.risco_fisico;
-                document.getElementById('func-rq').value = reg.risco_quimico;
-                document.getElementById('func-rb').value = reg.risco_biologico;
-                document.getElementById('func-re').value = reg.risco_ergonomico;
-                document.getElementById('func-ra').value = reg.risco_acidente;
-                document.getElementById('func-rp').value = reg.risco_psicossocial || 'Ausência de fatores de risco';
-                
-                let nrsStr = "";
-                try {
-                    let nrsObj = typeof reg.nrs_aplicaveis === 'string' ? JSON.parse(reg.nrs_aplicaveis) : reg.nrs_aplicaveis;
-                    if(nrsObj && nrsObj.length > 0) nrsStr = nrsObj.map(n => n.nome).join(', ');
-                } catch(e) {}
-                document.getElementById('func-nrs').value = nrsStr;
-                
-                document.getElementById('titulo-modal-funcao').textContent = "✏️ Editar Função";
-                abrirModal('modal-funcao');
-            } else if (tipo === 'esocial') {
-                const reg = window.dbEsocial.find(e => String(e.id) === String(id));
-                document.getElementById('eso-id').value = reg.id;
-                document.getElementById('eso-nome').value = reg.exame_nome;
-                document.getElementById('eso-codigo').value = reg.codigo;
-                document.getElementById('titulo-modal-esocial').textContent = "✏️ Editar Código";
-                abrirModal('modal-esocial');
+                document.getElementById('btn-add-nome-func').style.display = mostrarBotaoAdd ? 'block' : 'none';
             }
-        };
 
-        window.apagarRegistro = async function(id, tipo) {
-            if(!confirm("Tem a certeza que deseja apagar este registo? A ação não pode ser desfeita.")) return;
-            let tabela = tipo === 'empresas' ? 'empresas_base' : (tipo === 'funcoes' ? 'funcoes_base' : 'esocial_exames');
-            
-            try {
-                await supabase.from(tabela).delete().eq('id', id);
-                carregarDados();
-            } catch (e) { alert("Erro ao apagar registo."); }
-        };
+            function adicionarCampoFuncao() {
+                const container = document.getElementById('container-nomes-funcao');
+                const div = document.createElement('div');
+                div.style.cssText = 'display: flex; gap: 10px; align-items: center;';
+                div.innerHTML = `
+                    <input type="text" class="input-nome-funcao" placeholder="Ex: AJUDANTE II" style="flex: 1; padding: 9px 12px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface-muted); color: var(--text-strong);">
+                    <button type="button" class="btn-remover-var" style="background: var(--danger); color: #ffffff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">✕</button>
+                `;
+                div.querySelector('.btn-remover-var').addEventListener('click', () => div.remove());
+                container.appendChild(div);
+            }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnTheme = document.getElementById('btn-theme-toggle');
-            if (btnTheme) {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                btnTheme.textContent = isDark ? '☀️' : '🌙';
-                btnTheme.addEventListener('click', () => {
-                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                        document.documentElement.removeAttribute('data-theme');
-                        localStorage.setItem('monad_theme', 'light');
-                        btnTheme.textContent = '🌙';
-                    } else {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                        localStorage.setItem('monad_theme', 'dark');
-                        btnTheme.textContent = '☀️';
+            function limparFormularios() {
+                document.querySelectorAll('input[type="hidden"], select').forEach(el => {
+                    el.value = '';
+                });
+                document.querySelectorAll('input[type="text"]').forEach(el => {
+                    if (!CAMPOS_RISCO.includes(el.id)) el.value = '';
+                });
+                CAMPOS_RISCO.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) input.value = RISCO_PADRAO;
+                });
+                document.getElementById('titulo-modal-empresa').textContent = '🏢 Adicionar Empresa';
+                document.getElementById('titulo-modal-funcao').textContent = '👷 Adicionar Função';
+                document.getElementById('titulo-modal-esocial').textContent = '📋 Adicionar Código e-Social';
+                resetarCamposNomesFuncao('', true);
+            }
+
+            function abrirModal(id) {
+                const modal = document.getElementById(id);
+                if (modal) modal.style.display = 'flex';
+            }
+
+            function fecharModal(id) {
+                const modal = document.getElementById(id);
+                if (modal) modal.style.display = 'none';
+                limparFormularios();
+            }
+
+            function btnAcoes(id, tipo) {
+                return `
+                    <button type="button" class="btn-acao-editar" data-id="${id}" data-tipo="${tipo}" style="background:var(--accent); color:#ffffff; border:none; padding:6px 10px; border-radius:8px; cursor:pointer;">✏️</button>
+                    <button type="button" class="btn-acao-apagar" data-id="${id}" data-tipo="${tipo}" style="background:var(--danger); color:#ffffff; border:none; padding:6px 10px; border-radius:8px; cursor:pointer;">🗑️</button>
+                `;
+            }
+
+            function renderEmpresas(dados) {
+                state.empresas = dados;
+                const tbody = document.getElementById('lista-empresas');
+                tbody.innerHTML = dados.map(e => `
+                    <tr>
+                        <td><strong>${e.nome_fantasia}</strong></td>
+                        <td>${e.razao_social || '-'}</td>
+                        <td>${e.cnpj || '-'}</td>
+                        <td>${e.medico_coordenador || '-'}</td>
+                        <td style="text-align:center;">${btnAcoes(e.id, 'empresas')}</td>
+                    </tr>
+                `).join('');
+            }
+
+            function renderFuncoes(dados = state.funcoes) {
+                state.funcoes = dados;
+
+                const funcoesCompletas = dados.map(f => {
+                    const empInfo = state.empresas.find(e => String(e.id) === String(f.empresa_id));
+                    return {
+                        ...f,
+                        sem_vinculo: !empInfo,
+                        nome_empresa_visual: empInfo ? (empInfo.razao_social || empInfo.nome_fantasia) : 'Sem empresa vinculada'
+                    };
+                });
+
+                const empresasUnicas = [...new Set(funcoesCompletas.map(f => f.nome_empresa_visual))].sort();
+                const containerFiltros = document.getElementById('filtros-funcoes');
+                containerFiltros.innerHTML = '';
+
+                const criarBotaoFiltro = (rotulo, valorFiltro) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `btn-filtro ${state.filtroEmpresaAtivo === valorFiltro ? 'active' : ''}`;
+                    btn.textContent = rotulo;
+                    btn.addEventListener('click', () => {
+                        state.filtroEmpresaAtivo = valorFiltro;
+                        renderFuncoes();
+                    });
+                    containerFiltros.appendChild(btn);
+                };
+
+                criarBotaoFiltro('Todas as Funções', 'Todas');
+                empresasUnicas.forEach(emp => criarBotaoFiltro(emp, emp));
+
+                const dadosFiltrados = state.filtroEmpresaAtivo === 'Todas'
+                    ? funcoesCompletas
+                    : funcoesCompletas.filter(f => f.nome_empresa_visual === state.filtroEmpresaAtivo);
+
+                const tbody = document.getElementById('lista-funcoes');
+                tbody.innerHTML = dadosFiltrados.map(f => {
+                    const estiloEmpresa = f.sem_vinculo
+                        ? 'color: var(--danger); font-weight: bold;'
+                        : 'color: var(--text-muted); font-weight: bold;';
+
+                    return `
+                        <tr>
+                            <td style="font-size:11px; ${estiloEmpresa}">${f.nome_empresa_visual}</td>
+                            <td><strong>${f.nome_funcao}</strong></td>
+                            <td style="font-size:11px;">F: ${f.risco_fisico}<br>Q: ${f.risco_quimico}<br>B: ${f.risco_biologico}</td>
+                            <td style="font-size:11px;">E: ${f.risco_ergonomico}<br>A: ${f.risco_acidente}<br>P: ${f.risco_psicossocial || '-'}</td>
+                            <td style="font-size:11px; color:var(--accent); font-weight:bold;">${formatarNrsTexto(f.nrs_aplicaveis)}</td>
+                            <td style="text-align:center;">${btnAcoes(f.id, 'funcoes')}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            function renderEsocial(dados) {
+                state.esocial = dados;
+                const tbody = document.getElementById('lista-esocial');
+                tbody.innerHTML = dados.map(e => `
+                    <tr>
+                        <td><strong>${e.exame_nome}</strong></td>
+                        <td style="color:var(--warning); font-weight:bold;">${e.codigo}</td>
+                        <td style="text-align:center;">${btnAcoes(e.id, 'esocial')}</td>
+                    </tr>
+                `).join('');
+            }
+
+            async function carregarDados() {
+                msgCarregando.style.display = 'block';
+                try {
+                    const [resEmp, resFunc, resEso] = await Promise.all([
+                        supabase.from('empresas_base').select('*').order('nome_fantasia'),
+                        supabase.from('funcoes_base').select('*').order('nome_funcao'),
+                        supabase.from('esocial_exames').select('*').order('exame_nome')
+                    ]);
+
+                    if (resEmp.error) throw resEmp.error;
+                    if (resFunc.error) throw resFunc.error;
+                    if (resEso.error) throw resEso.error;
+
+                    if (resEmp.data) {
+                        renderEmpresas(resEmp.data);
+                        const selectEmp = document.getElementById('func-empresa');
+                        selectEmp.innerHTML = '<option value="">-- Selecione uma empresa --</option>' +
+                            resEmp.data.map(e => `<option value="${e.id}">${e.razao_social || e.nome_fantasia}</option>`).join('');
                     }
+                    if (resFunc.data) renderFuncoes(resFunc.data);
+                    if (resEso.data) renderEsocial(resEso.data);
+                } catch (e) {
+                    alert('Erro ao sincronizar base de dados.');
+                    console.error(e);
+                } finally {
+                    msgCarregando.style.display = 'none';
+                }
+            }
+
+            async function salvarEmpresa() {
+                const id = document.getElementById('emp-id').value;
+                const dados = {
+                    nome_fantasia: document.getElementById('emp-fantasia').value.trim(),
+                    razao_social: document.getElementById('emp-razao').value.trim(),
+                    cnpj: document.getElementById('emp-cnpj').value.trim(),
+                    medico_coordenador: document.getElementById('emp-medico').value.trim()
+                };
+                if (!dados.nome_fantasia) {
+                    alert('O Nome Fantasia é obrigatório.');
+                    return;
+                }
+
+                msgCarregando.style.display = 'block';
+                try {
+                    const { error } = id
+                        ? await supabase.from('empresas_base').update(dados).eq('id', id)
+                        : await supabase.from('empresas_base').insert([dados]);
+                    if (error) throw error;
+
+                    fecharModal('modal-empresa');
+                    await carregarDados();
+                } catch (e) {
+                    alert('Erro ao salvar empresa: ' + e.message);
+                    console.error(e);
+                } finally {
+                    msgCarregando.style.display = 'none';
+                }
+            }
+
+            async function salvarFuncao() {
+                const id = document.getElementById('func-id').value;
+                const valorSelectEmpresa = document.getElementById('func-empresa').value;
+
+                if (!valorSelectEmpresa || valorSelectEmpresa.trim() === '') {
+                    alert('AÇÃO BLOQUEADA: Selecione obrigatoriamente uma Empresa vinculada antes de salvar a função.');
+                    return;
+                }
+
+                const nomesValidos = Array.from(document.querySelectorAll('.input-nome-funcao'))
+                    .map(inp => inp.value.trim())
+                    .filter(Boolean);
+
+                if (nomesValidos.length === 0) {
+                    alert('Adicione pelo menos um Nome de Função.');
+                    return;
+                }
+
+                const nrsRaw = document.getElementById('func-nrs').value;
+                const jsonNrs = nrsRaw.trim() !== ''
+                    ? nrsRaw.split(',').map(n => ({ nome: n.trim(), status: '' })).filter(n => n.nome)
+                    : [];
+
+                const baseDados = {
+                    empresa_id: valorSelectEmpresa,
+                    risco_fisico: document.getElementById('func-rf').value,
+                    risco_quimico: document.getElementById('func-rq').value,
+                    risco_biologico: document.getElementById('func-rb').value,
+                    risco_ergonomico: document.getElementById('func-re').value,
+                    risco_acidente: document.getElementById('func-ra').value,
+                    risco_psicossocial: document.getElementById('func-rp').value,
+                    nrs_aplicaveis: jsonNrs
+                };
+
+                msgCarregando.style.display = 'block';
+                try {
+                    const { error } = id
+                        ? await supabase.from('funcoes_base').update({ ...baseDados, nome_funcao: nomesValidos[0] }).eq('id', id)
+                        : await supabase.from('funcoes_base').insert(nomesValidos.map(nome => ({ ...baseDados, nome_funcao: nome })));
+                    if (error) throw error;
+
+                    fecharModal('modal-funcao');
+                    await carregarDados();
+                } catch (error) {
+                    console.error(error);
+                    alert('Erro ao gravar funções: ' + error.message);
+                } finally {
+                    msgCarregando.style.display = 'none';
+                }
+            }
+
+            async function salvarEsocial() {
+                const id = document.getElementById('eso-id').value;
+                const dados = {
+                    exame_nome: document.getElementById('eso-nome').value.trim(),
+                    codigo: document.getElementById('eso-codigo').value.trim()
+                };
+                if (!dados.exame_nome || !dados.codigo) {
+                    alert('Nome e Código são obrigatórios.');
+                    return;
+                }
+
+                msgCarregando.style.display = 'block';
+                try {
+                    const { error } = id
+                        ? await supabase.from('esocial_exames').update(dados).eq('id', id)
+                        : await supabase.from('esocial_exames').insert([dados]);
+                    if (error) throw error;
+
+                    fecharModal('modal-esocial');
+                    await carregarDados();
+                } catch (e) {
+                    alert('Erro ao salvar código e-Social: ' + e.message);
+                    console.error(e);
+                } finally {
+                    msgCarregando.style.display = 'none';
+                }
+            }
+
+            function editarRegistro(id, tipo) {
+                if (tipo === 'empresas') {
+                    const reg = state.empresas.find(e => String(e.id) === String(id));
+                    if (!reg) return;
+                    document.getElementById('emp-id').value = reg.id;
+                    document.getElementById('emp-fantasia').value = reg.nome_fantasia || '';
+                    document.getElementById('emp-razao').value = reg.razao_social || '';
+                    document.getElementById('emp-cnpj').value = reg.cnpj || '';
+                    document.getElementById('emp-medico').value = reg.medico_coordenador || '';
+                    document.getElementById('titulo-modal-empresa').textContent = '✏️ Editar Empresa';
+                    abrirModal('modal-empresa');
+                } else if (tipo === 'funcoes') {
+                    const reg = state.funcoes.find(f => String(f.id) === String(id));
+                    if (!reg) return;
+                    document.getElementById('func-id').value = reg.id;
+                    document.getElementById('func-empresa').value = reg.empresa_id || '';
+                    resetarCamposNomesFuncao(reg.nome_funcao || '', false);
+
+                    document.getElementById('func-rf').value = reg.risco_fisico || RISCO_PADRAO;
+                    document.getElementById('func-rq').value = reg.risco_quimico || RISCO_PADRAO;
+                    document.getElementById('func-rb').value = reg.risco_biologico || RISCO_PADRAO;
+                    document.getElementById('func-re').value = reg.risco_ergonomico || RISCO_PADRAO;
+                    document.getElementById('func-ra').value = reg.risco_acidente || RISCO_PADRAO;
+                    document.getElementById('func-rp').value = reg.risco_psicossocial || RISCO_PADRAO;
+
+                    const nrsFormatadas = formatarNrsTexto(reg.nrs_aplicaveis);
+                    document.getElementById('func-nrs').value = nrsFormatadas === '-' ? '' : nrsFormatadas;
+
+                    document.getElementById('titulo-modal-funcao').textContent = '✏️ Editar Função';
+                    abrirModal('modal-funcao');
+                } else if (tipo === 'esocial') {
+                    const reg = state.esocial.find(e => String(e.id) === String(id));
+                    if (!reg) return;
+                    document.getElementById('eso-id').value = reg.id;
+                    document.getElementById('eso-nome').value = reg.exame_nome || '';
+                    document.getElementById('eso-codigo').value = reg.codigo || '';
+                    document.getElementById('titulo-modal-esocial').textContent = '✏️ Editar Código';
+                    abrirModal('modal-esocial');
+                }
+            }
+
+            async function apagarRegistro(id, tipo) {
+                if (!confirm('Tem a certeza que deseja apagar este registo? A ação não pode ser desfeita.')) return;
+                const mapaTabelas = {
+                    empresas: 'empresas_base',
+                    funcoes: 'funcoes_base',
+                    esocial: 'esocial_exames'
+                };
+                try {
+                    const { error } = await supabase.from(mapaTabelas[tipo]).delete().eq('id', id);
+                    if (error) throw error;
+                    await carregarDados();
+                } catch (e) {
+                    alert('Erro ao apagar registo: ' + e.message);
+                }
+            }
+
+            function configurarHeader() {
+                const btnTheme = document.getElementById('btn-theme-toggle');
+                if (btnTheme) {
+                    const atualizarIcone = () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        btnTheme.textContent = isDark ? '☀️' : '🌙';
+                    };
+                    atualizarIcone();
+
+                    btnTheme.addEventListener('click', () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        if (isDark) {
+                            document.documentElement.removeAttribute('data-theme');
+                            localStorage.setItem('monad_theme', 'light');
+                        } else {
+                            document.documentElement.setAttribute('data-theme', 'dark');
+                            localStorage.setItem('monad_theme', 'dark');
+                        }
+                        atualizarIcone();
+                    });
+                }
+
+                document.getElementById('btn-sair-sistema')?.addEventListener('click', () => {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
                 });
             }
-            carregarDados();
-        });
+
+            document.addEventListener('DOMContentLoaded', () => {
+                configurarHeader();
+                limparFormularios();
+
+                document.querySelectorAll('#tabs-cadastros .tab-btn').forEach(btn => {
+                    btn.addEventListener('click', () => mudarAba(btn.dataset.aba, btn));
+                });
+
+                document.querySelectorAll('[data-abrir-modal]').forEach(btn => {
+                    btn.addEventListener('click', () => abrirModal(btn.dataset.abrirModal));
+                });
+
+                document.querySelectorAll('[data-fechar-modal]').forEach(btn => {
+                    btn.addEventListener('click', () => fecharModal(btn.dataset.fecharModal));
+                });
+
+                document.getElementById('btn-add-nome-func')?.addEventListener('click', adicionarCampoFuncao);
+                document.getElementById('btn-salvar-empresa')?.addEventListener('click', salvarEmpresa);
+                document.getElementById('btn-salvar-funcao')?.addEventListener('click', salvarFuncao);
+                document.getElementById('btn-salvar-esocial')?.addEventListener('click', salvarEsocial);
+
+                document.querySelector('main')?.addEventListener('click', (e) => {
+                    const btnEditar = e.target.closest('.btn-acao-editar');
+                    if (btnEditar) {
+                        editarRegistro(btnEditar.dataset.id, btnEditar.dataset.tipo);
+                        return;
+                    }
+                    const btnApagar = e.target.closest('.btn-acao-apagar');
+                    if (btnApagar) {
+                        apagarRegistro(btnApagar.dataset.id, btnApagar.dataset.tipo);
+                    }
+                });
+
+                carregarDados();
+            });
+        })();
     </script>
 </body>
 </html>

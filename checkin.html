@@ -7,34 +7,132 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/checkin.css">
     <script>
-        // GATEKEEPER E LEITURA DO MODO ESCURO
         if (localStorage.getItem('monad_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
-        
-        // Verifica se há login e permite acesso
+
         const tokenAtivo = localStorage.getItem('monad_token');
         const setorLogado = localStorage.getItem('monad_setor');
-        if (!tokenAtivo || !setorLogado || (setorLogado !== "todos" && setorLogado !== "recepcao" && setorLogado !== "admin")) {
+        const setoresPermitidos = ['todos', 'recepcao', 'admin'];
+
+        if (!tokenAtivo || !setoresPermitidos.includes(setorLogado)) {
             localStorage.clear();
             window.location.href = "login.html";
         }
     </script>
     <style>
-        /* Classes de Toolbar para Responsividade (Mobile First) */
-        .toolbar-geral { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-        .toolbar-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .input-moderno { padding: 9px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-strong); font-family: inherit; font-size: 13px;}
-        .btn-acao { background-color: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow-btn); font-family: inherit; font-size: 13px; transition: opacity 0.2s; }
-        .btn-acao:hover { opacity: 0.9; }
-        .input-pesquisa { width: 220px; }
+        .painel-checkin-card {
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--accent);
+        }
+
+        .titulo-secao-checkin {
+            margin: 0;
+            color: var(--text-strong);
+            font-size: 22px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .toolbar-geral {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .grupo-data-acao {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-moderno {
+            padding: 10px 14px;
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            background: var(--surface-muted);
+            color: var(--text-strong);
+            font-family: inherit;
+            font-size: 13.5px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        .input-moderno:hover {
+            border-color: var(--border-hover);
+        }
+
+        .input-moderno:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 4px var(--accent-ring);
+        }
+
+        .btn-acao {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13.5px;
+            box-shadow: var(--shadow-btn);
+            font-family: inherit;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+
+        .btn-acao:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .btn-acao:active {
+            transform: translateY(0);
+        }
+
+        .input-pesquisa {
+            width: 230px;
+        }
+
+        .estado-vazio-checkin {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            display: none;
+            background: var(--surface-muted);
+            border-radius: 12px;
+            border: 1px dashed var(--border-strong);
+            margin-top: 14px;
+        }
 
         @media (max-width: 768px) {
             .toolbar-geral { flex-direction: column; align-items: stretch; }
             .toolbar-group { flex-direction: column; align-items: stretch; width: 100%; }
+            .grupo-data-acao { width: 100%; }
+            .grupo-data-acao .input-moderno { flex: 1; }
             .input-moderno, .btn-acao, .input-pesquisa { width: 100%; }
-            
-            .tabs-setores { display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
+
+            .tabs-setores {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 10px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+            }
             .tab-btn { flex: 0 0 auto; }
         }
     </style>
@@ -44,65 +142,63 @@
         <h1 style="color: var(--text-strong);">Sistema Interno</h1>
         <h2>Painel de Gestão (Visão Geral)</h2>
         <div class="header-controls">
-            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
+            <button type="button" id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
+            <button type="button" id="btn-sair-sistema" class="btn-header-danger">Sair</button>
         </div>
         <nav style="margin-top: 15px;">
             <ul>
                 <li><a href="index.html">Recepção</a></li>
-                <li><a href="checkin.html" style="background-color: var(--accent) !important; color: white !important;">Visão Geral</a></li>
+                <li><a href="checkin.html" style="background-color: var(--accent) !important; color: #ffffff !important;">Visão Geral</a></li>
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
-                <!-- Apenas Admin vê a Base de Dados e o Painel de Controle -->
                 <li id="menu-documentos" style="display: none;"><a href="documentos.html">Gerar ASO</a></li>
                 <li id="menu-cadastros" style="display: none;"><a href="cadastros.html">Base Dados</a></li>
-                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
+                <li id="menu-admin" style="display: none;"><a href="admin.html" style="background-color: var(--danger) !important; color: #ffffff !important;">Painel Admin</a></li>
                 <li id="menu-financeiro" style="display: none;"><a href="financeiro.html">Financeiro</a></li>
             </ul>
         </nav>
         <script>
-            // Adicionado suporte para mostrar o menu de ASO e Base de dados ao Admin e Todos
-            const setorNav = localStorage.getItem('monad_setor');
-            if (setorNav === 'admin' || setorNav === 'todos') {
-                const elDoc = document.getElementById('menu-documentos');
-                const elCad = document.getElementById('menu-cadastros');
-                if (elDoc) elDoc.style.display = 'inline-block';
-                if (elCad) elCad.style.display = 'inline-block';
-            
-            }
-            if (setorNav === 'admin') {
-                const elAdmin = document.getElementById('menu-admin');
-                if (elAdmin) elAdmin.style.display = 'inline-block';
-            }
-            if (setorNav === 'admin') {
-    const elFin = document.getElementById('menu-financeiro');
-    if (elFin) elFin.style.display = 'inline-block';
-}
+            (() => {
+                const setorNav = localStorage.getItem('monad_setor');
+                const mostrar = (id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'inline-block';
+                };
+
+                if (setorNav === 'admin' || setorNav === 'todos') {
+                    mostrar('menu-documentos');
+                    mostrar('menu-cadastros');
+                }
+                if (setorNav === 'admin') {
+                    mostrar('menu-admin');
+                    mostrar('menu-financeiro');
+                }
+            })();
         </script>
     </header>
-    
+
     <main>
-        <div class="painel-recepcao no-print">
+        <div class="painel-recepcao painel-checkin-card no-print">
             <div class="toolbar-geral">
-                <h2 style="margin: 0; color: var(--text-strong); font-size: 22px; border-bottom: 2px solid var(--surface-strong); padding-bottom: 12px; margin-bottom: 5px;">Acompanhamento Global</h2>
-                
+                <h2 class="titulo-secao-checkin">Acompanhamento Global</h2>
+
                 <div class="toolbar-group">
-                    <div style="display: flex; align-items: center; gap: 5px; width: 100%;">
-                        <input type="date" id="filtro-data" class="input-moderno" style="flex: 1;">
-                        <button id="btn-buscar-data" class="btn-acao">Atualizar</button>
+                    <div class="grupo-data-acao">
+                        <input type="date" id="filtro-data" class="input-moderno">
+                        <button type="button" id="btn-buscar-data" class="btn-acao">Atualizar</button>
                     </div>
                     <input type="text" id="pesquisa-paciente" placeholder="Pesquisar..." class="input-moderno input-pesquisa">
                 </div>
             </div>
 
             <div class="tabs-setores">
-                <button class="tab-btn active" data-aba="todos">Todos os Setores</button>
-                <button class="tab-btn" data-aba="clinico">Clínico</button>
-                <button class="tab-btn" data-aba="raiox">Raio-X</button>
-                <button class="tab-btn" data-aba="fono">Fonoaudiologia</button>
-                <button class="tab-btn" data-aba="lab">Laboratório</button>
-                <button class="tab-btn" data-aba="consulta">Consulta Médica</button>
+                <button type="button" class="tab-btn active" data-aba="todos">Todos os Setores</button>
+                <button type="button" class="tab-btn" data-aba="clinico">Clínico</button>
+                <button type="button" class="tab-btn" data-aba="raiox">Raio-X</button>
+                <button type="button" class="tab-btn" data-aba="fono">Fonoaudiologia</button>
+                <button type="button" class="tab-btn" data-aba="lab">Laboratório</button>
+                <button type="button" class="tab-btn" data-aba="consulta">Consulta Médica</button>
             </div>
-            
+
             <div id="msg-carregando" style="text-align: center; padding: 20px; font-weight: bold; color: var(--accent); display: none;">⏳ A procurar dados...</div>
 
             <div class="table-responsive">
@@ -122,253 +218,284 @@
                     <tbody id="lista-liberacao"></tbody>
                 </table>
             </div>
-            
-            <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--bg-slate); border-radius: 8px; border: 1px dashed var(--border-strong); margin-top: 10px;">
+
+            <div id="msg-vazio" class="estado-vazio-checkin">
                 <strong>Nenhum paciente encontrado para esta data.</strong>
             </div>
         </div>
     </main>
 
-    <!-- INÍCIO DA ADAPTAÇÃO PARA SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const tabela = document.getElementById('lista-liberacao');
-            const inputData = document.getElementById('filtro-data');
-            const inputPesq = document.getElementById('pesquisa-paciente');
-            let abaAtiva = 'todos'; 
+        (() => {
+            const SETORES = ['clinico', 'raiox', 'fono', 'lab', 'consulta'];
 
-            const hoje = new Date();
-            inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+            const temCampoValido = (valor) => Boolean(valor && String(valor).trim() !== '' && valor !== 'Nenhum');
 
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    abaAtiva = this.getAttribute('data-aba');
-                    aplicarFiltros();
-                });
-            });
+            const formatarExtras = (extras) => {
+                if (!temCampoValido(extras)) return '';
+                return String(extras).split(',').map(item => item.trim()).filter(Boolean).join(', ');
+            };
 
-            async function buscarDados() {
-                if(!inputData.value) return;
-                document.getElementById('msg-carregando').style.display = "block";
-                
-                try {
-                    const { data, error } = await supabase
-                        .from('atendimentos')
-                        .select('*')
-                        .eq('data_exame', inputData.value)
-                        .order('created_at', { ascending: false });
+            const extrairFlagsPaciente = (pac) => {
+                const clinico = temCampoValido(pac.exames_clinicos);
+                const raiox = temCampoValido(pac.exames_raiox);
+                const lab = temCampoValido(pac.exames_lab);
+                const extrasTexto = formatarExtras(pac.exames_extras);
+                const extras = Boolean(extrasTexto);
+                const fono = pac.audiometria === true;
+                const consultaMedica = pac.consulta_clinica === true;
+                const psicossocial = pac.avaliacao_psicossocial === true;
+                const consulta = consultaMedica || psicossocial;
+                const valido = clinico || raiox || lab || extras || fono || consulta;
 
-                    document.getElementById('msg-carregando').style.display = "none";
-                    if (error) throw error;
+                return { clinico, raiox, lab, extras, extrasTexto, fono, consultaMedica, psicossocial, consulta, valido };
+            };
 
-                    if (data && data.length > 0) {
-                        renderizarTabela(data);
-                    } else { 
-                        tabela.innerHTML = ""; 
-                        document.getElementById('msg-vazio').style.display = "block"; 
-                    }
-                } catch (err) {
-                    console.error("Erro na busca:", err);
-                    document.getElementById('msg-carregando').style.display = "none";
+            function configurarTemaESair() {
+                const btnTheme = document.getElementById('btn-theme-toggle');
+                if (btnTheme) {
+                    const atualizarIcone = () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        btnTheme.textContent = isDark ? '☀️' : '🌙';
+                    };
+                    atualizarIcone();
+
+                    btnTheme.addEventListener('click', () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        if (isDark) {
+                            document.documentElement.removeAttribute('data-theme');
+                            localStorage.setItem('monad_theme', 'light');
+                        } else {
+                            document.documentElement.setAttribute('data-theme', 'dark');
+                            localStorage.setItem('monad_theme', 'dark');
+                        }
+                        atualizarIcone();
+                    });
                 }
+
+                document.getElementById('btn-sair-sistema')?.addEventListener('click', () => {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                });
             }
 
-            setInterval(atualizacaoSilenciosa, 1000);
+            document.addEventListener('DOMContentLoaded', () => {
+                configurarTemaESair();
 
-            async function atualizacaoSilenciosa() {
-                if (document.hidden || !inputData.value) return; 
-                
-                try {
-                    const { data, error } = await supabase
-                        .from('atendimentos')
-                        .select('*')
-                        .eq('data_exame', inputData.value);
+                const tabela = document.getElementById('lista-liberacao');
+                const inputData = document.getElementById('filtro-data');
+                const inputPesq = document.getElementById('pesquisa-paciente');
+                const msgCarregando = document.getElementById('msg-carregando');
+                const msgVazio = document.getElementById('msg-vazio');
+                let abaAtiva = 'todos';
 
-                    if (error) throw error;
+                const hoje = new Date();
+                inputData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
-                    if (data && data.length > 0) {
-                        const pacValidos = data.filter(p => 
-                            (p.exames_clinicos && p.exames_clinicos !== 'Nenhum') || 
-                            (p.exames_raiox && p.exames_raiox !== 'Nenhum') || 
-                            (p.exames_lab && p.exames_lab !== 'Nenhum') || 
-                            (p.exames_extras && p.exames_extras !== 'Nenhum') ||
-                            p.audiometria === true || 
-                            p.consulta_clinica === true || 
-                            p.avaliacao_psicossocial === true
-                        );
-                        
-                        if (pacValidos.length !== document.querySelectorAll('.linha-paciente').length) {
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        abaAtiva = btn.dataset.aba;
+                        aplicarFiltros();
+                    });
+                });
+
+                async function buscarDados() {
+                    if (!inputData.value) return;
+                    msgCarregando.style.display = 'block';
+
+                    try {
+                        const { data, error } = await supabase
+                            .from('atendimentos')
+                            .select('*')
+                            .eq('data_exame', inputData.value)
+                            .order('created_at', { ascending: false });
+
+                        if (error) throw error;
+
+                        if (data && data.length > 0) {
+                            renderizarTabela(data);
+                        } else {
+                            tabela.innerHTML = '';
+                            msgVazio.style.display = 'block';
+                        }
+                    } catch (err) {
+                        console.error('Erro na busca:', err);
+                    } finally {
+                        msgCarregando.style.display = 'none';
+                    }
+                }
+
+                async function atualizacaoSilenciosa() {
+                    if (document.hidden || !inputData.value) return;
+
+                    try {
+                        const { data, error } = await supabase
+                            .from('atendimentos')
+                            .select('*')
+                            .eq('data_exame', inputData.value);
+
+                        if (error) throw error;
+                        if (!data || data.length === 0) return;
+
+                        const validos = data.filter(p => extrairFlagsPaciente(p).valido);
+                        if (validos.length !== tabela.querySelectorAll('.linha-paciente').length) {
                             renderizarTabela(data);
                             return;
                         }
-                        
+
                         data.forEach(pac => {
-                            const linha = document.querySelector(`tr[data-id="${pac.id}"]`);
-                            if (linha) {
-                                const updateCheck = (cls, val) => {
-                                    const cb = linha.querySelector(cls);
-                                    if (cb && cb.checked !== val) cb.checked = val;
-                                };
-                                
-                                updateCheck('.c-clinico', pac.liberado_clinico);
-                                updateCheck('.c-raiox', pac.liberado_raiox);
-                                updateCheck('.c-fono', pac.liberado_fono);
-                                updateCheck('.c-lab', pac.liberado_lab);
-                                updateCheck('.c-consulta', pac.liberado_consulta);
-                                
-                                const obs = linha.querySelector('.obs-read'); 
-                                if(obs && obs.textContent !== (pac.observacao || '')) obs.textContent = pac.observacao;
+                            const linha = tabela.querySelector(`tr[data-id="${pac.id}"]`);
+                            if (!linha) return;
 
-                                const extrasBox = linha.querySelector('.extras-read');
-                                const temExtras = pac.exames_extras && pac.exames_extras !== 'Nenhum';
-                                const novoTextoExtras = temExtras
-                                    ? '➕ Extras: ' + pac.exames_extras.split(',').map(i => i.trim()).filter(Boolean).join(', ')
-                                    : '';
-                                if (extrasBox && extrasBox.textContent !== novoTextoExtras) {
-                                    extrasBox.textContent = novoTextoExtras;
-                                    extrasBox.style.display = temExtras ? 'block' : 'none';
-                                }
-                                
-                                verificarStatusFilaLocal(linha);
+                            const flags = extrairFlagsPaciente(pac);
+                            const setChecked = (cls, val) => {
+                                const cb = linha.querySelector(cls);
+                                if (cb && cb.checked !== Boolean(val)) cb.checked = Boolean(val);
+                            };
+
+                            setChecked('.c-clinico', pac.liberado_clinico);
+                            setChecked('.c-raiox', pac.liberado_raiox);
+                            setChecked('.c-fono', pac.liberado_fono);
+                            setChecked('.c-lab', pac.liberado_lab);
+                            setChecked('.c-consulta', pac.liberado_consulta);
+
+                            const obs = linha.querySelector('.obs-read');
+                            const textoObs = pac.observacao || '';
+                            if (obs && obs.textContent !== textoObs) obs.textContent = textoObs;
+
+                            const extrasBox = linha.querySelector('.extras-read');
+                            const novoTextoExtras = flags.extras ? `➕ Extras: ${flags.extrasTexto}` : '';
+                            if (extrasBox && extrasBox.textContent !== novoTextoExtras) {
+                                extrasBox.textContent = novoTextoExtras;
+                                extrasBox.style.display = flags.extras ? 'block' : 'none';
                             }
+
+                            verificarStatusFilaLocal(linha);
                         });
+                    } catch (err) {
+                        console.error('Erro no polling:', err);
                     }
-                } catch (err) { console.error("Erro no polling:", err); }
-            }
+                }
 
-            function renderizarTabela(pacientes) {
-                tabela.innerHTML = "";
-                pacientes.forEach(pac => {
-                    const temClinico = pac.exames_clinicos && pac.exames_clinicos !== 'Nenhum';
-                    const temRaiox = pac.exames_raiox && pac.exames_raiox !== 'Nenhum';
-                    const temLab = pac.exames_lab && pac.exames_lab !== 'Nenhum';
-                    const temExtras = pac.exames_extras && pac.exames_extras !== 'Nenhum';
-                    const temFono = pac.audiometria === true;
-                    const temConsultaMedica = pac.consulta_clinica === true;
-                    const temPsicossocial = pac.avaliacao_psicossocial === true;
-                    const temConsulta = temConsultaMedica || temPsicossocial;
-
-                    if (!temClinico && !temRaiox && !temLab && !temFono && !temConsulta && !temExtras) return;
-
-                    let itensConsulta = [];
-                    if (temConsultaMedica) itensConsulta.push("Médico do Trabalho");
-                    if (temPsicossocial) itensConsulta.push("Avaliação Psicossocial");
-                    const textoConsulta = itensConsulta.join(", ");
-
-                    const listaExtrasFormatada = temExtras
-                        ? pac.exames_extras.split(',').map(item => item.trim()).filter(Boolean).join(', ')
+                function criarCelulaExame(exame, checked, classe, obs = null) {
+                    const blocoObs = obs !== null
+                        ? `<div class="obs-read" style="font-size:10px; color:var(--danger); background:var(--danger-soft); padding:3px; border-radius:3px; width:100%; text-align:center; min-height: 18px; margin-top:5px;">${obs || ''}</div>`
                         : '';
 
-                    const cell = (exame, checked, classe) => `
+                    return `
                         <div class="celula-exame">
                             <input type="checkbox" class="${classe}" ${checked ? 'checked' : ''} onclick="return false;" style="cursor:not-allowed; transform: scale(1.2);">
                             <div class="detalhe-exame" style="margin-top:5px;">${exame}</div>
+                            ${blocoObs}
                         </div>
                     `;
-                    const cellLab = (exame, checked, obs) => `
-                        <div class="celula-exame">
-                            <input type="checkbox" class="c-lab" ${checked ? 'checked' : ''} onclick="return false;" style="cursor:not-allowed; transform: scale(1.2);">
-                            <div class="detalhe-exame" style="margin-top:5px;">${exame}</div>
-                            <div class="obs-read" style="font-size:10px; color:var(--danger); background:var(--danger-soft); padding:3px; border-radius:3px; width:100%; text-align:center; min-height: 18px; margin-top:5px;">${obs || ''}</div>
-                        </div>
-                    `;
-
-                    const tdC = temClinico ? cell(pac.exames_clinicos, pac.liberado_clinico, 'c-clinico') : `<span class="text-na">—</span>`;
-                    const tdR = temRaiox ? cell(pac.exames_raiox, pac.liberado_raiox, 'c-raiox') : `<span class="text-na">—</span>`;
-                    const tdF = temFono ? cell("Audiometria", pac.liberado_fono, 'c-fono') : `<span class="text-na">—</span>`;
-                    const tdL = temLab ? cellLab(pac.exames_lab, pac.liberado_lab, pac.observacao) : `<span class="text-na">—</span>`;
-                    const tdM = temConsulta ? cell(textoConsulta, pac.liberado_consulta, 'c-consulta') : `<span class="text-na">—</span>`;
-
-                    const iniciais = (pac.nome || '-').split(" ").map((n, i, a) => i === 0 || i === a.length - 1 ? n[0] : "").join("").toUpperCase();
-
-                    const tr = document.createElement('tr');
-                    tr.className = 'linha-paciente';
-                    tr.dataset.id = pac.id;
-                    tr.dataset.clinico = temClinico;
-                    tr.dataset.raiox = temRaiox;
-                    tr.dataset.fono = temFono;
-                    tr.dataset.lab = temLab;
-                    tr.dataset.consulta = temConsulta;
-
-                    tr.innerHTML = `
-                        <td><span class="tag-empresa">${pac.empresa || '-'}</span></td>
-                        <td>
-                            <div class="perfil-paciente">
-                                <div class="avatar">${iniciais}</div>
-                                <div style="display: flex; flex-direction: column;">
-                                    <span class="col-nome">${pac.nome}</span>
-                                    <span style="font-size: 11px; color: var(--text-muted);">CPF: ${pac.cpf || '-'}</span>
-                                    <span class="extras-read" style="font-size: 11px; color: var(--warning); font-weight: 600; display: ${temExtras ? 'block' : 'none'};">${temExtras ? '➕ Extras: ' + listaExtrasFormatada : ''}</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="col-clinico" style="text-align: center;">${tdC}</td>
-                        <td class="col-raiox" style="text-align: center;">${tdR}</td>
-                        <td class="col-fono" style="text-align: center;">${tdF}</td>
-                        <td class="col-lab" style="text-align: center;">${tdL}</td>
-                        <td class="col-consulta" style="text-align: center;">${tdM}</td>
-                        <td style="text-align: center;"><span class="badge-status pendente">AGUARDANDO</span></td>
-                    `;
-                    tabela.appendChild(tr);
-                    verificarStatusFilaLocal(tr);
-                });
-                aplicarFiltros();
-            }
-
-            function aplicarFiltros() {
-                const termo = inputPesq.value.toLowerCase();
-                let visiveis = 0;
-                ['clinico', 'raiox', 'fono', 'lab', 'consulta'].forEach(s => {
-                    document.querySelectorAll(`.col-${s}`).forEach(el => el.style.display = (abaAtiva === 'todos' || abaAtiva === s) ? '' : 'none');
-                });
-                document.querySelectorAll('.linha-paciente').forEach(linha => {
-                    const passaPesq = linha.textContent.toLowerCase().includes(termo);
-                    const passaAba = abaAtiva === 'todos' || linha.dataset[abaAtiva] === 'true';
-                    linha.style.display = (passaPesq && passaAba) ? '' : 'none';
-                    if (passaPesq && passaAba) visiveis++;
-                });
-                document.getElementById('msg-vazio').style.display = visiveis === 0 ? 'block' : 'none';
-            }
-
-            function verificarStatusFilaLocal(linha) {
-                const checkboxes = linha.querySelectorAll('input[type="checkbox"]');
-                const marcados = linha.querySelectorAll('input[type="checkbox"]:checked');
-                const badge = linha.querySelector('.badge-status');
-                if (checkboxes.length > 0 && checkboxes.length === marcados.length) {
-                    badge.textContent = 'CONCLUÍDO'; badge.className = 'badge-status liberado'; linha.classList.add('paciente-liberado-fade');
-                } else {
-                    badge.textContent = 'EM ATENDIMENTO'; badge.className = 'badge-status pendente'; linha.classList.remove('paciente-liberado-fade');
                 }
-            }
 
-            document.getElementById('btn-buscar-data').addEventListener('click', buscarDados);
-            inputPesq.addEventListener('input', aplicarFiltros);
-            buscarDados();
-        });
+                function renderizarTabela(pacientes) {
+                    tabela.innerHTML = '';
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnTheme = document.getElementById('btn-theme-toggle');
-            if (btnTheme) {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                btnTheme.textContent = isDark ? '☀️' : '🌙';
-                btnTheme.addEventListener('click', () => {
-                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                        document.documentElement.removeAttribute('data-theme');
-                        localStorage.setItem('monad_theme', 'light');
-                        btnTheme.textContent = '🌙';
-                    } else {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                        localStorage.setItem('monad_theme', 'dark');
-                        btnTheme.textContent = '☀️';
-                    }
-                });
-            }
-        });
+                    pacientes.forEach(pac => {
+                        const f = extrairFlagsPaciente(pac);
+                        if (!f.valido) return;
+
+                        const itensConsulta = [];
+                        if (f.consultaMedica) itensConsulta.push('Médico do Trabalho');
+                        if (f.psicossocial) itensConsulta.push('Avaliação Psicossocial');
+
+                        const tdC = f.clinico ? criarCelulaExame(pac.exames_clinicos, pac.liberado_clinico, 'c-clinico') : `<span class="text-na">—</span>`;
+                        const tdR = f.raiox ? criarCelulaExame(pac.exames_raiox, pac.liberado_raiox, 'c-raiox') : `<span class="text-na">—</span>`;
+                        const tdF = f.fono ? criarCelulaExame('Audiometria', pac.liberado_fono, 'c-fono') : `<span class="text-na">—</span>`;
+                        const tdL = f.lab ? criarCelulaExame(pac.exames_lab, pac.liberado_lab, 'c-lab', pac.observacao) : `<span class="text-na">—</span>`;
+                        const tdM = f.consulta ? criarCelulaExame(itensConsulta.join(', '), pac.liberado_consulta, 'c-consulta') : `<span class="text-na">—</span>`;
+
+                        const iniciais = (pac.nome || '-')
+                            .split(' ')
+                            .filter(Boolean)
+                            .map((n, i, a) => (i === 0 || i === a.length - 1 ? n[0] : ''))
+                            .join('')
+                            .toUpperCase();
+
+                        const tr = document.createElement('tr');
+                        tr.className = 'linha-paciente';
+                        tr.dataset.id = pac.id;
+                        tr.dataset.clinico = f.clinico;
+                        tr.dataset.raiox = f.raiox;
+                        tr.dataset.fono = f.fono;
+                        tr.dataset.lab = f.lab;
+                        tr.dataset.consulta = f.consulta;
+
+                        tr.innerHTML = `
+                            <td><span class="tag-empresa">${pac.empresa || '-'}</span></td>
+                            <td>
+                                <div class="perfil-paciente">
+                                    <div class="avatar">${iniciais}</div>
+                                    <div style="display: flex; flex-direction: column;">
+                                        <span class="col-nome">${pac.nome}</span>
+                                        <span style="font-size: 11px; color: var(--text-muted);">CPF: ${pac.cpf || '-'}</span>
+                                        <span class="extras-read" style="font-size: 11px; color: var(--warning); font-weight: 600; display: ${f.extras ? 'block' : 'none'};">${f.extras ? '➕ Extras: ' + f.extrasTexto : ''}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-clinico" style="text-align: center;">${tdC}</td>
+                            <td class="col-raiox" style="text-align: center;">${tdR}</td>
+                            <td class="col-fono" style="text-align: center;">${tdF}</td>
+                            <td class="col-lab" style="text-align: center;">${tdL}</td>
+                            <td class="col-consulta" style="text-align: center;">${tdM}</td>
+                            <td style="text-align: center;"><span class="badge-status pendente">EM ATENDIMENTO</span></td>
+                        `;
+
+                        tabela.appendChild(tr);
+                        verificarStatusFilaLocal(tr);
+                    });
+
+                    aplicarFiltros();
+                }
+
+                function aplicarFiltros() {
+                    const termo = inputPesq.value.toLowerCase();
+                    let visiveis = 0;
+
+                    SETORES.forEach(s => {
+                        const mostrarColuna = abaAtiva === 'todos' || abaAtiva === s;
+                        document.querySelectorAll(`.col-${s}`).forEach(el => {
+                            el.style.display = mostrarColuna ? '' : 'none';
+                        });
+                    });
+
+                    tabela.querySelectorAll('.linha-paciente').forEach(linha => {
+                        const passaPesq = linha.textContent.toLowerCase().includes(termo);
+                        const passaAba = abaAtiva === 'todos' || linha.dataset[abaAtiva] === 'true';
+                        const visivel = passaPesq && passaAba;
+                        linha.style.display = visivel ? '' : 'none';
+                        if (visivel) visiveis++;
+                    });
+
+                    msgVazio.style.display = visiveis === 0 ? 'block' : 'none';
+                }
+
+                function verificarStatusFilaLocal(linha) {
+                    const checkboxes = linha.querySelectorAll('input[type="checkbox"]');
+                    const marcados = linha.querySelectorAll('input[type="checkbox"]:checked');
+                    const badge = linha.querySelector('.badge-status');
+                    if (!badge) return;
+
+                    const concluido = checkboxes.length > 0 && checkboxes.length === marcados.length;
+                    badge.textContent = concluido ? 'CONCLUÍDO' : 'EM ATENDIMENTO';
+                    badge.className = concluido ? 'badge-status liberado' : 'badge-status pendente';
+                    linha.classList.toggle('paciente-liberado-fade', concluido);
+                }
+
+                document.getElementById('btn-buscar-data')?.addEventListener('click', buscarDados);
+                inputPesq?.addEventListener('input', aplicarFiltros);
+
+                setInterval(atualizacaoSilenciosa, 3000);
+                buscarDados();
+            });
+        })();
     </script>
 </body>
 </html>

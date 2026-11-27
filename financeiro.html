@@ -19,32 +19,126 @@
         }
     </script>
     <style>
+        .painel-financeiro-card {
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--accent);
+        }
+
+        .titulo-secao-financeiro {
+            margin: 0 0 18px 0;
+            color: var(--text-strong);
+            font-size: 22px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .filtro-box-financeiro {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            background: var(--surface-muted);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 22px;
+        }
+
+        .filtro-campo-financeiro {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filtro-campo-financeiro label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .input-financeiro-moderno {
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-strong);
+            background: var(--surface);
+            color: var(--text-strong);
+            font-family: inherit;
+            font-size: 13.5px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        .input-financeiro-moderno:hover {
+            border-color: var(--border-hover);
+        }
+
+        .input-financeiro-moderno:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-ring);
+        }
+
+        .btn-fin-acao {
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            font-family: inherit;
+            box-shadow: var(--shadow-btn);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+
+        .btn-fin-acao:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .btn-fin-acao:active {
+            transform: translateY(0);
+        }
+
         .resumo-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
         }
+
         .card-kpi {
             background: var(--surface);
-            border: 1px solid var(--border-strong);
-            border-radius: 8px;
-            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 4px 14px -6px rgba(15, 23, 42, 0.08);
+            transition: all 0.2s ease;
         }
+
+        .card-kpi:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-hover);
+        }
+
         .card-kpi .kpi-label {
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 11.5px;
+            font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
+            letter-spacing: 0.4px;
         }
+
         .card-kpi .kpi-valor {
-            font-size: 22px;
-            font-weight: bold;
+            font-size: 24px;
+            font-weight: 700;
             color: var(--text-strong);
-            margin-top: 6px;
+            margin-top: 8px;
         }
+
         .card-kpi.destaque {
             border-left: 4px solid var(--accent);
+            background: linear-gradient(135deg, var(--surface) 0%, var(--accent-soft) 100%);
         }
 
         .titulo-faturamento-box {
@@ -52,84 +146,129 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
             background: var(--surface);
-            border: 1px solid var(--border-strong);
+            border: 1px solid var(--border);
             border-bottom: none;
-            padding: 14px 18px;
-            border-radius: 8px 8px 0 0;
+            padding: 16px 20px;
+            border-radius: 12px 12px 0 0;
         }
+
         .titulo-faturamento-box h3 {
             margin: 0;
             color: var(--text-strong);
             font-size: 17px;
         }
 
+        .tabela-financeiro-wrap {
+            border: 1px solid var(--border);
+            border-radius: 0 0 12px 12px;
+            overflow-x: auto;
+            background: var(--surface);
+        }
+
         .badge-novo-preco {
-            background: rgba(245, 158, 11, 0.18);
-            color: #b45309;
-            border: 1px solid #f59e0b;
+            background: var(--warning-soft);
+            color: var(--warning);
+            border: 1px solid rgba(217, 119, 6, 0.35);
             font-size: 10px;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 4px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 999px;
             text-transform: uppercase;
         }
-        [data-theme="dark"] .badge-novo-preco {
-            color: #fbbf24;
+
+        .estado-vazio-financeiro {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            display: none;
+            background: var(--surface-muted);
+            border-radius: 12px;
+            border: 1px dashed var(--border-strong);
+            margin-top: 14px;
         }
 
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.72);
+            background: rgba(15, 23, 42, 0.68);
+            backdrop-filter: blur(5px);
             z-index: 9999;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 16px;
         }
+
         .modal-box {
             background: var(--surface);
-            padding: 24px;
-            border-radius: 8px;
-            width: 95%;
+            padding: 26px;
+            border-radius: var(--radius-lg);
+            width: 100%;
             max-width: 720px;
             max-height: 92vh;
             overflow-y: auto;
-            border: 2px solid var(--accent);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--accent);
+            box-shadow: var(--shadow-hover);
+            box-sizing: border-box;
         }
+
         .modal-box h3 {
             margin-top: 0;
             color: var(--accent);
-            border-bottom: 1px solid var(--border-strong);
-            padding-bottom: 10px;
-        }
-        .linha-preco-modal {
-            display: grid;
-            grid-template-columns: 1fr auto 150px;
-            gap: 10px;
-            align-items: center;
-            background: var(--surface-muted);
-            border: 1px solid var(--border-strong);
-            padding: 10px 12px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
-        .linha-preco-modal input {
-            padding: 8px;
-            border: 1px solid var(--border-strong);
-            border-radius: 4px;
-            background: var(--surface);
-            color: var(--text-strong);
-            font-weight: bold;
-            text-align: right;
-            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            font-size: 18px;
         }
 
-        /* ÁREA DE IMPRESSÃO A4 */
+        .linha-preco-modal {
+            display: grid;
+            grid-template-columns: 1fr auto 155px;
+            gap: 12px;
+            align-items: center;
+            background: var(--surface-muted);
+            border: 1px solid var(--border);
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .linha-preco-modal input {
+            padding: 8px 10px;
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--text-strong);
+            font-weight: 700;
+            text-align: right;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .linha-preco-modal input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-ring);
+        }
+
         .area-impressao-faturamento {
             display: none;
+        }
+
+        @media (max-width: 650px) {
+            .linha-preco-modal {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .linha-preco-modal input {
+                width: 100%;
+            }
+            .modal-box {
+                padding: 20px 16px;
+            }
         }
 
         @media print {
@@ -214,8 +353,8 @@
         <h1 style="color: var(--text-strong);">Sistema Interno</h1>
         <h2>Módulo Financeiro & Faturamento</h2>
         <div class="header-controls">
-            <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn-header-danger">Sair</button>
+            <button type="button" id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar Tema">🌙</button>
+            <button type="button" id="btn-sair-sistema" class="btn-header-danger">Sair</button>
         </div>
         <nav style="margin-top: 15px;">
             <ul>
@@ -224,62 +363,41 @@
                 <li><a href="reimpressao.html">Reimpressão / Agendados</a></li>
                 <li><a href="documentos.html">Gerar ASO</a></li>
                 <li><a href="cadastros.html">Base Dados</a></li>
-                <li><a href="admin.html" style="background-color: var(--danger) !important; color: white !important;">Painel Admin</a></li>
-                <li><a href="financeiro.html" style="background-color: var(--accent) !important; color: white !important;">Financeiro</a></li>
+                <li><a href="admin.html" style="background-color: var(--danger) !important; color: #ffffff !important;">Painel Admin</a></li>
+                <li><a href="financeiro.html" style="background-color: var(--accent) !important; color: #ffffff !important;">Financeiro</a></li>
             </ul>
         </nav>
-        <script>
-            // Adicionado suporte para mostrar o menu de ASO e Base de dados ao Admin e Todos
-            const setorNav = localStorage.getItem('monad_setor');
-            if (setorNav === 'admin' || setorNav === 'todos') {
-                const elDoc = document.getElementById('menu-documentos');
-                const elCad = document.getElementById('menu-cadastros');
-                if (elDoc) elDoc.style.display = 'inline-block';
-                if (elCad) elCad.style.display = 'inline-block';
-            
-            }
-            if (setorNav === 'admin') {
-                const elAdmin = document.getElementById('menu-admin');
-                if (elAdmin) elAdmin.style.display = 'inline-block';
-            }
-            if (setorNav === 'admin') {
-    const elFin = document.getElementById('menu-financeiro');
-    if (elFin) elFin.style.display = 'inline-block';
-}
-        </script>
     </header>
 
     <main class="no-print">
-        <div class="painel-recepcao">
-            <h2 style="margin: 0 0 15px 0; color: var(--text-strong);">Apuração de Faturamento por Empresa</h2>
+        <div class="painel-recepcao painel-financeiro-card">
+            <h2 class="titulo-secao-financeiro">Apuração de Faturamento por Empresa</h2>
 
-            <!-- FILTROS -->
-            <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; background: var(--surface); padding: 16px; border-radius: 8px; border: 1px solid var(--border-strong); margin-bottom: 20px;">
-                <div style="display: flex; flex-direction: column; gap: 5px; flex: 2; min-width: 240px;">
-                    <label for="sel-empresa" style="font-size: 12px; font-weight: bold; color: var(--text-muted);">🏢 Empresa Cliente:</label>
-                    <select id="sel-empresa" style="padding: 9px; border-radius: 5px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong); font-weight: bold;">
+            <div class="filtro-box-financeiro">
+                <div class="filtro-campo-financeiro" style="flex: 2; min-width: 240px;">
+                    <label for="sel-empresa">🏢 Empresa Cliente:</label>
+                    <select id="sel-empresa" class="input-financeiro-moderno" style="font-weight: 600;">
                         <option value="">-- Selecione uma empresa --</option>
                     </select>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 5px; min-width: 150px;">
-                    <label for="data-inicio" style="font-size: 12px; font-weight: bold; color: var(--text-muted);">📅 Data Inicial:</label>
-                    <input type="date" id="data-inicio" style="padding: 8px; border-radius: 5px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong);">
+                <div class="filtro-campo-financeiro" style="min-width: 150px;">
+                    <label for="data-inicio">📅 Data Inicial:</label>
+                    <input type="date" id="data-inicio" class="input-financeiro-moderno">
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 5px; min-width: 150px;">
-                    <label for="data-fim" style="font-size: 12px; font-weight: bold; color: var(--text-muted);">📅 Data Final:</label>
-                    <input type="date" id="data-fim" style="padding: 8px; border-radius: 5px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong);">
+                <div class="filtro-campo-financeiro" style="min-width: 150px;">
+                    <label for="data-fim">📅 Data Final:</label>
+                    <input type="date" id="data-fim" class="input-financeiro-moderno">
                 </div>
 
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button id="btn-buscar-faturamento" style="background: var(--accent); color: white; border: none; padding: 9px 18px; border-radius: 5px; cursor: pointer; font-weight: bold;">🔎 Consultar Período</button>
+                    <button type="button" id="btn-buscar-faturamento" class="btn-fin-acao" style="background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%); color: #ffffff;">🔎 Consultar Período</button>
                 </div>
             </div>
 
             <div id="msg-status" style="text-align: center; padding: 18px; font-weight: bold; color: var(--accent); display: none;"></div>
 
-            <!-- PAINEL DE RESULTADOS -->
             <div id="painel-resultados" style="display: none;">
                 <div class="resumo-cards">
                     <div class="card-kpi">
@@ -302,13 +420,13 @@
                         <span id="subtitulo-periodo" style="font-size: 12px; color: var(--text-muted);"></span>
                     </div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button id="btn-abrir-precos" style="background: var(--warning); color: #0f172a; border: none; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold;">💲 Valores dos Exames</button>
-                        <button id="btn-exportar-excel" style="background: #15803d; color: white; border: none; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold;">📊 Exportar Planilha Oficial (.xlsx)</button>
-                        <button id="btn-imprimir-faturamento" style="background: #003366; color: white; border: none; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold;">🖨️ Imprimir Faturamento</button>
+                        <button type="button" id="btn-abrir-precos" class="btn-fin-acao" style="background: linear-gradient(135deg, var(--warning) 0%, #b45309 100%); color: #ffffff;">💲 Valores dos Exames</button>
+                        <button type="button" id="btn-exportar-excel" class="btn-fin-acao" style="background: linear-gradient(135deg, var(--success) 0%, #047857 100%); color: #ffffff;">📊 Exportar Planilha Oficial (.xlsx)</button>
+                        <button type="button" id="btn-imprimir-faturamento" class="btn-fin-acao" style="background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%); color: #ffffff;">🖨️ Imprimir Faturamento</button>
                     </div>
                 </div>
 
-                <div class="table-responsive" style="border: 1px solid var(--border-strong); border-radius: 0 0 8px 8px;">
+                <div class="table-responsive tabela-financeiro-wrap">
                     <table class="tabela-liberacao" style="margin-bottom: 0;">
                         <thead>
                             <tr>
@@ -324,15 +442,15 @@
                         <tbody id="tbody-faturamento"></tbody>
                         <tfoot>
                             <tr style="background: var(--surface-muted); font-weight: bold;">
-                                <td colspan="6" style="text-align: right; padding: 10px;">TOTAL DO FATURAMENTO:</td>
-                                <td id="tfoot-total" style="text-align: right; padding: 10px; color: var(--accent); font-size: 15px;">R$ 0,00</td>
+                                <td colspan="6" style="text-align: right; padding: 12px;">TOTAL DO FATURAMENTO:</td>
+                                <td id="tfoot-total" style="text-align: right; padding: 12px; color: var(--accent); font-size: 15px;">R$ 0,00</td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
             </div>
 
-            <div id="msg-vazio" style="text-align: center; padding: 30px; color: var(--text-muted); display: none; background: var(--surface); border-radius: 8px; border: 1px dashed var(--border-strong);">
+            <div id="msg-vazio" class="estado-vazio-financeiro">
                 <strong>Nenhum atendimento encontrado para esta empresa no período selecionado.</strong>
             </div>
         </div>
@@ -342,15 +460,15 @@
     <div id="modal-precos" class="modal-overlay no-print" style="display: none;">
         <div class="modal-box">
             <h3>💲 Tabela de Valores — <span id="modal-nome-empresa"></span></h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin-top: -10px; margin-bottom: 14px;">
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: -8px; margin-bottom: 16px;">
                 Os valores salvos ficam vinculados <strong>exclusivamente a esta empresa</strong> e serão carregados automaticamente nos próximos faturamentos (podendo ser alterados a qualquer momento).
             </p>
 
             <div id="lista-inputs-precos"></div>
 
-            <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" id="btn-fechar-modal-precos" style="padding: 9px 15px; border-radius: 5px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong); cursor: pointer; font-weight: bold;">Cancelar</button>
-                <button type="button" id="btn-salvar-precos" style="padding: 9px 18px; border-radius: 5px; border: none; background: var(--accent); color: white; cursor: pointer; font-weight: bold;">💾 Salvar Valores da Empresa</button>
+            <div style="margin-top: 22px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" id="btn-fechar-modal-precos" style="padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface-muted); color: var(--text-strong); cursor: pointer; font-weight: 600; font-family: inherit;">Cancelar</button>
+                <button type="button" id="btn-salvar-precos" class="btn-fin-acao" style="background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%); color: #ffffff; padding: 10px 20px;">💾 Salvar Valores da Empresa</button>
             </div>
         </div>
     </div>
@@ -388,7 +506,6 @@
             </tr>
         </table>
 
-        <!-- QUADRO RESUMO AGRUPADO POR EXAME (APRESENTA TOTAL DO RESUMO) -->
         <table class="print-table">
             <thead>
                 <tr>
@@ -410,7 +527,6 @@
             </tfoot>
         </table>
 
-        <!-- RELAÇÃO DETALHADA POR COLABORADOR -->
         <table class="print-table" style="margin-bottom: 0;">
             <thead>
                 <tr>
@@ -429,7 +545,6 @@
             <tbody id="print-tbody-analitico"></tbody>
         </table>
 
-        <!-- FECHAMENTO ÚNICO NA ÚLTIMA FOLHA DA MEDIÇÃO -->
         <div class="print-fechamento-ultima-folha" id="print-fechamento-final">
             <table class="print-table" style="margin-top: -1px;">
                 <tr class="print-total-row">
@@ -454,634 +569,603 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="js/supabase.js"></script>
-
     <script>
-        const normalizarTexto = (texto) => {
-            if (!texto) return '';
-            return String(texto).trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        };
+        (() => {
+            const normalizarTexto = (texto) => (!texto
+                ? ''
+                : String(texto).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
 
-        const formatarMoeda = (valor) => {
-            const num = Number(valor) || 0;
-            return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        };
+            const formatarMoeda = (valor) => (Number(valor) || 0)
+                .toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-        const formatarDataBR = (data) => {
-            if (!data) return '-';
-            if (String(data).includes('/')) return data;
-            const partes = String(data).split('T')[0].split('-');
-            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
-            return data;
-        };
+            const formatarDataBR = (data) => {
+                if (!data) return '-';
+                const limpo = String(data).trim();
+                if (limpo.includes('/')) return limpo;
+                const partes = limpo.split('T')[0].split('-');
+                return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : limpo;
+            };
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const btnTheme = document.getElementById('btn-theme-toggle');
-            if (btnTheme) {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                btnTheme.textContent = isDark ? '☀️' : '🌙';
-                btnTheme.addEventListener('click', () => {
-                    if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                        document.documentElement.removeAttribute('data-theme');
-                        localStorage.setItem('monad_theme', 'light');
-                        btnTheme.textContent = '🌙';
-                    } else {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                        localStorage.setItem('monad_theme', 'dark');
-                        btnTheme.textContent = '☀️';
-                    }
-                });
-            }
-
-            const hoje = new Date();
-            const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-            document.getElementById('data-inicio').value = primeiroDiaMes.toISOString().split('T')[0];
-            document.getElementById('data-fim').value = hoje.toISOString().split('T')[0];
-
-            let empresasLista = [];
-            let empresaAtualObj = null;
-            let linhasFaturamento = [];
-            let mapaPrecosEmpresa = {};
-            let isPrimeiroRegistroEmpresa = false;
-
-            async function carregarEmpresas() {
-                const sel = document.getElementById('sel-empresa');
-                try {
-                    const [resBase, resAtend] = await Promise.all([
-                        supabase.from('empresas_base').select('*').order('nome_fantasia', { ascending: true }),
-                        supabase.from('atendimentos').select('empresa')
-                    ]);
-
-                    const mapa = new Map();
-
-                    (resBase.data || []).forEach(emp => {
-                        const nomeExibicao = emp.razao_social || emp.nome_fantasia;
-                        const chave = normalizarTexto(emp.nome_fantasia || emp.razao_social);
-                        if (chave && !mapa.has(chave)) {
-                            mapa.set(chave, {
-                                chave,
-                                nomeFantasia: emp.nome_fantasia || nomeExibicao,
-                                razaoSocial: emp.razao_social || emp.nome_fantasia,
-                                cnpj: emp.cnpj || '---'
-                            });
-                        }
-                    });
-
-                    (resAtend.data || []).forEach(row => {
-                        if (!row.empresa) return;
-                        const chave = normalizarTexto(row.empresa);
-                        if (chave && !mapa.has(chave)) {
-                            mapa.set(chave, {
-                                chave,
-                                nomeFantasia: row.empresa.trim(),
-                                razaoSocial: row.empresa.trim(),
-                                cnpj: '---'
-                            });
-                        }
-                    });
-
-                    empresasLista = Array.from(mapa.values()).sort((a, b) => a.razaoSocial.localeCompare(b.razaoSocial));
-                    empresasLista.forEach(emp => {
-                        const opt = document.createElement('option');
-                        opt.value = emp.chave;
-                        opt.textContent = emp.razaoSocial !== emp.nomeFantasia
-                            ? `${emp.razaoSocial} (${emp.nomeFantasia})`
-                            : emp.razaoSocial;
-                        sel.appendChild(opt);
-                    });
-                } catch (err) {
-                    console.error("Erro ao carregar empresas:", err);
-                }
-            }
-
-            await carregarEmpresas();
-
-            function extrairExamesDoAtendimento(pac) {
-                const examesBrutos = [];
-
-                const camposTexto = [pac.exames_clinicos, pac.exames_raiox, pac.exames_lab, pac.exames_extras];
-                camposTexto.forEach(campo => {
-                    if (campo && campo !== 'Nenhum' && String(campo).trim() !== '') {
-                        String(campo).split(',').forEach(item => {
-                            const limpo = item.trim();
-                            if (limpo && limpo.toLowerCase() !== 'nenhum') {
-                                examesBrutos.push(limpo);
-                            }
-                        });
-                    }
-                });
-
-                if (pac.audiometria) examesBrutos.push('Audiometria');
-                if (pac.consulta_clinica) examesBrutos.push('Av. Clínica Ocupacional');
-                if (pac.avaliacao_psicossocial) examesBrutos.push('Avaliação Psicossocial');
-
-                const vistosNoAtendimento = new Set();
-                const resultado = [];
-
-                examesBrutos.forEach(ex => {
-                    let nome = ex.trim();
-                    const lower = normalizarTexto(nome);
-                    if (lower === 'consulta medica' || lower === 'consulta médica') {
-                        nome = 'Av. Clínica Ocupacional';
-                    } else if (!lower.includes('raio') && !lower.includes('rx') && nome.length > 0) {
-                        nome = nome.charAt(0).toUpperCase() + nome.slice(1);
-                    }
-
-                    const chave = normalizarTexto(nome);
-                    if (chave && !vistosNoAtendimento.has(chave)) {
-                        vistosNoAtendimento.add(chave);
-                        resultado.push({ nome, chave });
-                    }
-                });
-
-                return resultado;
-            }
-
-            async function carregarPrecosSalvosDaEmpresa(empresaChave) {
-                mapaPrecosEmpresa = {};
-                isPrimeiroRegistroEmpresa = true;
-
-                try {
-                    const { data, error } = await supabase
-                        .from('empresa_precos_exames')
-                        .select('*')
-                        .eq('empresa_chave', empresaChave);
-
-                    if (error) throw error;
-
-                    if (data && data.length > 0) {
-                        isPrimeiroRegistroEmpresa = false;
-                        data.forEach(row => {
-                            mapaPrecosEmpresa[row.exame_chave] = Number(row.valor) || 0;
-                        });
-                    }
-                } catch (err) {
-                    console.warn("Aviso ao consultar empresa_precos_exames:", err.message);
-                }
-            }
-
-            function renderizarTabelaFaturamento() {
-                const tbody = document.getElementById('tbody-faturamento');
-                tbody.innerHTML = '';
-
-                let totalGeral = 0;
-                const colaboradoresUnicos = new Set();
-
-                linhasFaturamento.forEach(item => {
-                    const precoUnit = mapaPrecosEmpresa[item.exameChave] !== undefined
-                        ? Number(mapaPrecosEmpresa[item.exameChave])
-                        : 0;
-                    item.valor = precoUnit;
-                    totalGeral += precoUnit;
-                    colaboradoresUnicos.add(`${item.nome}|${item.cpf}`);
-
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${item.dataBR}</td>
-                        <td><strong>${item.nome}</strong></td>
-                        <td>${item.cpf}</td>
-                        <td>${item.dn}</td>
-                        <td>${item.funcao}</td>
-                        <td>${item.exameNome}</td>
-                        <td style="text-align: right; font-weight: bold;">${formatarMoeda(precoUnit)}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-
-                document.getElementById('kpi-colaboradores').textContent = colaboradoresUnicos.size;
-                document.getElementById('kpi-exames').textContent = linhasFaturamento.length;
-                document.getElementById('kpi-total').textContent = formatarMoeda(totalGeral);
-                document.getElementById('tfoot-total').textContent = formatarMoeda(totalGeral);
-            }
-
-            function abrirModalPrecos(autoAbertoPrimeiroRegistro = false) {
-                if (!empresaAtualObj || linhasFaturamento.length === 0) return;
-
-                document.getElementById('modal-nome-empresa').textContent = empresaAtualObj.razaoSocial;
-                const container = document.getElementById('lista-inputs-precos');
-                container.innerHTML = '';
-
-                const examesUnicos = new Map();
-                linhasFaturamento.forEach(item => {
-                    if (!examesUnicos.has(item.exameChave)) {
-                        examesUnicos.set(item.exameChave, {
-                            chave: item.exameChave,
-                            nome: item.exameNome,
-                            qtd: 0
-                        });
-                    }
-                    examesUnicos.get(item.exameChave).qtd++;
-                });
-
-                examesUnicos.forEach(ex => {
-                    const temPrecoSalvo = mapaPrecosEmpresa[ex.chave] !== undefined;
-                    const valorAtual = temPrecoSalvo ? Number(mapaPrecosEmpresa[ex.chave]).toFixed(2) : '0.00';
-                    const badge = (!temPrecoSalvo || autoAbertoPrimeiroRegistro)
-                        ? `<span class="badge-novo-preco">Novo</span>`
-                        : `<span style="font-size: 11px; color: var(--text-muted);">Salvo</span>`;
-
-                    const div = document.createElement('div');
-                    div.className = 'linha-preco-modal';
-                    div.innerHTML = `
-                        <div>
-                            <strong style="color: var(--text-strong); font-size: 14px;">${ex.nome}</strong>
-                            <div style="font-size: 12px; color: var(--text-muted);">${ex.qtd} realização(ões) no período</div>
-                        </div>
-                        <div>${badge}</div>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <span style="font-size: 13px; font-weight: bold; color: var(--text-muted);">R$</span>
-                            <input type="number" step="0.01" min="0" class="input-valor-exame"
-                                data-chave="${ex.chave}"
-                                data-nome="${ex.nome}"
-                                value="${valorAtual}">
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-
-                document.getElementById('modal-precos').style.display = 'flex';
-            }
-
-            document.getElementById('btn-buscar-faturamento').addEventListener('click', async () => {
-                const empresaChave = document.getElementById('sel-empresa').value;
-                const dtIni = document.getElementById('data-inicio').value;
-                const dtFim = document.getElementById('data-fim').value;
-
-                if (!empresaChave) {
-                    alert("Selecione uma empresa para consultar o faturamento.");
-                    return;
-                }
-                if (!dtIni || !dtFim) {
-                    alert("Informe a data inicial e a data final.");
-                    return;
-                }
-
-                empresaAtualObj = empresasLista.find(e => e.chave === empresaChave);
-                const msgStatus = document.getElementById('msg-status');
-                const painelRes = document.getElementById('painel-resultados');
-                const msgVazio = document.getElementById('msg-vazio');
-
-                msgStatus.textContent = "⏳ A consultar atendimentos e tabela de preços da empresa...";
-                msgStatus.style.display = "block";
-                painelRes.style.display = "none";
-                msgVazio.style.display = "none";
-
-                try {
-                    const [resAtend] = await Promise.all([
-                        supabase
-                            .from('atendimentos')
-                            .select('*')
-                            .gte('data_exame', dtIni)
-                            .lte('data_exame', dtFim)
-                            .order('data_exame', { ascending: true }),
-                        carregarPrecosSalvosDaEmpresa(empresaChave)
-                    ]);
-
-                    if (resAtend.error) throw resAtend.error;
-
-                    const atendimentosEmpresa = (resAtend.data || []).filter(pac => {
-                        const ch = normalizarTexto(pac.empresa);
-                        return ch === empresaAtualObj.chave ||
-                               ch === normalizarTexto(empresaAtualObj.nomeFantasia) ||
-                               ch === normalizarTexto(empresaAtualObj.razaoSocial);
-                    });
-
-                    linhasFaturamento = [];
-                    atendimentosEmpresa.forEach(pac => {
-                        const exames = extrairExamesDoAtendimento(pac);
-                        exames.forEach(ex => {
-                            linhasFaturamento.push({
-                                dataISO: pac.data_exame || '',
-                                dataBR: formatarDataBR(pac.data_exame),
-                                nome: pac.nome || '-',
-                                cpf: pac.cpf || '-',
-                                dn: formatarDataBR(pac.data_nascimento),
-                                funcao: pac.funcao || '-',
-                                exameNome: ex.nome,
-                                exameChave: ex.chave,
-                                valor: mapaPrecosEmpresa[ex.chave] || 0
-                            });
-                        });
-                    });
-
-                    msgStatus.style.display = "none";
-
-                    if (linhasFaturamento.length === 0) {
-                        msgVazio.style.display = "block";
-                        return;
-                    }
-
-                    document.getElementById('titulo-tabela-empresa').textContent = `Faturamento "${empresaAtualObj.razaoSocial}"`;
-                    document.getElementById('subtitulo-periodo').textContent = `Período: ${formatarDataBR(dtIni)} a ${formatarDataBR(dtFim)} • CNPJ: ${empresaAtualObj.cnpj}`;
-
-                    renderizarTabelaFaturamento();
-                    painelRes.style.display = "block";
-
-                    const temExameSemPreco = linhasFaturamento.some(l => mapaPrecosEmpresa[l.exameChave] === undefined);
-                    if (isPrimeiroRegistroEmpresa || temExameSemPreco) {
-                        abrirModalPrecos(isPrimeiroRegistroEmpresa);
-                    }
-                } catch (err) {
-                    console.error("Erro ao gerar faturamento:", err);
-                    msgStatus.style.display = "none";
-                    alert("Erro ao consultar faturamento: " + err.message);
-                }
-            });
-
-            document.getElementById('btn-abrir-precos').addEventListener('click', () => abrirModalPrecos(false));
-            document.getElementById('btn-fechar-modal-precos').addEventListener('click', () => {
-                document.getElementById('modal-precos').style.display = 'none';
-            });
-
-            document.getElementById('btn-salvar-precos').addEventListener('click', async () => {
-                if (!empresaAtualObj) return;
-                const btnSalvar = document.getElementById('btn-salvar-precos');
-                const inputs = document.querySelectorAll('#lista-inputs-precos .input-valor-exame');
-
-                const registrosUpsert = [];
-                inputs.forEach(inp => {
-                    const exameChave = inp.dataset.chave;
-                    const exameNome = inp.dataset.nome;
-                    const valorNum = Math.max(0, parseFloat(inp.value) || 0);
-
-                    mapaPrecosEmpresa[exameChave] = valorNum;
-                    registrosUpsert.push({
-                        empresa_chave: empresaAtualObj.chave,
-                        empresa_nome: empresaAtualObj.razaoSocial,
-                        exame_chave: exameChave,
-                        exame_nome: exameNome,
-                        valor: valorNum,
-                        updated_at: new Date().toISOString()
-                    });
-                });
-
-                btnSalvar.textContent = "⏳ Salvando...";
-                btnSalvar.disabled = true;
-
-                try {
-                    const { error } = await supabase
-                        .from('empresa_precos_exames')
-                        .upsert(registrosUpsert, { onConflict: 'empresa_chave,exame_chave' });
-
-                    if (error) throw error;
-
-                    isPrimeiroRegistroEmpresa = false;
-                    renderizarTabelaFaturamento();
-                    document.getElementById('modal-precos').style.display = 'none';
-                } catch (err) {
-                    console.error("Erro ao salvar preços da empresa:", err);
-                    alert("Não foi possível salvar os preços no banco (" + err.message + "). Os valores foram aplicados temporariamente na tela.");
-                    renderizarTabelaFaturamento();
-                    document.getElementById('modal-precos').style.display = 'none';
-                } finally {
-                    btnSalvar.textContent = "💾 Salvar Valores da Empresa";
-                    btnSalvar.disabled = false;
-                }
-            });
-
-            // Exportação para Planilha Oficial (.xlsx) formatada com SheetJS (7 colunas: A até G)
-            document.getElementById('btn-exportar-excel').addEventListener('click', () => {
-                if (!empresaAtualObj || linhasFaturamento.length === 0) return;
-
-                const dtIniBR = formatarDataBR(document.getElementById('data-inicio').value);
-                const dtFimBR = formatarDataBR(document.getElementById('data-fim').value);
-                const dataEmissaoBR = new Date().toLocaleDateString('pt-BR');
-                const formatoMoedaExcel = '"R$ "#,##0.00';
-
+            function construirResumoPorExame(linhas) {
                 const resumoMap = new Map();
-                linhasFaturamento.forEach(item => {
-                    const v = Number(item.valor) || 0;
+                let totalGeral = 0;
+
+                linhas.forEach(item => {
+                    const valorUnit = Number(item.valor) || 0;
+                    totalGeral += valorUnit;
+
                     if (!resumoMap.has(item.exameChave)) {
                         resumoMap.set(item.exameChave, {
+                            chave: item.exameChave,
                             nome: item.exameNome,
                             qtd: 0,
-                            unitario: v,
+                            unitario: valorUnit,
                             subtotal: 0
                         });
                     }
                     const reg = resumoMap.get(item.exameChave);
                     reg.qtd += 1;
-                    reg.subtotal += v;
+                    reg.subtotal += valorUnit;
                 });
 
-                const rows = [];
-                const merges = [];
-                const addMerge = (r1, c1, r2, c2) => merges.push({ s: { r: r1, c: c1 }, e: { r: r2, c: c2 } });
+                return { resumoMap, totalGeral };
+            }
 
-                rows.push(['CLÍNICA MONAD – MEDICINA E SEGURANÇA DO TRABALHO', '', '', '', '', '', '']);
-                addMerge(rows.length - 1, 0, rows.length - 1, 6);
+            function configurarHeader() {
+                const btnTheme = document.getElementById('btn-theme-toggle');
+                if (btnTheme) {
+                    const atualizarIcone = () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        btnTheme.textContent = isDark ? '☀️' : '🌙';
+                    };
+                    atualizarIcone();
 
-                rows.push(['CNPJ: 53.678.700/0001-04 | Tel.: (93) 99196-2206 / (92) 99265-9610 | clinicamonadorixi@outlook.com', '', '', '', '', '', '']);
-                addMerge(rows.length - 1, 0, rows.length - 1, 6);
+                    btnTheme.addEventListener('click', () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        if (isDark) {
+                            document.documentElement.removeAttribute('data-theme');
+                            localStorage.setItem('monad_theme', 'light');
+                        } else {
+                            document.documentElement.setAttribute('data-theme', 'dark');
+                            localStorage.setItem('monad_theme', 'dark');
+                        }
+                        atualizarIcone();
+                    });
+                }
 
-                rows.push([`DEMONSTRATIVO OFICIAL DE FATURAMENTO — "${empresaAtualObj.razaoSocial.toUpperCase()}"`, '', '', '', '', '', '']);
-                addMerge(rows.length - 1, 0, rows.length - 1, 6);
+                document.getElementById('btn-sair-sistema')?.addEventListener('click', () => {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                });
+            }
 
-                rows.push([`Empresa: ${empresaAtualObj.razaoSocial}`, '', '', `CNPJ: ${empresaAtualObj.cnpj}`, '', `Emissão: ${dataEmissaoBR}`, '']);
-                addMerge(rows.length - 1, 0, rows.length - 1, 2);
-                addMerge(rows.length - 1, 3, rows.length - 1, 4);
-                addMerge(rows.length - 1, 5, rows.length - 1, 6);
+            document.addEventListener('DOMContentLoaded', async () => {
+                configurarHeader();
 
-                rows.push([`Período Apurado: ${dtIniBR} a ${dtFimBR}`, '', '', '', '', '', '']);
-                addMerge(rows.length - 1, 0, rows.length - 1, 6);
+                const hoje = new Date();
+                const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+                document.getElementById('data-inicio').value = primeiroDiaMes.toISOString().split('T')[0];
+                document.getElementById('data-fim').value = hoje.toISOString().split('T')[0];
 
-                rows.push(['', '', '', '', '', '', '']);
+                const state = {
+                    empresas: [],
+                    empresaAtual: null,
+                    linhas: [],
+                    precos: {},
+                    isPrimeiroRegistro: false
+                };
 
-                rows.push(['RESUMO POR PROCEDIMENTO / EXAME', '', '', '', '', '', '']);
-                addMerge(rows.length - 1, 0, rows.length - 1, 6);
+                async function carregarEmpresas() {
+                    const sel = document.getElementById('sel-empresa');
+                    try {
+                        const [resBase, resAtend] = await Promise.all([
+                            supabase.from('empresas_base').select('*').order('nome_fantasia', { ascending: true }),
+                            supabase.from('atendimentos').select('empresa')
+                        ]);
 
-                rows.push(['Exame / Procedimento', '', '', 'Quantidade', 'Valor Unitário', 'Subtotal', '']);
-                addMerge(rows.length - 1, 0, rows.length - 1, 2);
-                addMerge(rows.length - 1, 5, rows.length - 1, 6);
+                        const mapa = new Map();
 
-                const resumoInicioLinha = rows.length + 1;
-                resumoMap.forEach(reg => {
-                    const linhaAtualExcel = rows.length + 1;
+                        (resBase.data || []).forEach(emp => {
+                            const nomeExibicao = emp.razao_social || emp.nome_fantasia;
+                            const chave = normalizarTexto(emp.nome_fantasia || emp.razao_social);
+                            if (chave && !mapa.has(chave)) {
+                                mapa.set(chave, {
+                                    chave,
+                                    nomeFantasia: emp.nome_fantasia || nomeExibicao,
+                                    razaoSocial: emp.razao_social || emp.nome_fantasia,
+                                    cnpj: emp.cnpj || '---'
+                                });
+                            }
+                        });
+
+                        (resAtend.data || []).forEach(row => {
+                            if (!row.empresa) return;
+                            const chave = normalizarTexto(row.empresa);
+                            if (chave && !mapa.has(chave)) {
+                                mapa.set(chave, {
+                                    chave,
+                                    nomeFantasia: row.empresa.trim(),
+                                    razaoSocial: row.empresa.trim(),
+                                    cnpj: '---'
+                                });
+                            }
+                        });
+
+                        state.empresas = Array.from(mapa.values()).sort((a, b) => a.razaoSocial.localeCompare(b.razaoSocial));
+                        state.empresas.forEach(emp => {
+                            const opt = document.createElement('option');
+                            opt.value = emp.chave;
+                            opt.textContent = emp.razaoSocial !== emp.nomeFantasia
+                                ? `${emp.razaoSocial} (${emp.nomeFantasia})`
+                                : emp.razaoSocial;
+                            sel.appendChild(opt);
+                        });
+                    } catch (err) {
+                        console.error('Erro ao carregar empresas:', err);
+                    }
+                }
+
+                await carregarEmpresas();
+
+                function extrairExamesDoAtendimento(pac) {
+                    const examesBrutos = [];
+                    [pac.exames_clinicos, pac.exames_raiox, pac.exames_lab, pac.exames_extras].forEach(campo => {
+                        if (campo && campo !== 'Nenhum' && String(campo).trim() !== '') {
+                            String(campo).split(',').forEach(item => {
+                                const limpo = item.trim();
+                                if (limpo && limpo.toLowerCase() !== 'nenhum') examesBrutos.push(limpo);
+                            });
+                        }
+                    });
+
+                    if (pac.audiometria) examesBrutos.push('Audiometria');
+                    if (pac.consulta_clinica) examesBrutos.push('Av. Clínica Ocupacional');
+                    if (pac.avaliacao_psicossocial) examesBrutos.push('Avaliação Psicossocial');
+
+                    const vistos = new Set();
+                    const resultado = [];
+
+                    examesBrutos.forEach(ex => {
+                        let nome = ex.trim();
+                        const lower = normalizarTexto(nome);
+                        if (lower === 'consulta medica' || lower === 'consulta médica') {
+                            nome = 'Av. Clínica Ocupacional';
+                        } else if (!lower.includes('raio') && !lower.includes('rx') && nome.length > 0) {
+                            nome = nome.charAt(0).toUpperCase() + nome.slice(1);
+                        }
+
+                        const chave = normalizarTexto(nome);
+                        if (chave && !vistos.has(chave)) {
+                            vistos.add(chave);
+                            resultado.push({ nome, chave });
+                        }
+                    });
+
+                    return resultado;
+                }
+
+                async function carregarPrecosSalvosDaEmpresa(empresaChave) {
+                    state.precos = {};
+                    state.isPrimeiroRegistro = true;
+
+                    try {
+                        const { data, error } = await supabase
+                            .from('empresa_precos_exames')
+                            .select('*')
+                            .eq('empresa_chave', empresaChave);
+
+                        if (error) throw error;
+
+                        if (data && data.length > 0) {
+                            state.isPrimeiroRegistro = false;
+                            data.forEach(row => {
+                                state.precos[row.exame_chave] = Number(row.valor) || 0;
+                            });
+                        }
+                    } catch (err) {
+                        console.warn('Aviso ao consultar empresa_precos_exames:', err.message);
+                    }
+                }
+
+                function renderizarTabelaFaturamento() {
+                    const tbody = document.getElementById('tbody-faturamento');
+                    tbody.innerHTML = '';
+
+                    let totalGeral = 0;
+                    const colaboradoresUnicos = new Set();
+
+                    state.linhas.forEach(item => {
+                        const precoUnit = state.precos[item.exameChave] !== undefined
+                            ? Number(state.precos[item.exameChave])
+                            : 0;
+                        item.valor = precoUnit;
+                        totalGeral += precoUnit;
+                        colaboradoresUnicos.add(`${item.nome}|${item.cpf}`);
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${item.dataBR}</td>
+                            <td><strong>${item.nome}</strong></td>
+                            <td>${item.cpf}</td>
+                            <td>${item.dn}</td>
+                            <td>${item.funcao}</td>
+                            <td>${item.exameNome}</td>
+                            <td style="text-align: right; font-weight: bold;">${formatarMoeda(precoUnit)}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+
+                    document.getElementById('kpi-colaboradores').textContent = colaboradoresUnicos.size;
+                    document.getElementById('kpi-exames').textContent = state.linhas.length;
+                    document.getElementById('kpi-total').textContent = formatarMoeda(totalGeral);
+                    document.getElementById('tfoot-total').textContent = formatarMoeda(totalGeral);
+                }
+
+                function abrirModalPrecos(autoAbertoPrimeiroRegistro = false) {
+                    if (!state.empresaAtual || state.linhas.length === 0) return;
+
+                    document.getElementById('modal-nome-empresa').textContent = state.empresaAtual.razaoSocial;
+                    const container = document.getElementById('lista-inputs-precos');
+                    container.innerHTML = '';
+
+                    const { resumoMap } = construirResumoPorExame(state.linhas);
+
+                    resumoMap.forEach(ex => {
+                        const temPrecoSalvo = state.precos[ex.chave] !== undefined;
+                        const valorAtual = temPrecoSalvo ? Number(state.precos[ex.chave]).toFixed(2) : '0.00';
+                        const badge = (!temPrecoSalvo || autoAbertoPrimeiroRegistro)
+                            ? `<span class="badge-novo-preco">Novo</span>`
+                            : `<span style="font-size: 11px; color: var(--text-muted);">Salvo</span>`;
+
+                        const div = document.createElement('div');
+                        div.className = 'linha-preco-modal';
+                        div.innerHTML = `
+                            <div>
+                                <strong style="color: var(--text-strong); font-size: 14px;">${ex.nome}</strong>
+                                <div style="font-size: 12px; color: var(--text-muted);">${ex.qtd} realização(ões) no período</div>
+                            </div>
+                            <div>${badge}</div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 13px; font-weight: bold; color: var(--text-muted);">R$</span>
+                                <input type="number" step="0.01" min="0" class="input-valor-exame"
+                                    data-chave="${ex.chave}"
+                                    data-nome="${ex.nome}"
+                                    value="${valorAtual}">
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+
+                    document.getElementById('modal-precos').style.display = 'flex';
+                }
+
+                document.getElementById('btn-buscar-faturamento')?.addEventListener('click', async () => {
+                    const empresaChave = document.getElementById('sel-empresa').value;
+                    const dtIni = document.getElementById('data-inicio').value;
+                    const dtFim = document.getElementById('data-fim').value;
+
+                    if (!empresaChave) {
+                        alert('Selecione uma empresa para consultar o faturamento.');
+                        return;
+                    }
+                    if (!dtIni || !dtFim) {
+                        alert('Informe a data inicial e a data final.');
+                        return;
+                    }
+
+                    state.empresaAtual = state.empresas.find(e => e.chave === empresaChave);
+                    const msgStatus = document.getElementById('msg-status');
+                    const painelRes = document.getElementById('painel-resultados');
+                    const msgVazio = document.getElementById('msg-vazio');
+
+                    msgStatus.textContent = '⏳ A consultar atendimentos e tabela de preços da empresa...';
+                    msgStatus.style.display = 'block';
+                    painelRes.style.display = 'none';
+                    msgVazio.style.display = 'none';
+
+                    try {
+                        const [resAtend] = await Promise.all([
+                            supabase
+                                .from('atendimentos')
+                                .select('*')
+                                .gte('data_exame', dtIni)
+                                .lte('data_exame', dtFim)
+                                .order('data_exame', { ascending: true }),
+                            carregarPrecosSalvosDaEmpresa(empresaChave)
+                        ]);
+
+                        if (resAtend.error) throw resAtend.error;
+
+                        const atendimentosEmpresa = (resAtend.data || []).filter(pac => {
+                            const ch = normalizarTexto(pac.empresa);
+                            return ch === state.empresaAtual.chave
+                                || ch === normalizarTexto(state.empresaAtual.nomeFantasia)
+                                || ch === normalizarTexto(state.empresaAtual.razaoSocial);
+                        });
+
+                        state.linhas = [];
+                        atendimentosEmpresa.forEach(pac => {
+                            extrairExamesDoAtendimento(pac).forEach(ex => {
+                                state.linhas.push({
+                                    dataISO: pac.data_exame || '',
+                                    dataBR: formatarDataBR(pac.data_exame),
+                                    nome: pac.nome || '-',
+                                    cpf: pac.cpf || '-',
+                                    dn: formatarDataBR(pac.data_nascimento),
+                                    funcao: pac.funcao || '-',
+                                    exameNome: ex.nome,
+                                    exameChave: ex.chave,
+                                    valor: state.precos[ex.chave] || 0
+                                });
+                            });
+                        });
+
+                        msgStatus.style.display = 'none';
+
+                        if (state.linhas.length === 0) {
+                            msgVazio.style.display = 'block';
+                            return;
+                        }
+
+                        document.getElementById('titulo-tabela-empresa').textContent = `Faturamento "${state.empresaAtual.razaoSocial}"`;
+                        document.getElementById('subtitulo-periodo').textContent = `Período: ${formatarDataBR(dtIni)} a ${formatarDataBR(dtFim)} • CNPJ: ${state.empresaAtual.cnpj}`;
+
+                        renderizarTabelaFaturamento();
+                        painelRes.style.display = 'block';
+
+                        const temExameSemPreco = state.linhas.some(l => state.precos[l.exameChave] === undefined);
+                        if (state.isPrimeiroRegistro || temExameSemPreco) {
+                            abrirModalPrecos(state.isPrimeiroRegistro);
+                        }
+                    } catch (err) {
+                        console.error('Erro ao gerar faturamento:', err);
+                        msgStatus.style.display = 'none';
+                        alert('Erro ao consultar faturamento: ' + err.message);
+                    }
+                });
+
+                document.getElementById('btn-abrir-precos')?.addEventListener('click', () => abrirModalPrecos(false));
+                document.getElementById('btn-fechar-modal-precos')?.addEventListener('click', () => {
+                    document.getElementById('modal-precos').style.display = 'none';
+                });
+
+                document.getElementById('btn-salvar-precos')?.addEventListener('click', async () => {
+                    if (!state.empresaAtual) return;
+                    const btnSalvar = document.getElementById('btn-salvar-precos');
+                    const inputs = document.querySelectorAll('#lista-inputs-precos .input-valor-exame');
+
+                    const registrosUpsert = Array.from(inputs).map(inp => {
+                        const exameChave = inp.dataset.chave;
+                        const exameNome = inp.dataset.nome;
+                        const valorNum = Math.max(0, parseFloat(inp.value) || 0);
+                        state.precos[exameChave] = valorNum;
+
+                        return {
+                            empresa_chave: state.empresaAtual.chave,
+                            empresa_nome: state.empresaAtual.razaoSocial,
+                            exame_chave: exameChave,
+                            exame_nome: exameNome,
+                            valor: valorNum,
+                            updated_at: new Date().toISOString()
+                        };
+                    });
+
+                    btnSalvar.textContent = '⏳ Salvando...';
+                    btnSalvar.disabled = true;
+
+                    try {
+                        const { error } = await supabase
+                            .from('empresa_precos_exames')
+                            .upsert(registrosUpsert, { onConflict: 'empresa_chave,exame_chave' });
+                        if (error) throw error;
+
+                        state.isPrimeiroRegistro = false;
+                        renderizarTabelaFaturamento();
+                        document.getElementById('modal-precos').style.display = 'none';
+                    } catch (err) {
+                        console.error('Erro ao salvar preços da empresa:', err);
+                        alert('Não foi possível salvar os preços no banco (' + err.message + '). Os valores foram aplicados temporariamente na tela.');
+                        renderizarTabelaFaturamento();
+                        document.getElementById('modal-precos').style.display = 'none';
+                    } finally {
+                        btnSalvar.textContent = '💾 Salvar Valores da Empresa';
+                        btnSalvar.disabled = false;
+                    }
+                });
+
+                document.getElementById('btn-exportar-excel')?.addEventListener('click', () => {
+                    if (!state.empresaAtual || state.linhas.length === 0) return;
+
+                    const dtIniBR = formatarDataBR(document.getElementById('data-inicio').value);
+                    const dtFimBR = formatarDataBR(document.getElementById('data-fim').value);
+                    const dataEmissaoBR = new Date().toLocaleDateString('pt-BR');
+                    const formatoMoedaExcel = '"R$ "#,##0.00';
+
+                    const { resumoMap } = construirResumoPorExame(state.linhas);
+                    const rows = [];
+                    const merges = [];
+                    const addMerge = (r1, c1, r2, c2) => merges.push({ s: { r: r1, c: c1 }, e: { r: r2, c: c2 } });
+
+                    rows.push(['CLÍNICA MONAD – MEDICINA E SEGURANÇA DO TRABALHO', '', '', '', '', '', '']);
+                    addMerge(rows.length - 1, 0, rows.length - 1, 6);
+
+                    rows.push(['CNPJ: 53.678.700/0001-04 | Tel.: (93) 99196-2206 / (92) 99265-9610 | clinicamonadorixi@outlook.com', '', '', '', '', '', '']);
+                    addMerge(rows.length - 1, 0, rows.length - 1, 6);
+
+                    rows.push([`DEMONSTRATIVO OFICIAL DE FATURAMENTO — "${state.empresaAtual.razaoSocial.toUpperCase()}"`, '', '', '', '', '', '']);
+                    addMerge(rows.length - 1, 0, rows.length - 1, 6);
+
+                    rows.push([`Empresa: ${state.empresaAtual.razaoSocial}`, '', '', `CNPJ: ${state.empresaAtual.cnpj}`, '', `Emissão: ${dataEmissaoBR}`, '']);
+                    addMerge(rows.length - 1, 0, rows.length - 1, 2);
+                    addMerge(rows.length - 1, 3, rows.length - 1, 4);
+                    addMerge(rows.length - 1, 5, rows.length - 1, 6);
+
+                    rows.push([`Período Apurado: ${dtIniBR} a ${dtFimBR}`, '', '', '', '', '', '']);
+                    addMerge(rows.length - 1, 0, rows.length - 1, 6);
+
+                    rows.push(['', '', '', '', '', '', '']);
+                    rows.push(['RESUMO POR PROCEDIMENTO / EXAME', '', '', '', '', '', '']);
+                    addMerge(rows.length - 1, 0, rows.length - 1, 6);
+
+                    rows.push(['Exame / Procedimento', '', '', 'Quantidade', 'Valor Unitário', 'Subtotal', '']);
+                    addMerge(rows.length - 1, 0, rows.length - 1, 2);
+                    addMerge(rows.length - 1, 5, rows.length - 1, 6);
+
+                    const resumoInicioLinha = rows.length + 1;
+                    resumoMap.forEach(reg => {
+                        const linhaAtualExcel = rows.length + 1;
+                        rows.push([
+                            reg.nome,
+                            '',
+                            '',
+                            reg.qtd,
+                            reg.unitario,
+                            { f: `D${linhaAtualExcel}*E${linhaAtualExcel}` },
+                            ''
+                        ]);
+                        addMerge(rows.length - 1, 0, rows.length - 1, 2);
+                        addMerge(rows.length - 1, 5, rows.length - 1, 6);
+                    });
+                    const resumoFimLinha = rows.length;
+
+                    const linhaTotalResumoExcel = rows.length + 1;
                     rows.push([
-                        reg.nome,
+                        'TOTAL DO RESUMO',
                         '',
                         '',
-                        reg.qtd,
-                        reg.unitario,
-                        { f: `D${linhaAtualExcel}*E${linhaAtualExcel}` },
+                        { f: `SUM(D${resumoInicioLinha}:D${resumoFimLinha})` },
+                        '',
+                        { f: `SUM(F${resumoInicioLinha}:F${resumoFimLinha})` },
                         ''
                     ]);
                     addMerge(rows.length - 1, 0, rows.length - 1, 2);
                     addMerge(rows.length - 1, 5, rows.length - 1, 6);
-                });
-                const resumoFimLinha = rows.length;
 
-                const linhaTotalResumoExcel = rows.length + 1;
-                rows.push([
-                    'TOTAL DO RESUMO',
-                    '',
-                    '',
-                    { f: `SUM(D${resumoInicioLinha}:D${resumoFimLinha})` },
-                    '',
-                    { f: `SUM(F${resumoInicioLinha}:F${resumoFimLinha})` },
-                    ''
-                ]);
-                addMerge(rows.length - 1, 0, rows.length - 1, 2);
-                addMerge(rows.length - 1, 5, rows.length - 1, 6);
+                    rows.push(['', '', '', '', '', '', '']);
+                    rows.push(['RELAÇÃO ANALÍTICA DE EXAMES REALIZADOS', '', '', '', '', '', '']);
+                    addMerge(rows.length - 1, 0, rows.length - 1, 6);
 
-                rows.push(['', '', '', '', '', '', '']);
+                    rows.push(['Data', 'Nome', 'CPF', 'DN', 'Função', 'Exame', 'Valor']);
 
-                rows.push(['RELAÇÃO ANALÍTICA DE EXAMES REALIZADOS', '', '', '', '', '', '']);
-                addMerge(rows.length - 1, 0, rows.length - 1, 6);
+                    const analiticoInicioLinha = rows.length + 1;
+                    state.linhas.forEach(item => {
+                        rows.push([
+                            item.dataBR,
+                            item.nome,
+                            item.cpf,
+                            item.dn,
+                            item.funcao,
+                            item.exameNome,
+                            Number(item.valor) || 0
+                        ]);
+                    });
+                    const analiticoFimLinha = rows.length;
 
-                rows.push(['Data', 'Nome', 'CPF', 'DN', 'Função', 'Exame', 'Valor']);
-
-                const analiticoInicioLinha = rows.length + 1;
-                linhasFaturamento.forEach(item => {
+                    const linhaTotalGeralExcel = rows.length + 1;
                     rows.push([
-                        item.dataBR,
-                        item.nome,
-                        item.cpf,
-                        item.dn,
-                        item.funcao,
-                        item.exameNome,
-                        Number(item.valor) || 0
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        'VALOR TOTAL DA MEDIÇÃO',
+                        { f: `SUM(G${analiticoInicioLinha}:G${analiticoFimLinha})` }
                     ]);
-                });
-                const analiticoFimLinha = rows.length;
 
-                const linhaTotalGeralExcel = rows.length + 1;
-                rows.push([
-                    '',
-                    '',
-                    '',
-                    '',
-                    '',
-                    'VALOR TOTAL DA MEDIÇÃO',
-                    { f: `SUM(G${analiticoInicioLinha}:G${analiticoFimLinha})` }
-                ]);
+                    rows.push(['', '', '', '', '', '', '']);
+                    rows.push(['', '', '', '', '', '', '']);
+                    rows.push(['__________________________________________', '', '', '', '__________________________________________', '', '']);
+                    addMerge(rows.length - 1, 0, rows.length - 1, 3);
+                    addMerge(rows.length - 1, 4, rows.length - 1, 6);
 
-                rows.push(['', '', '', '', '', '', '']);
-                rows.push(['', '', '', '', '', '', '']);
+                    rows.push(['Clínica Monad • Setor Financeiro', '', '', '', 'Conferência / Aceite da Empresa', '', '']);
+                    addMerge(rows.length - 1, 0, rows.length - 1, 3);
+                    addMerge(rows.length - 1, 4, rows.length - 1, 6);
 
-                rows.push(['__________________________________________', '', '', '', '__________________________________________', '', '']);
-                addMerge(rows.length - 1, 0, rows.length - 1, 3);
-                addMerge(rows.length - 1, 4, rows.length - 1, 6);
+                    const ws = XLSX.utils.aoa_to_sheet(rows);
+                    ws['!merges'] = merges;
+                    ws['!cols'] = [
+                        { wch: 14 },
+                        { wch: 32 },
+                        { wch: 16 },
+                        { wch: 13 },
+                        { wch: 24 },
+                        { wch: 26 },
+                        { wch: 15 }
+                    ];
 
-                rows.push(['Clínica Monad • Setor Financeiro', '', '', '', 'Conferência / Aceite da Empresa', '', '']);
-                addMerge(rows.length - 1, 0, rows.length - 1, 3);
-                addMerge(rows.length - 1, 4, rows.length - 1, 6);
-
-                const ws = XLSX.utils.aoa_to_sheet(rows);
-                ws['!merges'] = merges;
-
-                ws['!cols'] = [
-                    { wch: 14 },
-                    { wch: 32 },
-                    { wch: 16 },
-                    { wch: 13 },
-                    { wch: 24 },
-                    { wch: 26 },
-                    { wch: 15 }
-                ];
-
-                for (let r = resumoInicioLinha; r <= resumoFimLinha; r++) {
-                    const cUnit = ws[`E${r}`];
-                    const cSub = ws[`F${r}`];
-                    if (cUnit) cUnit.z = formatoMoedaExcel;
-                    if (cSub) cSub.z = formatoMoedaExcel;
-                }
-                if (ws[`F${linhaTotalResumoExcel}`]) ws[`F${linhaTotalResumoExcel}`].z = formatoMoedaExcel;
-
-                for (let r = analiticoInicioLinha; r <= analiticoFimLinha; r++) {
-                    const cVal = ws[`G${r}`];
-                    if (cVal) cVal.z = formatoMoedaExcel;
-                }
-                if (ws[`G${linhaTotalGeralExcel}`]) ws[`G${linhaTotalGeralExcel}`].z = formatoMoedaExcel;
-
-                ws['!pageSetup'] = {
-                    orientation: 'portrait',
-                    paperSize: 9,
-                    fitToWidth: 1,
-                    fitToHeight: 0
-                };
-                ws['!sheetViews'] = [{ showGridLines: true }];
-
-                const wb = XLSX.utils.book_new();
-                wb.Props = {
-                    Title: `Faturamento - ${empresaAtualObj.razaoSocial}`,
-                    Subject: 'Demonstrativo Oficial de Faturamento Ocupacional',
-                    Author: 'Clínica Monad'
-                };
-                XLSX.utils.book_append_sheet(wb, ws, 'Faturamento Oficial');
-
-                const nomeArquivo = `Demonstrativo_Oficial_${empresaAtualObj.nomeFantasia.replace(/[^a-zA-Z0-9]/g, '_')}_${dtIniBR.replace(/\//g, '-')}_a_${dtFimBR.replace(/\//g, '-')}.xlsx`;
-                XLSX.writeFile(wb, nomeArquivo);
-            });
-
-            // Preparar e Imprimir Página A4 de Faturamento
-            document.getElementById('btn-imprimir-faturamento').addEventListener('click', () => {
-                if (!empresaAtualObj || linhasFaturamento.length === 0) return;
-
-                const dtIniBR = formatarDataBR(document.getElementById('data-inicio').value);
-                const dtFimBR = formatarDataBR(document.getElementById('data-fim').value);
-
-                document.getElementById('print-data-emissao').textContent = new Date().toLocaleDateString('pt-BR');
-                document.getElementById('print-titulo-faturamento').textContent = `FATURAMENTO "${empresaAtualObj.razaoSocial.toUpperCase()}"`;
-                document.getElementById('print-empresa-nome').textContent = empresaAtualObj.razaoSocial;
-                document.getElementById('print-empresa-cnpj').textContent = empresaAtualObj.cnpj;
-                document.getElementById('print-periodo').textContent = `${dtIniBR} a ${dtFimBR}`;
-                document.getElementById('print-qtd-resumo').textContent = `${document.getElementById('kpi-colaboradores').textContent} colaborador(es) • ${linhasFaturamento.length} exame(s)`;
-
-                const resumoMap = new Map();
-                let totalGeral = 0;
-
-                const tbodyAnalitico = document.getElementById('print-tbody-analitico');
-                tbodyAnalitico.innerHTML = '';
-
-                linhasFaturamento.forEach(item => {
-                    const v = Number(item.valor) || 0;
-                    totalGeral += v;
-
-                    if (!resumoMap.has(item.exameChave)) {
-                        resumoMap.set(item.exameChave, {
-                            nome: item.exameNome,
-                            qtd: 0,
-                            unitario: v,
-                            subtotal: 0
-                        });
+                    for (let r = resumoInicioLinha; r <= resumoFimLinha; r++) {
+                        if (ws[`E${r}`]) ws[`E${r}`].z = formatoMoedaExcel;
+                        if (ws[`F${r}`]) ws[`F${r}`].z = formatoMoedaExcel;
                     }
-                    const reg = resumoMap.get(item.exameChave);
-                    reg.qtd += 1;
-                    reg.subtotal += v;
+                    if (ws[`F${linhaTotalResumoExcel}`]) ws[`F${linhaTotalResumoExcel}`].z = formatoMoedaExcel;
 
-                    const trA = document.createElement('tr');
-                    trA.innerHTML = `
-                        <td>${item.dataBR}</td>
-                        <td>${item.nome}</td>
-                        <td>${item.cpf}</td>
-                        <td>${item.dn}</td>
-                        <td>${item.funcao}</td>
-                        <td>${item.exameNome}</td>
-                        <td class="print-right">${formatarMoeda(v)}</td>
-                    `;
-                    tbodyAnalitico.appendChild(trA);
+                    for (let r = analiticoInicioLinha; r <= analiticoFimLinha; r++) {
+                        if (ws[`G${r}`]) ws[`G${r}`].z = formatoMoedaExcel;
+                    }
+                    if (ws[`G${linhaTotalGeralExcel}`]) ws[`G${linhaTotalGeralExcel}`].z = formatoMoedaExcel;
+
+                    ws['!pageSetup'] = { orientation: 'portrait', paperSize: 9, fitToWidth: 1, fitToHeight: 0 };
+                    ws['!sheetViews'] = [{ showGridLines: true }];
+
+                    const wb = XLSX.utils.book_new();
+                    wb.Props = {
+                        Title: `Faturamento - ${state.empresaAtual.razaoSocial}`,
+                        Subject: 'Demonstrativo Oficial de Faturamento Ocupacional',
+                        Author: 'Clínica Monad'
+                    };
+                    XLSX.utils.book_append_sheet(wb, ws, 'Faturamento Oficial');
+
+                    const nomeArquivo = `Demonstrativo_Oficial_${state.empresaAtual.nomeFantasia.replace(/[^a-zA-Z0-9]/g, '_')}_${dtIniBR.replace(/\//g, '-')}_a_${dtFimBR.replace(/\//g, '-')}.xlsx`;
+                    XLSX.writeFile(wb, nomeArquivo);
                 });
 
-                const tbodyResumo = document.getElementById('print-tbody-resumo');
-                tbodyResumo.innerHTML = '';
-                resumoMap.forEach(reg => {
-                    const trR = document.createElement('tr');
-                    trR.innerHTML = `
-                        <td>${reg.nome}</td>
-                        <td class="print-center">${reg.qtd}</td>
-                        <td class="print-right">${formatarMoeda(reg.unitario)}</td>
-                        <td class="print-right"><strong>${formatarMoeda(reg.subtotal)}</strong></td>
-                    `;
-                    tbodyResumo.appendChild(trR);
+                document.getElementById('btn-imprimir-faturamento')?.addEventListener('click', () => {
+                    if (!state.empresaAtual || state.linhas.length === 0) return;
+
+                    const dtIniBR = formatarDataBR(document.getElementById('data-inicio').value);
+                    const dtFimBR = formatarDataBR(document.getElementById('data-fim').value);
+
+                    document.getElementById('print-data-emissao').textContent = new Date().toLocaleDateString('pt-BR');
+                    document.getElementById('print-titulo-faturamento').textContent = `FATURAMENTO "${state.empresaAtual.razaoSocial.toUpperCase()}"`;
+                    document.getElementById('print-empresa-nome').textContent = state.empresaAtual.razaoSocial;
+                    document.getElementById('print-empresa-cnpj').textContent = state.empresaAtual.cnpj;
+                    document.getElementById('print-periodo').textContent = `${dtIniBR} a ${dtFimBR}`;
+                    document.getElementById('print-qtd-resumo').textContent = `${document.getElementById('kpi-colaboradores').textContent} colaborador(es) • ${state.linhas.length} exame(s)`;
+
+                    const { resumoMap, totalGeral } = construirResumoPorExame(state.linhas);
+
+                    const tbodyAnalitico = document.getElementById('print-tbody-analitico');
+                    tbodyAnalitico.innerHTML = state.linhas.map(item => `
+                        <tr>
+                            <td>${item.dataBR}</td>
+                            <td>${item.nome}</td>
+                            <td>${item.cpf}</td>
+                            <td>${item.dn}</td>
+                            <td>${item.funcao}</td>
+                            <td>${item.exameNome}</td>
+                            <td class="print-right">${formatarMoeda(item.valor)}</td>
+                        </tr>
+                    `).join('');
+
+                    const tbodyResumo = document.getElementById('print-tbody-resumo');
+                    tbodyResumo.innerHTML = Array.from(resumoMap.values()).map(reg => `
+                        <tr>
+                            <td>${reg.nome}</td>
+                            <td class="print-center">${reg.qtd}</td>
+                            <td class="print-right">${formatarMoeda(reg.unitario)}</td>
+                            <td class="print-right"><strong>${formatarMoeda(reg.subtotal)}</strong></td>
+                        </tr>
+                    `).join('');
+
+                    const totalFormatado = formatarMoeda(totalGeral);
+                    document.getElementById('print-total-resumo').textContent = totalFormatado;
+                    document.getElementById('print-total-final-medicao').textContent = totalFormatado;
+
+                    setTimeout(() => window.print(), 200);
                 });
-
-                const totalFormatado = formatarMoeda(totalGeral);
-                document.getElementById('print-total-resumo').textContent = totalFormatado;
-                document.getElementById('print-total-final-medicao').textContent = totalFormatado;
-
-                setTimeout(() => window.print(), 200);
             });
-        });
+        })();
     </script>
 </body>
 </html>
